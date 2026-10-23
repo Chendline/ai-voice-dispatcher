@@ -1,5 +1,12 @@
 import { useState, useEffect } from 'react';
 import Lenis from 'lenis';
+import {
+  playTap,
+  playSwitch,
+  playDispatchLaunch,
+  playStepTick,
+  playDispatchComplete,
+} from './utils/soundEffects';
 import './App.css';
 
 interface IntegrationStatus {
@@ -143,6 +150,7 @@ export default function App() {
   }, [activeTenantId]);
 
   const handleApplyPreset = (preset: typeof PRESET_SCENARIOS[0]) => {
+    playTap();
     setCallerName(preset.callerName);
     setCallerContact(preset.callerContact);
     setRawQuery(preset.query);
@@ -152,12 +160,23 @@ export default function App() {
     e.preventDefault();
     if (!rawQuery.trim() || isDispatching) return;
 
+    playDispatchLaunch();
     setIsDispatching(true);
     setDispatchStage(1);
+    playStepTick(1);
 
-    const stageTimer1 = setTimeout(() => setDispatchStage(2), 260);
-    const stageTimer2 = setTimeout(() => setDispatchStage(3), 520);
-    const stageTimer3 = setTimeout(() => setDispatchStage(4), 780);
+    const stageTimer1 = setTimeout(() => {
+      setDispatchStage(2);
+      playStepTick(2);
+    }, 260);
+    const stageTimer2 = setTimeout(() => {
+      setDispatchStage(3);
+      playStepTick(3);
+    }, 520);
+    const stageTimer3 = setTimeout(() => {
+      setDispatchStage(4);
+      playStepTick(4);
+    }, 780);
 
     try {
       const response = await fetch('http://localhost:3001/api/dispatch/trigger', {
@@ -175,6 +194,7 @@ export default function App() {
       if (resData.success && resData.log) {
         setLogs(prev => [resData.log, ...prev]);
         setExpandedLogId(resData.log.id);
+        playDispatchComplete();
       }
     } catch (err) {
       console.error('Dispatch trigger failed:', err);
@@ -190,6 +210,7 @@ export default function App() {
   };
 
   const handleCopyId = (id: string) => {
+    playTap();
     navigator.clipboard.writeText(id);
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 1500);
@@ -249,7 +270,10 @@ export default function App() {
                   role="tab"
                   aria-selected={isActive}
                   className={`segmented-pill ${isActive ? 'active' : ''}`}
-                  onClick={() => setActiveTenantId(t.id)}
+                  onClick={() => {
+                    playSwitch();
+                    setActiveTenantId(t.id);
+                  }}
                 >
                   <span className="tenant-pill-dot" />
                   <span className="tenant-pill-text">{t.name.replace(/\s*\(.*\)/, '')}</span>
@@ -269,7 +293,10 @@ export default function App() {
           <div className="subnav-tabs">
             <button
               className={`subnav-btn ${activeTab === 'simulator' ? 'active' : ''}`}
-              onClick={() => setActiveTab('simulator')}
+              onClick={() => {
+                playTap();
+                setActiveTab('simulator');
+              }}
             >
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
@@ -280,7 +307,10 @@ export default function App() {
             </button>
             <button
               className={`subnav-btn ${activeTab === 'connectors' ? 'active' : ''}`}
-              onClick={() => setActiveTab('connectors')}
+              onClick={() => {
+                playTap();
+                setActiveTab('connectors');
+              }}
             >
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <rect width="20" height="8" x="2" y="2" rx="2" />
@@ -536,7 +566,10 @@ export default function App() {
                     key={cat}
                     type="button"
                     className={`filter-chip ${selectedCategory === cat ? 'active' : ''}`}
-                    onClick={() => setSelectedCategory(cat)}
+                    onClick={() => {
+                      playTap();
+                      setSelectedCategory(cat);
+                    }}
                   >
                     {cat === 'Technical Support' ? 'Tech' : cat === 'Sales Inquiry' ? 'Sales' : cat}
                   </button>
@@ -673,7 +706,10 @@ export default function App() {
                         <button
                           type="button"
                           className="expand-btn"
-                          onClick={() => setExpandedLogId(isExpanded ? null : log.id)}
+                          onClick={() => {
+                            playTap();
+                            setExpandedLogId(isExpanded ? null : log.id);
+                          }}
                         >
                           <svg
                             width="12"
