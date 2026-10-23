@@ -1,0 +1,65 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Environment variables — never commit these
+.env
+.env.local
+.env.development
+.env.production
+.env.*.local
+
+# Build output
+dist/
+build/
+out/
+.next/
+.nuxt/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor / IDE
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Temp / cache
+.cache/
+.temp/
+tmp/
+
+# Fastn secrets / workspace config
+fastn.secret.json
+fastn-credentials.json
+
+# API keys or secret files
+secrets/
+*.pem
+*.key
+*.cert
+
+# Package manager locks (pick one and keep it, ignore the rest)
+# Uncomment the ones you are NOT using:
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
