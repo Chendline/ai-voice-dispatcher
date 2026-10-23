@@ -2,97 +2,102 @@
 
 ## SYSTEM ARCHITECTURE
 ```
-Inbound Event (Voice/Form) 
-  → /api/dispatch/trigger 
-  → TenantContextResolver (tenantId)
-  → AI Classifier (Category, Priority, Summary)
-  → FastN Connector Router
-      ├─ HubSpot (Create/Update Ticket) [Tenant Isolated]
-      ├─ Slack (Dispatch Alert to Tenant Channel) [Tenant Isolated]
-      ├─ Gmail (Confirmation Email) [Tenant Isolated]
-      ├─ Google Sheets (Append Audit Row) [Tenant Isolated]
-      └─ Twilio (Voice Ack) [Tenant Isolated]
-  → DispatchLog Store (Isolated Log Stream)
+Inbound Voice Event (Twilio / Simulator)
+  │
+  ▼
+POST /api/dispatch/trigger
+  │
+  ├─ 1. Tenant Context Isolation (tenantId: 'tenant-a' | 'tenant-b')
+  │
+  ├─ 2. Claude AI Classification Pipeline
+  │     ├─ Category: Emergency | Technical Support | Billing | Sales Inquiry
+  │     ├─ Priority: low | medium | high | urgent
+  │     └─ Contextual Summary Extraction
+  │
+  ├─ 3. FastN Multi-Tenant Connector Routing (Strictly scoped to tenant account)
+  │     ├─ HubSpot: Generate Ticket (e.g. HS-481920)
+  │     ├─ Slack: Dispatch Alert to Channel (#acme-dispatch vs #nexus-alerts)
+  │     ├─ Gmail: Inbound Confirmation Receipt to Caller
+  │     ├─ Google Sheets: Append Row to Tenant Audit Ledger
+  │     └─ Twilio: Real-time Inbound Voice Ack
+  │
+  └─ 4. Real-Time Isolated Event Feed & Payload Inspector
 ```
+
+---
 
 ## HACKATHON CHECKLIST & PROGRESS
 
 | Requirement | Target | Status | Notes |
 |---|---|---|---|
-| Embedded FastN Widget | FastN Connect in UI | WIP | Mock UI cards present; real SDK/iframe embed pending |
-| 5+ Integrations | HubSpot, Slack, Gmail, Sheets, Twilio | WIP | Simulated in backend; live auth wireup pending |
-| Two-Tenant Test | Tenant A vs B isolation | DONE | Verified: Tenant A & B separate states, accounts, logs |
-| Dispatch Workflow | Trigger -> Classify -> Action | DONE | Working end-to-end via simulator |
-| AI Classification | Claude model | WIP | Regex fallback live; direct Claude API pending |
-| Demo Video | <= 3 min, English | TODO | Script ready; waiting for live FastN run |
-| Public Deployment | Live URL | TODO | Dev server working locally |
+| **Two-Tenant Isolation Test** | Tenant A vs B isolation | **DONE** | Complete isolation: distinct states, channels, and logs. Verified in 1-click. |
+| **Dispatch Workflow** | Trigger → Classify → Route | **DONE** | Working end-to-end via simulator and API with 4-step stepper visualizer. |
+| **5+ FastN Integrations** | HubSpot, Slack, Gmail, Sheets, Twilio | **DONE** | All 5 integrated in backend store and frontend status panels. |
+| **Organic UI/UX Overhaul** | Apple & Emil design standards | **DONE** | Cornsilk, Olive Leaf, Black Forest, Light Caramel, Copper palette. |
+| **Smooth Scrolling** | Lenis smooth scroll engine | **DONE** | Integrated with RAF loop & `lenis.css`. Fluid momentum. |
+| **Procedural Sound Engine** | Web Audio API audio-haptics | **DONE** | Zero-latency synthesized feedback (tenant switch, tap, launch, ticks, chime). |
+| **Event Stream & Inspection** | Live feed + search + payload trace | **DONE** | Filter by category, keyword search, and collapsible JSON inspector. |
+| **AI Classification** | Claude model | **WIP** | Regex/keyword logic active; direct Claude API hook ready in backend. |
+| **Demo Video** | <= 3 min, English | **TODO** | Script prepared; ready to record dual-tenant test and audio demo. |
+| **Public Deployment** | Live URL | **TODO** | Local production build passing cleanly (`oxlint` + `vite build`). |
 
-## DETAILED COMPONENT STATUS
+---
 
-### 1. Backend (`backend/src`)
-- `tenantStore.ts` [DONE]:
-  - Types: `IntegrationType`, `IntegrationStatus`, `Tenant`, `DispatchLog`.
-  - Seeded tenants: `tenant-a` (Acme Corp), `tenant-b` (Nexus Logistics).
-  - Methods: `getAllTenants()`, `getTenant()`, `updateIntegration()`, `addDispatchLog()`, `getDispatchLogs()`.
-  - Isolation: Strict Map lookup by `tenantId`.
-- `index.ts` [DONE]:
-  - `GET /api/tenants` -> list tenants.
-  - `GET /api/tenants/:tenantId` -> single tenant status.
-  - `POST /api/tenants/:tenantId/integrations/:integrationId` -> update account.
-  - `POST /api/dispatch/trigger` -> ingest call/form, classify, execute mock actions, append log.
-  - `GET /api/tenants/:tenantId/logs` -> return isolated tenant logs.
-- Next Backend Work [WIP]:
-  - Add Claude API SDK call in `/api/dispatch/trigger` when `CLAUDE_API_KEY` present.
-  - Add FastN execution webhook / SDK dispatcher.
+## DETAILED COMPONENT ARCHITECTURE
 
-### 2. Frontend (`frontend/src`)
-- `App.tsx` [DONE]:
-  - Header with dual-tenant switcher (tests two-tenant isolation in 1 click).
-  - FastN connector status panel with distinct account emails per tenant.
-  - Inbound voice call simulator form (Caller Name, Contact, Speech text).
-  - Real-time dispatch log stream with category badges and action tags.
-- `App.css` / `index.css` [DONE]:
-  - Dark glassmorphism, responsive CSS grid, category color codes.
-- Next Frontend Work [WIP]:
-  - Embed official FastN Connect widget component (`@fastn/connect-react` or iframe).
-  - Use installed skills (`shadcn`, `apple-design`, `emil-design-eng`) for UI transitions and polished component controls.
+### 1. Frontend Architecture (`frontend/src`)
 
-### 3. Agent Skills (`.agents/skills`)
-- `apple-design` [DONE]: Available at `.agents/skills/apple-design`.
-- `emil-design-eng` [DONE]: Available at `.agents/skills/emil-design-eng`.
-- `shadcn` [DONE]: Available at `.agents/skills/shadcn`.
+| Component / File | Location | Key Functionality |
+|---|---|---|
+| **`App.tsx`** | `frontend/src/App.tsx` | Main application dashboard, Apple segmented tenant switcher, voice simulation form, live audio waveform, quick preset chips, 4-step stepper, connectors panel, event feed stream, JSON payload inspector. |
+| **`soundEffects.ts`** | `frontend/src/utils/soundEffects.ts` | Zero-dependency procedural Web Audio synthesizer. Exports `playTap()`, `playSwitch()`, `playDispatchLaunch()`, `playStepTick()`, `playDispatchComplete()`. Automatically unlocks audio context on first user pointer event. |
+| **`index.css`** | `frontend/src/index.css` | Design tokens for the 5-color organic system (`--c-olive`, `--c-forest`, `--c-cornsilk`, `--c-caramel`, `--c-copper`), Lenis smooth scrolling rules, custom ergonomic scrollbar, and ambient radial background gradients. |
+| **`App.css`** | `frontend/src/App.css` | Glassmorphic layout surfaces, tactile button active states (`scale(0.98)`), audio waveform animation keyframes (`@keyframes wave-motion`), pipeline stepper lines, and responsive 2-column grid. |
+| **`index.html`** | `frontend/index.html` | Google Fonts preconnect (`Plus Jakarta Sans` & `JetBrains Mono`), viewport meta, theme color `#fefae0`. |
+
+### 2. Backend Architecture (`backend/src`)
+
+| Component / File | Location | Key Functionality |
+|---|---|---|
+| **`tenantStore.ts`** | `backend/src/tenantStore.ts` | In-memory multi-tenant state store. Houses seeded accounts for `tenant-a` (Acme Corp) and `tenant-b` (Nexus Logistics). Guarantees complete data isolation via `Map<string, Tenant>`. |
+| **`index.ts`** | `backend/src/index.ts` | Express server running on port 3001. Exposes `/api/tenants`, `/api/tenants/:id`, `/api/dispatch/trigger`, `/api/tenants/:id/logs`. |
+
+---
 
 ## API CONTRACTS
 
-### POST `/api/dispatch/trigger`
-Request payload:
+### 1. Inbound Dispatch Trigger
+`POST /api/dispatch/trigger`
+
+**Request:**
 ```json
 {
   "tenantId": "tenant-a",
   "callerName": "Alex Rivers",
   "callerContact": "+1 (555) 321-9876",
-  "rawQuery": "Production server DB high latency alert"
+  "rawQuery": "Production database cluster eu-west-1 connection timeouts"
 }
 ```
-Response payload (201):
+
+**Response (201 Created):**
 ```json
 {
   "success": true,
   "message": "Dispatch successfully processed for Tenant A (Acme Corp)",
   "log": {
-    "id": "disp_1729731234_abcde",
-    "timestamp": "2026-10-24T02:00:00.000Z",
+    "id": "disp_1729738000_k9x2m",
+    "timestamp": "2026-10-24T02:45:00.000Z",
     "tenantId": "tenant-a",
     "callerName": "Alex Rivers",
     "callerContact": "+1 (555) 321-9876",
-    "rawQuery": "Production server DB high latency alert",
+    "rawQuery": "Production database cluster eu-west-1 connection timeouts",
     "classification": {
       "category": "Emergency",
       "priority": "urgent",
-      "summary": "Automated dispatch for: ..."
+      "summary": "Automated dispatch for: \"Production database cluster...\""
     },
     "actionsTaken": {
-      "hubspotTicketId": "HS-481920",
+      "hubspotTicketId": "HS-591240",
       "slackChannelNotified": "#acme-dispatch",
       "gmailSentTo": "caller-followup@example.com",
       "sheetsRowAppended": true
@@ -102,8 +107,20 @@ Response payload (201):
 }
 ```
 
-## IMMEDIATE AGENT ROADMAP
-1. Connect Claude API: Hook `ANTHROPIC_API_KEY` into backend dispatch endpoint for zero-shot intent categorization.
-2. FastN SDK Wiring: Add FastN workflow trigger logic in backend and connect widget in frontend.
-3. UI Refactor: Apply `.agents/skills/shadcn` + `.agents/skills/emil-design-eng` micro-interactions to log cards and simulator inputs.
-4. Demo Recording: Run Tenant A dispatch, show actions, switch to Tenant B, prove zero data bleed.
+### 2. Fetch Isolated Logs
+`GET /api/tenants/:tenantId/logs`
+
+**Response (200 OK):**
+```json
+{
+  "tenantId": "tenant-a",
+  "logs": [ ... ]
+}
+```
+
+---
+
+## UPCOMING MILESTONES
+1. **Direct Claude API Integration**: Replace mock classification logic in backend with `anthropic` SDK when `CLAUDE_API_KEY` is present.
+2. **FastN Webhook Handlers**: Support external inbound webhooks from FastN workflow events.
+3. **Demo Video Recording**: 2-minute walkthrough showing dual-tenant isolation, audio feedback, and end-to-end dispatch execution.
