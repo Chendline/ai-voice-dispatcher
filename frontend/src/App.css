@@ -596,6 +596,85 @@
   justify-content: space-between;
 }
 
+.input-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.mic-dictate-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  border-radius: 999px;
+  border: 1px solid var(--border-medium);
+  background: var(--bg-surface-elevated);
+  color: var(--c-forest);
+  cursor: pointer;
+  transition: transform var(--duration-press) var(--ease-out),
+              background var(--duration-state) var(--ease-out),
+              border-color var(--duration-state) var(--ease-out),
+              color var(--duration-state) var(--ease-out);
+}
+
+.mic-dictate-btn:hover {
+  background: var(--bg-surface-subtle);
+  border-color: var(--c-copper);
+  color: var(--c-copper);
+}
+
+.mic-dictate-btn:active {
+  transform: scale(0.96);
+}
+
+.mic-dictate-btn.listening {
+  background: rgba(188, 108, 37, 0.12);
+  border-color: var(--c-copper);
+  color: var(--c-copper);
+  box-shadow: 0 0 0 3px rgba(188, 108, 37, 0.16);
+  animation: mic-pulse 1.8s infinite ease-out;
+}
+
+.mic-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--c-olive);
+  transition: background-color var(--duration-state) var(--ease-out);
+}
+
+.mic-dictate-btn.listening .mic-dot {
+  background: #d90429;
+  box-shadow: 0 0 6px rgba(217, 4, 41, 0.7);
+  animation: mic-blink 0.9s infinite alternate;
+}
+
+.clean-textarea.recording-border {
+  border-color: var(--c-copper);
+  box-shadow: 0 0 0 3px rgba(188, 108, 37, 0.14);
+}
+
+.mic-error-notice {
+  font-size: 0.75rem;
+  color: #b02a37;
+  margin-top: 4px;
+}
+
+@keyframes mic-blink {
+  from { opacity: 0.35; }
+  to { opacity: 1; }
+}
+
+@keyframes mic-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(188, 108, 37, 0.4); }
+  70% { box-shadow: 0 0 0 7px rgba(188, 108, 37, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(188, 108, 37, 0); }
+}
+
 .label-aux {
   color: var(--text-muted);
   font-weight: 400;
