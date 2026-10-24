@@ -38,6 +38,7 @@ Built for the **FastN Online Hackathon 2026**.
 | Integrations Platform | FastN (embedded connectors & routing) |
 | AI Classifier | Claude Messages API + heuristic fallback |
 | Deployment | Vercel (Vite frontend + Express container API) |
+| Persistence | Vercel Blob (per-tenant JSON state; memory fallback) |
 
 ---
 
@@ -165,7 +166,7 @@ npm start
 
 Then set `VITE_API_BASE_URL=https://your-api-host` in Vercel and redeploy. Keep `FRONTEND_URL` on the API set to your public domain so CORS stays scoped.
 
-> The tenant store is in-memory. Logs and connector toggles reset when the container restarts or scales to a new instance; the seeded tenants always remain available.
+> Dispatch logs and connector toggles are mirrored to a private Vercel Blob store (`tenants/<tenantId>.json`) whenever `BLOB_READ_WRITE_TOKEN` is present, so they survive container restarts and scale-out. Without that token the API degrades to memory-only state. The seeded tenants always remain available.
 
 ---
 
@@ -177,7 +178,8 @@ ai-voice-dispatcher/
 │   ├── src/
 │   │   ├── main.ts               # Express API server (port 3001) + health probe
 │   │   ├── classifier.ts         # Claude classifier with heuristic fallback
-│   │   └── tenantStore.ts        # In-memory tenant store & isolation logic
+│   │   ├── persistence.ts        # Vercel Blob hydration & persistence
+│   │   └── tenantStore.ts        # Tenant store & isolation logic
 │   ├── Dockerfile                # Multi-stage container build for Vercel
 │   ├── package.json
 │   └── tsconfig.json

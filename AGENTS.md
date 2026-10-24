@@ -128,7 +128,8 @@ Live: https://aivoicedispatcher.vercel.app
 │   ├── src/
 │   │   ├── classifier.ts         # Claude API classifier + heuristic fallback
 │   │   ├── main.ts               # Express API, dispatch trigger, tenant endpoints, health
-│   │   └── tenantStore.ts        # In-memory tenant store, isolation logic, dual seed
+│   │   ├── persistence.ts        # Vercel Blob hydration/persistence for tenant state
+│   │   └── tenantStore.ts        # Tenant store, isolation logic, dual seed
 │   ├── Dockerfile                # Multi-stage container build (Vercel backend service)
 │   ├── .dockerignore
 │   ├── package.json
@@ -159,11 +160,11 @@ Live: https://aivoicedispatcher.vercel.app
 
 ## COMMON AGENT PITFALLS
 - Backend port conflict: Backend default port is 3001; frontend proxies/fetches `http://localhost:3001`. Do not hardcode 3000.
-- State loss on backend reload: `tenantStore.ts` is in-memory. Dev server restart resets logs to empty and tenant integrations to defaults. Keep seed data intact.
+- State loss without storage: `tenantStore.ts` keeps state in memory, but `persistence.ts` mirrors each tenant to Vercel Blob when `BLOB_READ_WRITE_TOKEN` is set. Local dev without the token resets logs/toggles on restart. Keep seed data intact.
 - Missing tenantId in payload: All POST requests to `/api/dispatch/trigger` require `tenantId` and `rawQuery`.
 - Audio autoplay policy: AudioContext must be unlocked via user pointer gesture (handled in `soundEffects.ts`).
 - Vercel is full-stack: `vercel.json` declares a Vite `frontend` service and a containerized Express `backend` service; `/api/*` routes to the backend, everything else to the frontend. The live project sets `VITE_API_BASE_URL=/` so the built frontend calls the same-origin API. Without that env var, production falls back to `demoStore.ts` sandbox mode.
-- Container state is ephemeral: the API container can restart or scale to a new instance, so in-memory logs/connector toggles reset. Tenant seeds always return. Do not assume the API and sandbox logs stay identical.
+- Container state is durable via Vercel Blob: each write persists `{ integrations, dispatchLogs }` to `tenants/<tenantId>.json` in the private `aivoicedispatcher-logs` store. If `BLOB_READ_WRITE_TOKEN` is missing the API falls back to memory-only and state resets on restart. Do not assume the API and browser sandbox logs stay identical.
 - Sandbox data is sessionStorage-scoped: demo logs/connector pauses survive reload but not a new browser tab/session. The footer "Reset sandbox" clears them.
 - Tab state lives in the URL: `?tenant=tenant-a|tenant-b&tab=simulator|connectors`. Do not remove `replaceState` sync or deep links regress.
 - Tenant switches replace the vault snapshot keyed by `tenantId`; never render `tenantData`/`logs` unless `vault.tenantId === activeTenantId`. Preserve the snapshot guard and `activeTenantRef` dispatch guard to avoid cross-tenant bleed.

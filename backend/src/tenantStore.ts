@@ -37,7 +37,15 @@ export interface DispatchLog {
   status: 'processing' | 'dispatched' | 'failed';
 }
 
-// In-memory multi-tenant store ensuring complete isolation
+export interface PersistedTenantState {
+  integrations: Record<IntegrationType, IntegrationStatus>;
+  dispatchLogs: DispatchLog[];
+  updatedAt: string;
+}
+
+const MAX_LOGS = 200;
+
+// Tenant store ensuring complete isolation; hydration makes it durable across instances.
 export class TenantStore {
   private tenants: Map<string, Tenant> = new Map();
 
@@ -115,6 +123,36 @@ export class TenantStore {
   public getDispatchLogs(tenantId: string): DispatchLog[] {
     const tenant = this.tenants.get(tenantId);
     return tenant ? tenant.dispatchLogs : [];
+  }
+
+  /** Merge durable state into memory, keeping the newest copy of every dispatch log. */
+  public mergePersisted(tenantId: string, state: PersistedTenantState): void {
+    const tenant = this.tenants.get(tenantId);
+    if (!tenant) return;
+
+    for (const key of Object.keys(tenant.integrations) as IntegrationType[]) {
+      const incoming = state.integrations?.[key];
+      if (incoming) tenant.integrations[key] = { ...tenant.integrations[key], ...incoming };
+    }
+
+    const byId = new Map<string, DispatchLog>();
+    for (const log of [...(state.dispatchLogs ?? []), ...tenant.dispatchLogs]) {
+      if (log?.id && log.tenantId === tenantId) byId.set(log.id, log);
+    }
+
+    tenant.dispatchLogs = [...byId.values()]
+      .sort((a, b) => (a.timestamp < b.timestamp ? 1 : -1))
+      .slice(0, MAX_LOGS);
+  }
+
+  public snapshot(tenantId: string): PersistedTenantState | null {
+    const tenant = this.tenants.get(tenantId);
+    if (!tenant) return null;
+    return {
+      integrations: tenant.integrations,
+      dispatchLogs: tenant.dispatchLogs,
+      updatedAt: new Date().toISOString(),
+    };
   }
 }
 

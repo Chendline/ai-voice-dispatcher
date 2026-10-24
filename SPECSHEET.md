@@ -136,6 +136,6 @@ POST /api/dispatch/trigger
 
 ## UPCOMING MILESTONES
 1. **Live FastN Credentials**: Replace simulated connector payloads with real FastN workspace actions when keys are provisioned.
-2. **Persistent Storage**: Move the in-memory tenant store to Postgres/KV so logs survive container restarts and scale-out (currently ephemeral per instance).
+2. **Persistent Storage**: **DONE** — tenant state (integrations + dispatch logs) is mirrored to Vercel Blob via `backend/src/persistence.ts`, so it survives container restarts and scale-out.
 3. **Demo Video Recording**: 2-minute walkthrough showing dual-tenant isolation, audio feedback, and end-to-end dispatch execution.
 4. **Custom Domain**: Point `aivoicedispatcher.com` at the Vercel project and enable HTTPS.
