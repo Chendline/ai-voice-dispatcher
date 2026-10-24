@@ -759,6 +759,26 @@
   line-height: 1.45;
 }
 
+.dispatch-notice {
+  font-size: 0.78rem;
+  line-height: 1.45;
+  border-radius: 8px;
+  padding: 8px 12px;
+  border: 1px solid;
+}
+
+.dispatch-notice.partial {
+  color: #7a4a12;
+  background: rgba(221, 161, 94, 0.14);
+  border-color: rgba(221, 161, 94, 0.45);
+}
+
+.dispatch-notice.failed {
+  color: #8f2f12;
+  background: rgba(188, 108, 37, 0.12);
+  border-color: rgba(188, 108, 37, 0.42);
+}
+
 /* --------------------------------------------------------------------------
    8. Connectors Stack (FastN Multi-Tenant Connectors)
    -------------------------------------------------------------------------- */
@@ -1343,6 +1363,35 @@
   padding: 2px 6px;
   border-radius: 4px;
   border: 1px solid var(--border-hairline);
+}
+
+.mode-badge,
+.status-badge {
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid;
+}
+
+.mode-badge.simulated {
+  color: #6b5a2a;
+  background: rgba(221, 161, 94, 0.16);
+  border-color: rgba(221, 161, 94, 0.4);
+}
+
+.status-badge.partial {
+  color: #7a4a12;
+  background: rgba(221, 161, 94, 0.2);
+  border-color: rgba(221, 161, 94, 0.5);
+}
+
+.status-badge.failed {
+  color: #8f2f12;
+  background: rgba(188, 108, 37, 0.16);
+  border-color: rgba(188, 108, 37, 0.45);
 }
 
 .timestamp-mono {

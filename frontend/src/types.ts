@@ -19,6 +19,17 @@ export interface TenantSummary {
   name: string;
 }
 
+export type ConnectorOutcomeStatus = 'success' | 'failed' | 'pending' | 'simulated';
+
+export interface ConnectorOutcome {
+  connector: IntegrationId;
+  status: ConnectorOutcomeStatus;
+  mode: 'live' | 'simulated';
+  reference?: string;
+  detail?: string;
+  executionId?: string;
+}
+
 export interface DispatchLog {
   id: string;
   timestamp: string;
@@ -37,8 +48,10 @@ export interface DispatchLog {
     slackChannelNotified?: string;
     gmailSentTo?: string;
     sheetsRowAppended?: boolean;
+    mode?: 'live' | 'simulated';
+    results?: ConnectorOutcome[];
   };
-  status?: string;
+  status?: 'processing' | 'dispatched' | 'partial' | 'failed' | string;
 }
 
 export interface DispatchInput {

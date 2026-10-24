@@ -26,6 +26,21 @@ export function getConnectionMode(): ConnectionMode {
   return connectionMode ?? 'demo';
 }
 
+/**
+ * A structured response from the Express API. These must never fall back to the
+ * browser sandbox: doing so would fabricate a successful dispatch after a real
+ * upstream failure.
+ */
+export class ApiError extends Error {
+  readonly status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+  }
+}
+
 async function request<T>(
   path: string,
   init?: RequestInit,
@@ -44,12 +59,21 @@ async function request<T>(
       },
     });
 
+    const contentType = response.headers.get('content-type') ?? '';
+    const isJson = contentType.includes('application/json');
+
     if (!response.ok) {
-      throw new Error(`${path} responded with ${response.status}`);
+      let message = `${path} responded with ${response.status}`;
+      if (isJson) {
+        const body = (await response.json().catch(() => null)) as { error?: unknown } | null;
+        if (body && typeof body.error === 'string' && body.error.trim()) {
+          message = body.error;
+        }
+      }
+      throw new ApiError(message, response.status);
     }
 
-    const contentType = response.headers.get('content-type') ?? '';
-    if (!contentType.includes('application/json')) {
+    if (!isJson) {
       throw new Error(`${path} is not serving the API`);
     }
 
@@ -69,7 +93,9 @@ async function withFallback<T>(
     const result = await live();
     connectionMode = 'live';
     return result;
-  } catch {
+  } catch (error) {
+    // The API answered, so the result is authoritative even when it is an error.
+    if (error instanceof ApiError) throw error;
     connectionMode = 'demo';
     return sandbox();
   }
@@ -108,7 +134,7 @@ export async function loadDispatchLogs(tenantId: string): Promise<DispatchLog[]>
 export async function triggerDispatch(input: DispatchInput): Promise<DispatchLog> {
   return withFallback(
     async () => {
-      const data = await request<{ success: boolean; log: DispatchLog }>(
+      const data = await request<{ success: boolean; outcome?: string; message?: string; log?: DispatchLog }>(
         '/api/dispatch/trigger',
         {
           method: 'POST',
@@ -116,7 +142,9 @@ export async function triggerDispatch(input: DispatchInput): Promise<DispatchLog
         },
         TRIGGER_TIMEOUT,
       );
-      if (!data.success || !data.log) throw new Error('Dispatch rejected');
+      // A failed dispatch is still a real, logged outcome. Return it so the UI can
+      // show the per-connector failure instead of inventing a sandbox success.
+      if (!data.log) throw new Error('Dispatch response contained no log.');
       return data.log;
     },
     () => demoApi.trigger(input),

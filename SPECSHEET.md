@@ -14,14 +14,16 @@ POST /api/dispatch/trigger
   │     ├─ Priority: low | medium | high | urgent
   │     └─ Contextual Summary Extraction
   │
-  ├─ 3. FastN Multi-Tenant Connector Routing (Strictly scoped to tenant account)
-  │     ├─ HubSpot: Generate Ticket (e.g. HS-481920)
-  │     ├─ Slack: Dispatch Alert to Channel (#acme-dispatch vs #nexus-alerts)
-  │     ├─ Gmail: Inbound Confirmation Receipt to Caller
-  │     ├─ Google Sheets: Append Row to Tenant Audit Ledger
-  │     └─ Twilio: Real-time Inbound Voice Ack
+  ├─ 3. FastN Connector Routing (strictly scoped to tenant account)
+  │     ├─ Live: POST /api/v1/workflows/{id}/execute per published workflow
+  │     ├─ Simulated: explicit sandbox results when no workflow id is configured
+  │     ├─ HubSpot: Create Ticket (ticketId)
+  │     ├─ Slack: Dispatch Alert (channel)
+  │     ├─ Gmail: Follow-up Email (messageId)
+  │     ├─ Google Sheets: Append Audit Row (rowId)
+  │     └─ Twilio: Inbound Voice Trigger (external telephony config required)
   │
-  └─ 4. Real-Time Isolated Event Feed & Payload Inspector
+  └─ 4. Real-Time Isolated Event Feed, Per-Connector Outcomes & Payload Inspector
 ```
 
 ---
@@ -32,7 +34,11 @@ POST /api/dispatch/trigger
 |---|---|---|---|
 | **Two-Tenant Isolation Test** | Tenant A vs B isolation | **DONE** | Complete isolation: distinct states, channels, and logs. Verified in 1-click. |
 | **Dispatch Workflow** | Trigger → Classify → Route | **DONE** | Working end-to-end via simulator and API with 4-step stepper visualizer. |
-| **5+ FastN Integrations** | HubSpot, Slack, Gmail, Sheets, Twilio | **DONE** | All 5 integrated in backend store and frontend status panels. |
+| **5+ FastN Integrations** | HubSpot, Slack, Gmail, Sheets, Twilio | **PARTIAL** | Connector workflows implemented for HubSpot, Slack, Gmail, Sheets; Twilio inbound remains external. Live execution blocked by FastN key scope and missing workflow ids (see milestones). |
+| **FastN Live Workflow Execution** | Documented execute endpoint | **BLOCKED** | Code calls `POST /api/v1/workflows/{id}/execute` with bearer auth. Current key returns `403` (`required: workflows.execute`) and no `FASTN_WORKFLOW_*` ids are configured, so production runs in simulated mode and labels results accordingly. |
+| **Truthful Outcomes** | success / failed / pending / simulated | **DONE** | Missing ids, upstream errors, timeouts and `202` queued runs are never reported as success; status aggregates to `dispatched`, `partial` or `failed`. |
+| **Security Hardening** | Server-side secrets, validation, limits | **DONE** | Helmet, CORS allowlist, 64kb JSON cap, 120 req/min/IP rate limit, input validation, sanitized errors, secret redaction, no stack traces. |
+| **Automated Tests** | Config, FastN client, connectors, routes | **DONE** | 43 `node:test` cases via `tsx --test`; FastN fetch is mocked, route tests use an ephemeral server. No real calls are made. |
 | **Organic UI/UX Overhaul** | Apple & Emil design standards | **DONE** | Cornsilk, Olive Leaf, Black Forest, Light Caramel, Copper palette. |
 | **Smooth Scrolling** | Lenis smooth scroll engine | **DONE** | Integrated with RAF loop & `lenis.css`. Fluid momentum. |
 | **Procedural Sound Engine** | Web Audio API audio-haptics | **DONE** | Zero-latency synthesized feedback (tenant switch, tap, launch, ticks, chime). |
@@ -64,9 +70,15 @@ POST /api/dispatch/trigger
 
 | Component / File | Location | Key Functionality |
 |---|---|---|
-| **`tenantStore.ts`** | `backend/src/tenantStore.ts` | In-memory multi-tenant state store. Houses seeded accounts for `tenant-a` (Acme Corp) and `tenant-b` (Nexus Logistics). Guarantees complete data isolation via `Map<string, Tenant>`. Preserves channel identity across connector pauses. |
+| **`tenantStore.ts`** | `backend/src/tenantStore.ts` | In-memory multi-tenant state store. Houses seeded accounts for `tenant-a` (Acme Corp) and `tenant-b` (Nexus Logistics). Guarantees complete data isolation via `Map<string, Tenant>`. Preserves channel identity across connector pauses. Stores per-connector `results` and `mode`. |
 | **`classifier.ts`** | `backend/src/classifier.ts` | Claude Messages API classifier with strict JSON validation, prompt-injection isolation, 7s timeout, and keyword fallback. |
-| **`main.ts`** | `backend/src/main.ts` | Express server running on port 3001. Exposes `/api/health`, `/api/tenants`, `/api/tenants/:id`, `/api/dispatch/trigger`, `/api/tenants/:id/logs`. |
+| **`config.ts`** | `backend/src/config.ts` | Parses `FASTN_*` env, validates workflow ids, resolves `auto|live|simulated`, collects startup warnings. |
+| **`fastn.ts`** | `backend/src/fastn.ts` | Executes published FastN workflows with bearer auth, tenant header, timeout, `202` queued handling, error taxonomy and secret redaction. |
+| **`connectors.ts`** | `backend/src/connectors.ts` | Fans out to connected connectors, maps workflow output to references, fails explicitly when confirmation is missing, aggregates log status. |
+| **`validation.ts`** | `backend/src/validation.ts` | Validates dispatch and integration payloads (tenant id, query length, booleans). |
+| **`app.ts`** | `backend/src/app.ts` | `createApp(deps)` factory, all routes, Helmet, CORS, rate limiting, JSON body cap, sanitized error handler. |
+| **`main.ts`** | `backend/src/main.ts` | Loads config, prints warnings, starts the server on port 3001. |
+| **`persistence.ts`** | `backend/src/persistence.ts` | Vercel Blob hydration/persistence per tenant with memory fallback. |
 
 ---
 
@@ -76,8 +88,22 @@ POST /api/dispatch/trigger
 `GET /api/health`
 
 ```json
-{ "status": "ok", "service": "aegis-voice-dispatcher", "classifiers": ["claude", "heuristic"] }
+{
+  "status": "ok",
+  "service": "aegis-voice-dispatcher",
+  "classifiers": ["claude", "heuristic"],
+  "storage": "blob",
+  "fastn": {
+    "configured": true,
+    "workspaceConfigured": true,
+    "mode": "live",
+    "workflows": ["hubspot", "slack", "gmail", "sheets"],
+    "warnings": []
+  }
+}
 ```
+
+The health probe never exposes the API key, workflow ids, or account details.
 
 ### 1. Inbound Dispatch Trigger
 `POST /api/dispatch/trigger`
@@ -92,10 +118,11 @@ POST /api/dispatch/trigger
 }
 ```
 
-**Response (201 Created):**
+**Response (201 Created — also used for failed dispatches, with `success: false`):**
 ```json
 {
   "success": true,
+  "outcome": "dispatched",
   "message": "Dispatch successfully processed for Tenant A (Acme Corp)",
   "log": {
     "id": "disp_1729738000_k9x2m",
@@ -111,15 +138,32 @@ POST /api/dispatch/trigger
       "source": "claude"
     },
     "actionsTaken": {
+      "mode": "live",
       "hubspotTicketId": "HS-591240",
       "slackChannelNotified": "#acme-dispatch",
       "gmailSentTo": "caller-followup@example.com",
-      "sheetsRowAppended": true
+      "sheetsRowAppended": true,
+      "results": [
+        { "connector": "hubspot", "status": "success", "mode": "live", "reference": "HS-591240" },
+        { "connector": "slack", "status": "success", "mode": "live", "reference": "#acme-dispatch" },
+        { "connector": "gmail", "status": "success", "mode": "live", "reference": "caller-followup@example.com" },
+        { "connector": "sheets", "status": "success", "mode": "live", "reference": "row_9" }
+      ]
     },
     "status": "dispatched"
   }
 }
 ```
+
+Outcome semantics:
+
+| `outcome` | Meaning |
+|---|---|
+| `dispatched` | Every targeted connector confirmed success (or the whole run was explicitly simulated). |
+| `partial` | At least one connector failed or is `pending` (FastN queued it). |
+| `failed` | No connector action completed. `success` is `false` and the message says the dispatch failed. |
+
+Per-connector `status` is one of `success`, `failed`, `pending`, `simulated`; `mode` is `live` or `simulated`. Failed connectors include a sanitized `detail` such as `403 Permission denied by API key (requires: workflows.execute)`. Validation errors return `400`, unknown tenants `404`, oversized bodies `413`, and rate limits `429`.
 
 ### 2. Fetch Isolated Logs
 `GET /api/tenants/:tenantId/logs`
@@ -135,7 +179,8 @@ POST /api/dispatch/trigger
 ---
 
 ## UPCOMING MILESTONES
-1. **Live FastN Credentials**: Replace simulated connector payloads with real FastN workspace actions when keys are provisioned.
-2. **Persistent Storage**: **DONE** — tenant state (integrations + dispatch logs) is mirrored to Vercel Blob via `backend/src/persistence.ts`, so it survives container restarts and scale-out.
-3. **Demo Video Recording**: 2-minute walkthrough showing dual-tenant isolation, audio feedback, and end-to-end dispatch execution.
-4. **Optional Custom Domain**: Only if desired later — the project runs on `aivoicedispatcher.vercel.app` with HTTPS by default.
+1. **Live FastN Execution (BLOCKED)**: the integration is implemented against the documented workflow execute endpoint, but the current `FASTN_API_KEY` returns `403 Permission denied by API key` with `required: workflows.execute`. Remaining steps: grant that scope (plus `unified.read` if unified endpoints are used) in FastN **Settings → API keys**, publish one workflow per connector, then set `FASTN_WORKFLOW_HUBSPOT|SLACK|GMAIL|SHEETS` to those ids. Until then `auto` mode truthfully runs simulated and the UI labels results **Sandbox**.
+2. **Telephony & Server-Side STT (BLOCKED)**: no Twilio account/phone number or STT provider key is configured. Browser dictation remains a UI affordance; production voice ingestion needs Twilio (or another carrier) plus a webhook endpoint and STT provider credentials.
+3. **Persistent Storage**: **DONE** — tenant state (integrations + dispatch logs) is mirrored to Vercel Blob via `backend/src/persistence.ts`, so it survives container restarts and scale-out.
+4. **Demo Video Recording**: 2-minute walkthrough showing dual-tenant isolation, audio feedback, and end-to-end dispatch execution.
+5. **Optional Custom Domain**: Only if desired later — the project runs on `aivoicedispatcher.vercel.app` with HTTPS by default.

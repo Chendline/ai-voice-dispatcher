@@ -20,6 +20,7 @@ Built for the **FastN Online Hackathon 2026**.
   - **Gmail** — sends a dispatch receipt to the caller.
   - **Google Sheets** — appends a row to the tenant's isolated audit ledger.
   - **Twilio** — simulates inbound voice ingestion and telephone routing.
+- **Truthful connector outcomes** — every dispatch records `success`, `failed`, `pending` (FastN queued the workflow) or `simulated` per connector. The UI never reports a sandbox or failed run as a real success.
 - **Two-tenant complete isolation** — Tenant A never sees or modifies Tenant B's data, connectors, or event feed.
 - **Tactile UI/UX** — Apple Design and Emil Kowalski design engineering principles, Lenis smooth scrolling, and zero-dependency Web Audio feedback.
 - **Shareable workspace state** — `?tenant=tenant-b&tab=connectors` deep links restore the exact vault and tab.
@@ -98,6 +99,12 @@ Copy `.env.example` to `.env` at the repository root for the backend:
 ```env
 FASTN_API_KEY=your_fastn_api_key_here
 FASTN_WORKSPACE_ID=your_fastn_workspace_id_here
+FASTN_WORKFLOW_HUBSPOT=wf_...
+FASTN_WORKFLOW_SLACK=wf_...
+FASTN_WORKFLOW_GMAIL=wf_...
+FASTN_WORKFLOW_SHEETS=wf_...
+FASTN_MODE=auto
+FASTN_TIMEOUT_MS=7000
 CLAUDE_API_KEY=your_claude_api_key_here
 CLAUDE_MODEL=claude-3-5-haiku-latest
 PORT=3001
@@ -112,7 +119,71 @@ VITE_API_BASE_URL=https://your-api-host.example.com
 
 Without `CLAUDE_API_KEY`, classification falls back to the deterministic keyword engine. Without `VITE_API_BASE_URL`, the production build uses its in-browser sandbox.
 
+### FastN workflow contract
+
+FastN exposes no generic "run connector action" endpoint. The supported server-side surface is workflow execution:
+
+```
+POST https://api.fastn.dev/api/v1/workflows/{workflowId}/execute
+Authorization: Bearer $FASTN_API_KEY
+Content-Type: application/json
+
+{ "input": { ... } }
+```
+
+`FASTN_API_KEY` is read only on the server; it is never bundled into the frontend. The workspace id is **not** part of the execute URL — each connector needs its own published workflow id from the workflow's **API** tab.
+
+| Variable | Purpose |
+|---|---|
+| `FASTN_WORKFLOW_HUBSPOT` | Workflow that creates a HubSpot ticket |
+| `FASTN_WORKFLOW_SLACK` | Workflow that posts the channel alert |
+| `FASTN_WORKFLOW_GMAIL` | Workflow that sends the follow-up email |
+| `FASTN_WORKFLOW_SHEETS` | Workflow that appends the audit row |
+| `FASTN_WORKFLOW_TWILIO` | Optional inbound-call workflow (not used for outbound dispatch) |
+| `FASTN_MODE` | `auto` (default), `live` or `simulated` |
+| `FASTN_TIMEOUT_MS` | Per-workflow timeout, 1000–25000 ms (default 7000) |
+| `FASTN_ENV` | Optional `x-fastn-env` header value |
+
+**Dispatch input** sent to every workflow:
+
+```json
+{
+  "input": {
+    "tenantId": "tenant-a",
+    "tenantName": "Tenant A (Acme Corp)",
+    "connector": "hubspot",
+    "callerName": "Alex Rivers",
+    "callerContact": "+1 (555) 321-9876",
+    "rawQuery": "…",
+    "classification": { "category": "Emergency", "priority": "urgent", "summary": "…" },
+    "dispatch": { "id": "disp_…", "timestamp": "2026-…" }
+  }
+}
+```
+
+Each request also carries `x-end-org-ref: <tenantId>` so workflows can scope to the right customer. Test keys (`fsk_test_…`) automatically send `X-fastn-Test-Mode: true`.
+
+**Expected workflow output** (the dispatcher refuses to claim success without a confirmation):
+
+| Connector | Confirmed by |
+|---|---|
+| HubSpot | `ticketId`, `ticket_id` or `id` |
+| Slack | `channel`, `channelId`, `reference` or `id` |
+| Gmail | `messageId` / `message_id` / `id`, or `{ "ok": true }` |
+| Sheets | `rowId` / `row_id` / `id`, or `{ "ok": true }` |
+
+**Modes and outcomes**
+
+- `auto` — live when at least one `FASTN_WORKFLOW_*` id is configured, otherwise simulated.
+- `live` — every enabled connector must have a workflow id; a missing id is a per-connector failure, never a fake success.
+- `simulated` — no FastN call is made; every result is labelled `mode: "simulated"` and the UI shows a **Sandbox** badge.
+- HTTP `202` means FastN queued the run; the connector is recorded as `pending` because FastN documents no polling endpoint for queued executions.
+- The log status becomes `dispatched` only when every target succeeded, `partial` when some failed or are pending, and `failed` when nothing completed. The API returns `201` with `success: false` for a failed dispatch.
+
+**Required FastN key scope:** the API key must include workflow execution (`workflows.execute`). A key without it returns `403 Permission denied by API key`; the backend surfaces that as a connector failure with the required permission in the detail. Workflows must also be **published**, otherwise FastN returns `WORKFLOW_NOT_PUBLISHED`.
+
 ---
+
 
 ## Deploy to Vercel
 
@@ -131,7 +202,7 @@ vercel link --project aivoicedispatcher   # one-time
 vercel --prod
 ```
 
-The project is already deployed at **https://aivoicedispatcher.vercel.app** (Vercel account `chendline`, project `aivoicedispatcher`). Re-running `vercel --prod` from the repo root publishes the latest commit.
+The project is already deployed at **https://aivoicedispatcher.vercel.app** (Vercel account `chendline`, project `aivoicedispatcher`). The GitHub repository is connected, so pushes to `main` deploy to production automatically and other branches produce Preview deployments. `vercel --prod` remains available for manual deploys.
 
 ### Option B — Dashboard
 
@@ -173,10 +244,16 @@ Then set `VITE_API_BASE_URL=https://your-api-host` in Vercel and redeploy. Keep 
 ai-voice-dispatcher/
 ├── backend/
 │   ├── src/
-│   │   ├── main.ts               # Express API server (port 3001) + health probe
+│   │   ├── main.ts               # Startup, config warnings, HTTP listen
+│   │   ├── app.ts                # Express app factory, routes, validation, limits
+│   │   ├── config.ts             # FastN env parsing, workflow ids, live/simulated mode
+│   │   ├── fastn.ts              # Workflow execute client, timeout, error taxonomy
+│   │   ├── connectors.ts         # Per-connector dispatch, result mapping, status
+│   │   ├── validation.ts         # Dispatch and integration payload validation
 │   │   ├── classifier.ts         # Claude classifier with heuristic fallback
 │   │   ├── persistence.ts        # Vercel Blob hydration & persistence
 │   │   └── tenantStore.ts        # Tenant store & isolation logic
+│   ├── test/                     # node:test suites (config, FastN, connectors, API)
 │   ├── Dockerfile                # Multi-stage container build for Vercel
 │   ├── package.json
 │   └── tsconfig.json

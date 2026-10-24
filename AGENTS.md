@@ -107,16 +107,30 @@ Live: https://aivoicedispatcher.vercel.app
   - `TenantStore` class holding `Map<string, Tenant>`.
   - Seeded accounts for `tenant-a` (Acme Corp) and `tenant-b` (Nexus Logistics).
   - All operations strictly indexed by `tenantId`; connector pauses preserve channel identity.
-- `classifier.ts`:
-  - Claude Messages API with strict JSON validation, prompt-injection isolation, 7s timeout.
-  - Deterministic keyword fallback when `CLAUDE_API_KEY` is absent or the API fails.
-- `index.ts`:
-  - `GET /api/health`: Service + classifier readiness probe.
-  - `GET /api/tenants`: Returns list of tenants.
-  - `GET /api/tenants/:tenantId`: Returns tenant status + 5 connected integration states.
-  - `POST /api/tenants/:tenantId/integrations/:integrationId`: Toggles or updates account details.
-  - `POST /api/dispatch/trigger`: Ingests speech, classifies via Claude/fallback, triggers mock connector outputs, appends to tenant's log stream.
-  - `GET /api/tenants/:tenantId/logs`: Returns tenant-isolated dispatch history.
+  - `DispatchLog.actionsTaken` carries `mode` (`live|simulated`) and per-connector `results`.
+- `config.ts`:
+  - Reads `FASTN_API_KEY`, `FASTN_WORKSPACE_ID`, `FASTN_WORKFLOW_*`, `FASTN_MODE`, `FASTN_TIMEOUT_MS`, `FASTN_ENV`.
+  - Resolves `auto|live|simulated`; `auto` is live only when a workflow id exists.
+  - Rejects malformed workflow ids and non-HTTPS base URLs; collects warnings.
+- `fastn.ts`:
+  - Executes `POST /api/v1/workflows/{id}/execute` with bearer auth, `x-end-org-ref`, optional `x-fastn-env`.
+  - Test keys add `X-fastn-Test-Mode: true`; timeout via `AbortController`.
+  - Error taxonomy: `not_configured|unauthorized|forbidden|not_found|not_published|rate_limited|timeout|network|invalid_response|upstream_error`.
+  - `202` is queued; sanitizes details and redacts the API key.
+- `connectors.ts`:
+  - Fans out to connected HubSpot/Slack/Gmail/Sheets only.
+  - Live mode requires a workflow per connector; missing ids fail explicitly.
+  - Maps workflow output (`ticketId`, `channel`, `messageId`, `rowId`, `ok`) into references.
+  - Aggregates `dispatched|partial|failed`; never reports fake success.
+- `validation.ts`: dispatch/integration payload validation (tenant id, query length, boolean flags).
+- `app.ts`:
+  - `createApp(deps)` factory for tests (store, executor, hydrate/persist, rate limit).
+  - Helmet, CORS via `FRONTEND_URL`, 64kb JSON limit, 120 req/min/IP rate limit (health exempt).
+  - Routes: health, tenant directory/detail, integration toggle, dispatch trigger, tenant logs.
+  - Sanitized 400/404/413/500 responses; no stack traces or secrets.
+- `main.ts`: loads config, logs warnings, starts the server on `:3001`.
+- `persistence.ts`: Vercel Blob hydration/persistence per tenant.
+- `backend/test/`: `node:test` via `tsx --test`; mocked FastN fetch plus real ephemeral HTTP route tests.
 
 ---
 
@@ -126,10 +140,16 @@ Live: https://aivoicedispatcher.vercel.app
 ├── .agents/skills/          # Installed agent skills (apple-design, emil-design-eng, shadcn)
 ├── backend/
 │   ├── src/
+│   │   ├── app.ts                # Express app factory, routes, validation, rate limit, CORS
 │   │   ├── classifier.ts         # Claude API classifier + heuristic fallback
-│   │   ├── main.ts               # Express API, dispatch trigger, tenant endpoints, health
+│   │   ├── config.ts             # FastN env parsing, workflow ids, live/simulated mode
+│   │   ├── connectors.ts         # Per-connector dispatch, output mapping, status
+│   │   ├── fastn.ts              # FastN workflow execute client, timeout, error taxonomy
+│   │   ├── main.ts               # Startup, config warnings, listen
 │   │   ├── persistence.ts        # Vercel Blob hydration/persistence for tenant state
-│   │   └── tenantStore.ts        # Tenant store, isolation logic, dual seed
+│   │   ├── tenantStore.ts        # Tenant store, isolation logic, dual seed
+│   │   └── validation.ts         # Dispatch/integration payload validation
+│   ├── test/                     # node:test suites (config, fastn, connectors, api)
 │   ├── Dockerfile                # Multi-stage container build (Vercel backend service)
 │   ├── .dockerignore
 │   ├── package.json
@@ -169,3 +189,7 @@ Live: https://aivoicedispatcher.vercel.app
 - Sandbox data is sessionStorage-scoped: demo logs/connector pauses survive reload but not a new browser tab/session. The footer "Reset sandbox" clears them.
 - Tab state lives in the URL: `?tenant=tenant-a|tenant-b&tab=simulator|connectors`. Do not remove `replaceState` sync or deep links regress.
 - Tenant switches replace the vault snapshot keyed by `tenantId`; never render `tenantData`/`logs` unless `vault.tenantId === activeTenantId`. Preserve the snapshot guard and `activeTenantRef` dispatch guard to avoid cross-tenant bleed.
+- FastN has no generic connector-action endpoint: live dispatch runs published workflows via `POST /api/v1/workflows/{id}/execute`. The API key must include `workflows.execute`; without it FastN returns `403` and the connector is recorded as failed. Workflow ids are not discoverable from the documented API — copy them from each workflow's API tab.
+- FastN `auto` mode is simulated until at least one `FASTN_WORKFLOW_*` id exists. Never label simulated results as live: `actionsTaken.mode` must stay truthful and the UI shows a Sandbox badge.
+- FastN `202` means queued, not done. There is no documented polling endpoint, so queued connectors stay `pending` and the log becomes `partial`, never `dispatched`.
+- Frontend API errors: structured `ApiError` responses (4xx/5xx) must propagate to the UI. Only network/timeout/non-JSON failures may fall back to `demoStore.ts`; falling back after a real connector failure would fabricate success.

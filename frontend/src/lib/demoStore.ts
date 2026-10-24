@@ -1,4 +1,5 @@
 import type {
+  ConnectorOutcome,
   DispatchInput,
   DispatchLog,
   IntegrationId,
@@ -157,6 +158,32 @@ export const demoApi = {
     if (!tenant) throw new Error(`Unknown tenant: ${input.tenantId}`);
 
     const { category, priority } = classify(input.rawQuery);
+    const hubspotTicketId = tenant.integrations.hubspot.connected
+      ? `HS-${Math.floor(100000 + Math.random() * 900000)}`
+      : undefined;
+    const slackChannelNotified = tenant.integrations.slack.connected
+      ? (tenant.integrations.slack.accountEmail || '#alerts')
+      : undefined;
+    const gmailSentTo = tenant.integrations.gmail.connected
+      ? (input.callerContact.includes('@') ? input.callerContact : 'caller-followup@example.com')
+      : undefined;
+    const sheetsRowAppended = tenant.integrations.sheets.connected;
+
+    const results: ConnectorOutcome[] = [
+      ...(hubspotTicketId
+        ? [{ connector: 'hubspot' as const, status: 'simulated' as const, mode: 'simulated' as const, reference: hubspotTicketId }]
+        : []),
+      ...(slackChannelNotified
+        ? [{ connector: 'slack' as const, status: 'simulated' as const, mode: 'simulated' as const, reference: slackChannelNotified }]
+        : []),
+      ...(gmailSentTo
+        ? [{ connector: 'gmail' as const, status: 'simulated' as const, mode: 'simulated' as const, reference: gmailSentTo }]
+        : []),
+      ...(sheetsRowAppended
+        ? [{ connector: 'sheets' as const, status: 'simulated' as const, mode: 'simulated' as const, reference: 'row' }]
+        : []),
+    ];
+
     const log: DispatchLog = {
       id: `disp_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
       timestamp: new Date().toISOString(),
@@ -171,16 +198,12 @@ export const demoApi = {
         source: 'heuristic',
       },
       actionsTaken: {
-        hubspotTicketId: tenant.integrations.hubspot.connected
-          ? `HS-${Math.floor(100000 + Math.random() * 900000)}`
-          : undefined,
-        slackChannelNotified: tenant.integrations.slack.connected
-          ? (tenant.integrations.slack.accountEmail || '#alerts')
-          : undefined,
-        gmailSentTo: tenant.integrations.gmail.connected
-          ? (input.callerContact.includes('@') ? input.callerContact : 'caller-followup@example.com')
-          : undefined,
-        sheetsRowAppended: tenant.integrations.sheets.connected,
+        hubspotTicketId,
+        slackChannelNotified,
+        gmailSentTo,
+        sheetsRowAppended,
+        mode: 'simulated',
+        results,
       },
       status: 'dispatched',
     };

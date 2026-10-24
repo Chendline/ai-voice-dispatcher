@@ -15,6 +15,15 @@ export interface Tenant {
   dispatchLogs: DispatchLog[];
 }
 
+export interface ConnectorActionOutcome {
+  connector: IntegrationType;
+  status: 'success' | 'failed' | 'pending' | 'simulated';
+  mode: 'live' | 'simulated';
+  reference?: string;
+  detail?: string;
+  executionId?: string;
+}
+
 export interface DispatchLog {
   id: string;
   timestamp: string;
@@ -33,8 +42,10 @@ export interface DispatchLog {
     slackChannelNotified?: string;
     gmailSentTo?: string;
     sheetsRowAppended?: boolean;
+    mode?: 'live' | 'simulated';
+    results?: ConnectorActionOutcome[];
   };
-  status: 'processing' | 'dispatched' | 'failed';
+  status: 'processing' | 'dispatched' | 'partial' | 'failed';
 }
 
 export interface PersistedTenantState {

@@ -163,6 +163,10 @@ export default function App() {
   const [isDispatching, setIsDispatching] = useState(false);
   const [dispatchStage, setDispatchStage] = useState<number>(0);
   const [dispatchError, setDispatchError] = useState<string | null>(null);
+  const [dispatchNotice, setDispatchNotice] = useState<{
+    kind: 'partial' | 'failed';
+    message: string;
+  } | null>(null);
 
   // Filter, search and tab state
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -267,6 +271,7 @@ export default function App() {
     setSelectedCategory('All');
     setSearchQuery('');
     setDispatchError(null);
+    setDispatchNotice(null);
   };
 
   const handleApplyPreset = (preset: typeof PRESET_SCENARIOS[0]) => {
@@ -275,6 +280,7 @@ export default function App() {
     setCallerContact(preset.callerContact);
     setRawQuery(preset.query);
     setDispatchError(null);
+    setDispatchNotice(null);
   };
 
   const handleTriggerDispatch = async (event: FormEvent) => {
@@ -285,6 +291,7 @@ export default function App() {
     playDispatchLaunch();
     setIsDispatching(true);
     setDispatchError(null);
+    setDispatchNotice(null);
     setDispatchStage(1);
     playStepTick(1);
 
@@ -324,11 +331,32 @@ export default function App() {
         setExpandedLogId(log.id);
         setSelectedCategory('All');
         setSearchQuery('');
-        playDispatchComplete();
+
+        if (log.status === 'failed') {
+          setDispatchNotice({
+            kind: 'failed',
+            message:
+              'No connector action completed. This dispatch is logged as failed — inspect the payload trace for the upstream reason.',
+          });
+        } else if (log.status === 'partial') {
+          setDispatchNotice({
+            kind: 'partial',
+            message:
+              'Dispatch partially completed. Some connectors did not confirm — inspect the payload trace for per-connector results.',
+          });
+          playDispatchComplete();
+        } else {
+          setDispatchNotice(null);
+          playDispatchComplete();
+        }
       }
-    } catch {
+    } catch (error) {
       if (activeTenantRef.current === dispatchTenantId) {
-        setDispatchError('Dispatch could not reach a connector vault. Please try again.');
+        setDispatchError(
+          error instanceof Error && error.message
+            ? error.message
+            : 'Dispatch could not reach the connector API. Please try again.',
+        );
       }
     } finally {
       stageTimersRef.current.forEach(timer => window.clearTimeout(timer));
@@ -442,6 +470,7 @@ export default function App() {
     setSearchQuery('');
     setExpandedLogId(null);
     setDispatchError(null);
+    setDispatchNotice(null);
     setVault({ tenantId: 'tenant-a', tenant: null, logs: [], status: 'loading' });
     setVaultEpoch(previous => previous + 1);
     if (activeTenantId !== 'tenant-a') {
@@ -733,6 +762,12 @@ export default function App() {
                     <p className="form-error" role="alert">{dispatchError}</p>
                   )}
 
+                  {dispatchNotice && (
+                    <p className={`dispatch-notice ${dispatchNotice.kind}`} role="status">
+                      {dispatchNotice.message}
+                    </p>
+                  )}
+
                   <button
                     type="submit"
                     className={`dispatch-button ${isDispatching ? 'loading' : ''}`}
@@ -995,6 +1030,17 @@ export default function App() {
                           <span className="priority-tag">
                             {log.classification.priority}
                           </span>
+                          {log.actionsTaken.mode === 'simulated' && (
+                            <span className="mode-badge simulated" title="Executed in the browser sandbox, not against FastN">
+                              Sandbox
+                            </span>
+                          )}
+                          {log.status === 'partial' && (
+                            <span className="status-badge partial">Partial</span>
+                          )}
+                          {log.status === 'failed' && (
+                            <span className="status-badge failed">Failed</span>
+                          )}
                         </div>
                         <div className="event-timestamp">
                           <span className="timestamp-mono">
@@ -1103,8 +1149,10 @@ export default function App() {
                                 id: log.id,
                                 tenant: log.tenantId,
                                 timestamp: log.timestamp,
+                                mode: log.actionsTaken.mode ?? 'simulated',
                                 classification: log.classification,
                                 dispatchedConnectors: log.actionsTaken,
+                                results: log.actionsTaken.results ?? [],
                                 status: log.status || 'dispatched',
                               },
                               null,
