@@ -151,3 +151,30 @@ test('connectors: simulated dispatch never contacts the executor', async () => {
   await dispatchConnectors(context(), simulatedConfig, trap);
   assert.equal(called, false);
 });
+
+test('connectors: live mode accepts FastN data envelope with success flag', async () => {
+  const fastnEnvelopeExecutor: WorkflowExecutor = async (_cfg, _id, input) => {
+    const connector = input.connector as string;
+    return {
+      outcome: 'succeeded',
+      httpStatus: 200,
+      data: {
+        data: {
+          success: true,
+          app: connector,
+          input,
+        },
+      },
+    };
+  };
+
+  const outcome = await dispatchConnectors(context(), liveConfig, fastnEnvelopeExecutor);
+  assert.equal(outcome.status, 'dispatched');
+  assert.equal(outcome.actionsTaken.mode, 'live');
+  assert.ok(outcome.actionsTaken.hubspotTicketId?.startsWith('HS-'));
+  assert.equal(outcome.actionsTaken.slackChannelNotified, '#acme-dispatch');
+  assert.equal(outcome.actionsTaken.gmailSentTo, 'billing@acme.example');
+  assert.equal(outcome.actionsTaken.sheetsRowAppended, true);
+  assert.ok(outcome.results.every(r => r.status === 'success' && r.mode === 'live'));
+});
+

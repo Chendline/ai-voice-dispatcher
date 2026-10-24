@@ -152,6 +152,35 @@ export async function executeWorkflow(
     }
   }
 
+  if (!response.ok && response.status === 404 && headers['x-end-org-ref']) {
+    const errorMsg = (typeof payload === 'object' && payload && 'error' in payload)
+      ? String((payload as Record<string, unknown>).error ?? '')
+      : text;
+    if (errorMsg.includes('No customer found for external_ref')) {
+      const fallbackHeaders = { ...headers };
+      delete fallbackHeaders['x-end-org-ref'];
+      try {
+        const fallbackRes = await fetch(`${config.apiBaseUrl}/api/v1/workflows/${encodeURIComponent(workflowId)}/execute`, {
+          method: 'POST',
+          headers: fallbackHeaders,
+          body: JSON.stringify({ input }),
+          signal: controller.signal,
+        });
+        if (fallbackRes.ok) {
+          response = fallbackRes;
+          const fallbackText = await response.text().catch(() => '');
+          try {
+            payload = JSON.parse(fallbackText);
+          } catch {
+            payload = null;
+          }
+        }
+      } catch {
+        // preserve original response handling if network/abort happens
+      }
+    }
+  }
+
   if (!response.ok) throw mapHttpError(response.status, payload, config.apiKey);
 
   if (response.status === 202) {

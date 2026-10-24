@@ -120,7 +120,7 @@ Live: https://aivoicedispatcher.vercel.app
 - `connectors.ts`:
   - Fans out to connected HubSpot/Slack/Gmail/Sheets only.
   - Live mode requires a workflow per connector; missing ids fail explicitly.
-  - Maps workflow output (`ticketId`, `channel`, `messageId`, `rowId`, `ok`) into references.
+  - Maps workflow output (`ticketId`, `channel`, `messageId`, `rowId`, `ok`, `success`) and unwraps FastN `{ data: ... }` envelopes into references.
   - Aggregates `dispatched|partial|failed`; never reports fake success.
 - `validation.ts`: dispatch/integration payload validation (tenant id, query length, boolean flags).
 - `app.ts`:

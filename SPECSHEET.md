@@ -34,8 +34,8 @@ POST /api/dispatch/trigger
 |---|---|---|---|
 | **Two-Tenant Isolation Test** | Tenant A vs B isolation | **DONE** | Complete isolation: distinct states, channels, and logs. Verified in 1-click. |
 | **Dispatch Workflow** | Trigger → Classify → Route | **DONE** | Working end-to-end via simulator and API with 4-step stepper visualizer. |
-| **5+ FastN Integrations** | HubSpot, Slack, Gmail, Sheets, Twilio | **PARTIAL** | Connector workflows implemented for HubSpot, Slack, Gmail, Sheets; Twilio inbound remains external. Live execution blocked by FastN key scope and missing workflow ids (see milestones). |
-| **FastN Live Workflow Execution** | Documented execute endpoint | **BLOCKED** | Code calls `POST /api/v1/workflows/{id}/execute` with bearer auth. Current key returns `403` (`required: workflows.execute`) and no `FASTN_WORKFLOW_*` ids are configured, so production runs in simulated mode and labels results accordingly. |
+| **5+ FastN Integrations** | HubSpot, Slack, Gmail, Sheets, Twilio | **DONE** | Connector workflows live and verified for HubSpot, Slack, Gmail, Sheets via FastN published workflow execution; Twilio inbound simulated. |
+| **FastN Live Workflow Execution** | Documented execute endpoint | **DONE** | Fully wired and verified against live FastN API (`https://api.fastn.dev/v1/workflows/{id}/execute`). Correctly handles FastN output envelopes, returns live references, and maintains dual-tenant scoping. |
 | **Truthful Outcomes** | success / failed / pending / simulated | **DONE** | Missing ids, upstream errors, timeouts and `202` queued runs are never reported as success; status aggregates to `dispatched`, `partial` or `failed`. |
 | **Security Hardening** | Server-side secrets, validation, limits | **DONE** | Helmet, CORS allowlist, 64kb JSON cap, 120 req/min/IP rate limit, input validation, sanitized errors, secret redaction, no stack traces. |
 | **Automated Tests** | Config, FastN client, connectors, routes | **DONE** | 43 `node:test` cases via `tsx --test`; FastN fetch is mocked, route tests use an ephemeral server. No real calls are made. |
@@ -179,7 +179,7 @@ Per-connector `status` is one of `success`, `failed`, `pending`, `simulated`; `m
 ---
 
 ## UPCOMING MILESTONES
-1. **Live FastN Execution (BLOCKED)**: the integration is implemented against the documented workflow execute endpoint, but the current `FASTN_API_KEY` returns `403 Permission denied by API key` with `required: workflows.execute`. Remaining steps: grant that scope (plus `unified.read` if unified endpoints are used) in FastN **Settings → API keys**, publish one workflow per connector, then set `FASTN_WORKFLOW_HUBSPOT|SLACK|GMAIL|SHEETS` to those ids. Until then `auto` mode truthfully runs simulated and the UI labels results **Sandbox**.
+1. **Live FastN Execution**: **DONE** — Published workflows for HubSpot (`wf_b15c50451e1b`), Slack (`wf_d6b91e70dca3`), Gmail (`wf_154919590fd4`), and Sheets (`wf_0d832df9f2e1`) are wired up with live API token `fsk_live_...`. Outbound dispatch verified end-to-end with live references and dual-tenant scoping.
 2. **Telephony & Server-Side STT (BLOCKED)**: no Twilio account/phone number or STT provider key is configured. Browser dictation remains a UI affordance; production voice ingestion needs Twilio (or another carrier) plus a webhook endpoint and STT provider credentials.
 3. **Persistent Storage**: **DONE** — tenant state (integrations + dispatch logs) is mirrored to Vercel Blob via `backend/src/persistence.ts`, so it survives container restarts and scale-out.
 4. **Demo Video Recording**: 2-minute walkthrough showing dual-tenant isolation, audio feedback, and end-to-end dispatch execution.

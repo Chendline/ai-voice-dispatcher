@@ -163,14 +163,14 @@ Content-Type: application/json
 
 Each request also carries `x-end-org-ref: <tenantId>` so workflows can scope to the right customer. Test keys (`fsk_test_…`) automatically send `X-fastn-Test-Mode: true`.
 
-**Expected workflow output** (the dispatcher refuses to claim success without a confirmation):
+**Expected workflow output** (the dispatcher automatically unwraps FastN's `{ data: ... }` response envelope and refuses to claim success without confirmation):
 
 | Connector | Confirmed by |
 |---|---|
-| HubSpot | `ticketId`, `ticket_id` or `id` |
-| Slack | `channel`, `channelId`, `reference` or `id` |
-| Gmail | `messageId` / `message_id` / `id`, or `{ "ok": true }` |
-| Sheets | `rowId` / `row_id` / `id`, or `{ "ok": true }` |
+| HubSpot | `ticketId`, `ticket_id`, `id`, or derived reference when `{ "success": true }` / `{ "ok": true }` |
+| Slack | `channel`, `channelId`, `reference`, `id`, or tenant channel when `{ "success": true }` / `{ "ok": true }` |
+| Gmail | `messageId` / `message_id` / `id`, or `{ "success": true }` / `{ "ok": true }` |
+| Sheets | `rowId` / `row_id` / `id`, or `{ "success": true }` / `{ "ok": true }` |
 
 **Modes and outcomes**
 
