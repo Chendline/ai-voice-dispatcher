@@ -32,6 +32,9 @@ npm install
 npm run dev      # vite dev server on :5173
 npm run build    # tsc -b && vite build
 npm run lint     # oxlint
+
+# Deploy (from repo root)
+npx vercel --prod
 ```
 
 ## AGENT OPERATING DIRECTIVES
@@ -55,43 +58,26 @@ npm run lint     # oxlint
 ## CODEBASE ATLAS & NAVIGATION MAP
 *Use this index as files grow larger to locate exact logic, styles, and audio hooks without hunting.*
 
-### 1. Frontend Component & Logic Map (`frontend/src/App.tsx`)
-- **Lines 1–38**: Type interfaces (`IntegrationStatus`, `Tenant`, `DispatchLog`).
-- **Lines 39–68**: `PRESET_SCENARIOS` constant array (Critical DB Outage, Invoice Overcharge, Fleet Route Lost, Enterprise Demo).
-- **Lines 70–95**: Core state variables:
-  - `activeTenantId`: `'tenant-a' | 'tenant-b'`
-  - `tenantData`: Current tenant metadata + 5 integrations status.
-  - `logs`: Current tenant's dispatch event list.
-  - `callerName`, `callerContact`, `rawQuery`: Simulation form state.
-  - `isDispatching`, `dispatchStage`: 4-step pipeline animation state (1=Twilio, 2=Claude, 3=Router, 4=Connectors).
-  - `selectedCategory`, `searchQuery`: Event filtering state.
-  - `expandedLogId`: JSON payload inspector toggle.
-  - `activeTab`: `'simulator' | 'connectors'`.
-- **Lines 96–120**: `Lenis` smooth scroll setup with `requestAnimationFrame` loop and cleanup.
-- **Lines 121–150**: Data fetch hooks (`/api/tenants`, `/api/tenants/:id`, `/api/tenants/:id/logs`).
-- **Lines 151–215**: Interaction handlers:
-  - `handleApplyPreset()`: Populates form + fires `playTap()`.
-  - `handleTriggerDispatch()`: Fires `playDispatchLaunch()`, triggers step progression timers with `playStepTick(1-4)`, posts to backend, updates state, and fires `playDispatchComplete()`.
-  - `handleCopyId()`: Copies event ID + fires `playTap()`.
-- **Lines 220–285**: **Header Navigation & Segmented Tenant Switcher**:
-  - Apple-style sliding pill track, status indicator dot, and isolation badge.
-  - Fires `playSwitch()` on tenant click.
-- **Lines 286–550**: **Left Panel (Simulator & Connectors)**:
-  - Subnav tabs (Voice Simulation vs FastN Connectors).
-  - Live audio waveform bars (`.wave-bar.bar-1..5`).
-  - Quick preset scenario chips.
-  - Voice form inputs + 4-step stepper (`.dispatch-stepper`).
-  - Copper dispatch trigger button (`.dispatch-button`).
-  - Connectors view: HubSpot, Slack, Gmail, Sheets, Twilio status rows.
-  - Metrics strip (Dispatched count, Connectors count, 100% Isolation badge).
-- **Lines 551–774**: **Right Panel (Live Event Stream)**:
-  - Stream header + Category filter pills (All, Emergency, Tech, Billing, Sales).
-  - Filter search bar.
-  - Empty stream placeholder state.
-  - Event cards (`.event-card`): category pill, priority tag, timestamp, caller initials avatar, speech quote blockquote, connector dispatch badges.
-  - Expandable JSON payload trace inspector (`.payload-inspector`).
+### 1. Frontend Component & Logic Map (`frontend/src/App.tsx`, ~1,110 lines)
+- **Lines 1–30**: Imports, tab/category constants, `DEFAULT_TENANTS`.
+- **Lines 31–86**: `PRESET_SCENARIOS` constant array (Critical DB Outage, Invoice Overcharge, Fleet Route Lost, Enterprise Demo) + URL/deep-link helpers.
+- **Lines 132–170**: Core state: active tenant, tenant data, logs, loading/mode, simulation form, pipeline animation, filters, active workspace tab.
+- **Lines 171–248**: Lenis setup (skips reduced motion), URL sync (`?tenant=&tab=`), tenant directory bootstrap, isolated vault loading with cancellation guards.
+- **Lines 250–452**: Interaction handlers:
+  - `handleApplyPreset()`, `handleTriggerDispatch()` (in-flight tenant guard, step ticks, completion chime), `handleToggleIntegration()` (optimistic connector switch), `handleCopyId()`.
+  - `handleWorkspaceKeyDown()` / `handleTenantKeyDown()`: Arrow/Home/End tab navigation with focus handoff.
+  - `handleResetSandbox()`: clears the session vault in demo mode.
+- **Lines 455–526**: **Header**: brand, API/sandbox mode pill, vault status, sliding segmented tenant tabs.
+- **Lines 528–825**: **Left Panel**: accessible subnav tabs, voice waveform, presets, form, stepper, connector toggles/skeletons, metrics strip.
+- **Lines 826–1083**: **Right Panel**: category filters, search, loading/empty/no-match states, event cards, JSON payload inspector.
+- **Lines 1085–1112**: Footer with domain-ready attribution and sandbox reset.
 
-### 2. Audio-Haptic Engine (`frontend/src/utils/soundEffects.ts`)
+### 2. Client Data Layer (`frontend/src/lib`, `frontend/src/types.ts`)
+- `api.ts`: `VITE_API_BASE_URL` resolution, JSON/timeout client, live→sandbox fallback, tenant/log/dispatch/connector operations.
+- `demoStore.ts`: session-scoped in-browser vault mirroring backend seeds, keyword classification, and connector routing. Keeps the static Vercel demo functional.
+- `types.ts`: shared tenant, integration, dispatch log, tab, and connection-mode contracts.
+
+### 3. Audio-Haptic Engine (`frontend/src/utils/soundEffects.ts`)
 - Zero-dependency Web Audio API synthesizer. Auto-resumes on first pointer interaction.
 - `playTap()`: Tactile downward chirp (520Hz → 180Hz, 45ms). Used for tabs, presets, filters, copy, and expand buttons.
 - `playSwitch()`: Dual-transient mechanical switch (320Hz → 140Hz triangle + 540Hz sine). Used for tenant switching.
@@ -99,7 +85,7 @@ npm run lint     # oxlint
 - `playStepTick(stepIndex)`: Pentatonic acoustic ticks (440Hz, 523Hz, 659Hz, 784Hz). Used across the 4 pipeline steps.
 - `playDispatchComplete()`: Warm triad chord chime (587Hz, 740Hz, 880Hz, 300ms tail). Used on successful dispatch logging.
 
-### 3. Styling & Color Tokens (`frontend/src/index.css` & `frontend/src/App.css`)
+### 4. Styling & Color Tokens (`frontend/src/index.css` & `frontend/src/App.css`)
 - **Color Palette (Refreshing Organic Aesthetic)**:
   - `--c-olive`: `#606c38` (Olive Leaf - badges, waveform, secondary text)
   - `--c-forest`: `#283618` (Black Forest - primary high-contrast text, active pills, headings)
@@ -114,16 +100,20 @@ npm run lint     # oxlint
   - Panels: Frosted white glass `rgba(255, 255, 255, 0.86)` with `backdrop-filter: blur(20px)`.
   - Specular sheen: `inset 0 1px 0 0 rgba(255, 255, 255, 0.95)`.
 
-### 4. Backend Engine (`backend/src`)
+### 5. Backend Engine (`backend/src`)
 - `tenantStore.ts`:
   - `TenantStore` class holding `Map<string, Tenant>`.
   - Seeded accounts for `tenant-a` (Acme Corp) and `tenant-b` (Nexus Logistics).
-  - All operations strictly indexed by `tenantId`.
+  - All operations strictly indexed by `tenantId`; connector pauses preserve channel identity.
+- `classifier.ts`:
+  - Claude Messages API with strict JSON validation, prompt-injection isolation, 7s timeout.
+  - Deterministic keyword fallback when `CLAUDE_API_KEY` is absent or the API fails.
 - `index.ts`:
+  - `GET /api/health`: Service + classifier readiness probe.
   - `GET /api/tenants`: Returns list of tenants.
   - `GET /api/tenants/:tenantId`: Returns tenant status + 5 connected integration states.
   - `POST /api/tenants/:tenantId/integrations/:integrationId`: Toggles or updates account details.
-  - `POST /api/dispatch/trigger`: Ingests speech, classifies category & priority, triggers mock connector outputs, appends to tenant's log stream.
+  - `POST /api/dispatch/trigger`: Ingests speech, classifies via Claude/fallback, triggers mock connector outputs, appends to tenant's log stream.
   - `GET /api/tenants/:tenantId/logs`: Returns tenant-isolated dispatch history.
 
 ---
@@ -134,23 +124,31 @@ npm run lint     # oxlint
 ├── .agents/skills/          # Installed agent skills (apple-design, emil-design-eng, shadcn)
 ├── backend/
 │   ├── src/
-│   │   ├── index.ts              # Express API, dispatch trigger, tenant endpoints
+│   │   ├── classifier.ts         # Claude API classifier + heuristic fallback
+│   │   ├── index.ts              # Express API, dispatch trigger, tenant endpoints, health
 │   │   └── tenantStore.ts        # In-memory tenant store, isolation logic, dual seed
 │   ├── package.json
 │   └── tsconfig.json
 ├── frontend/
+│   ├── public/
+│   │   └── favicon.svg           # Branded browser tab icon
 │   ├── src/
+│   │   ├── lib/
+│   │   │   ├── api.ts            # Live API client + automatic sandbox fallback
+│   │   │   └── demoStore.ts      # Session-scoped in-browser tenant vault
 │   │   ├── utils/
 │   │   │   └── soundEffects.ts   # Web Audio procedural sound engine (zero assets)
-│   │   ├── App.tsx               # Primary dashboard, simulator, live stream
+│   │   ├── types.ts              # Shared frontend domain contracts
+│   │   ├── App.tsx               # Primary dashboard, simulator, tabs, live stream
 │   │   ├── App.css               # Component styling, animations, waveform keyframes
 │   │   ├── index.css             # Organic color tokens, Lenis styles, scrollbars
 │   │   └── main.tsx
-│   ├── index.html                # App title, font preconnects, meta theme-color
+│   ├── index.html                # Title, favicon, SEO/OG meta, font preconnects
 │   ├── package.json              # React 19, Lenis, TypeScript, Vite
 │   └── vite.config.ts
-├── .env.example                  # FASTN_API_KEY, FASTN_WORKSPACE_ID, CLAUDE_API_KEY
-├── README.md                     # User-facing summary & submission checklist
+├── .env.example                  # FASTN_*, CLAUDE_*, VITE_API_BASE_URL
+├── vercel.json                   # Static frontend deploy config
+├── README.md                     # User-facing summary, domain & deploy guide
 ├── AGENTS.md                     # Agent operational runbook & codebase atlas (this file)
 └── SPECSHEET.md                  # Technical specs, architecture & progress tracker
 ```
@@ -160,3 +158,7 @@ npm run lint     # oxlint
 - State loss on backend reload: `tenantStore.ts` is in-memory. Dev server restart resets logs to empty and tenant integrations to defaults. Keep seed data intact.
 - Missing tenantId in payload: All POST requests to `/api/dispatch/trigger` require `tenantId` and `rawQuery`.
 - Audio autoplay policy: AudioContext must be unlocked via user pointer gesture (handled in `soundEffects.ts`).
+- Vercel runs the frontend only: the public deploy intentionally uses `demoStore.ts` because Vercel's static build has no API routes. Set `VITE_API_BASE_URL` at build time to point at a separately hosted backend for live mode.
+- Sandbox data is sessionStorage-scoped: demo logs/connector pauses survive reload but not a new browser tab/session. The footer "Reset sandbox" clears them.
+- Tab state lives in the URL: `?tenant=tenant-a|tenant-b&tab=simulator|connectors`. Do not remove `replaceState` sync or deep links regress.
+- Tenant switches must clear `tenantData`/`logs` before fetching. In-flight dispatches are guarded by `activeTenantRef`; preserve both to avoid cross-tenant bleed.

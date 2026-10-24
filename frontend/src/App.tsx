@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import type { CSSProperties, FormEvent, KeyboardEvent } from 'react';
 import Lenis from 'lenis';
 import {
   playTap,
@@ -7,42 +8,25 @@ import {
   playStepTick,
   playDispatchComplete,
 } from './utils/soundEffects';
+import {
+  getConnectionMode,
+  loadDispatchLogs,
+  loadTenant,
+  loadTenants,
+  resetSandbox,
+  setIntegration,
+  triggerDispatch,
+} from './lib/api';
+import type {
+  ConnectionMode,
+  DispatchLog,
+  IntegrationId,
+  IntegrationStatus,
+  LeftTab,
+  Tenant,
+  TenantSummary,
+} from './types';
 import './App.css';
-
-interface IntegrationStatus {
-  id: 'hubspot' | 'slack' | 'gmail' | 'sheets' | 'twilio';
-  name: string;
-  connected: boolean;
-  accountEmail?: string;
-  connectedAt?: string;
-}
-
-interface Tenant {
-  id: string;
-  name: string;
-  integrations: Record<string, IntegrationStatus>;
-}
-
-interface DispatchLog {
-  id: string;
-  timestamp: string;
-  tenantId: string;
-  callerName: string;
-  callerContact: string;
-  rawQuery: string;
-  classification: {
-    category: 'Billing' | 'Technical Support' | 'Sales Inquiry' | 'Emergency' | string;
-    priority: 'low' | 'medium' | 'high' | 'urgent' | string;
-    summary: string;
-  };
-  actionsTaken: {
-    hubspotTicketId?: string;
-    slackChannelNotified?: string;
-    gmailSentTo?: string;
-    sheetsRowAppended?: boolean;
-  };
-  status?: string;
-}
 
 const PRESET_SCENARIOS = [
   {
@@ -75,13 +59,102 @@ const PRESET_SCENARIOS = [
   },
 ];
 
-export default function App() {
-  const [tenants, setTenants] = useState<{ id: string; name: string }[]>([]);
-  const [activeTenantId, setActiveTenantId] = useState<string>('tenant-a');
-  const [tenantData, setTenantData] = useState<Tenant | null>(null);
-  const [logs, setLogs] = useState<DispatchLog[]>([]);
+const CATEGORY_FILTERS = ['All', 'Emergency', 'Technical Support', 'Billing', 'Sales Inquiry'];
+const WORKSPACE_TABS: LeftTab[] = ['simulator', 'connectors'];
+const DEFAULT_TENANTS: TenantSummary[] = [
+  { id: 'tenant-a', name: 'Tenant A (Acme Corp)' },
+  { id: 'tenant-b', name: 'Tenant B (Nexus Logistics)' },
+];
 
-  // Simulation Form State
+type VaultStatus = 'loading' | 'ready' | 'error';
+
+interface VaultSnapshot {
+  tenantId: string;
+  tenant: Tenant | null;
+  logs: DispatchLog[];
+  status: VaultStatus;
+}
+
+function timestampNow(): string {
+  return new Date().toISOString();
+}
+
+function readInitialTenant(): string {
+  const tenant = new URLSearchParams(window.location.search).get('tenant');
+  return tenant && /^[a-z0-9-]+$/i.test(tenant) ? tenant : 'tenant-a';
+}
+
+function readInitialTab(): LeftTab {
+  return new URLSearchParams(window.location.search).get('tab') === 'connectors'
+    ? 'connectors'
+    : 'simulator';
+}
+
+function splitTenantName(name: string): { label: string; alias: string } {
+  const match = name.match(/^(.*?)\s*\(([^)]+)\)\s*$/);
+  return match ? { label: match[1], alias: match[2] } : { label: name, alias: name };
+}
+
+function ConnectorGlyph({ id }: { id: IntegrationId }) {
+  if (id === 'hubspot') {
+    return (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+        <circle cx="12" cy="12" r="3" />
+        <circle cx="19" cy="5" r="2" />
+        <circle cx="5" cy="19" r="2" />
+        <path d="m10.5 13.5-4 4" />
+        <path d="m13.5 10.5 4-4" />
+      </svg>
+    );
+  }
+  if (id === 'slack') {
+    return (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+        <rect width="3" height="8" x="14" y="2" rx="1.5" />
+        <path d="M10 2a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1-3 0v-3A1.5 1.5 0 0 1 10 2z" />
+        <path d="M4 10a1.5 1.5 0 0 1 1.5-1.5h3a1.5 1.5 0 0 1 0 3h-3A1.5 1.5 0 0 1 4 10z" />
+        <rect width="8" height="3" x="2" y="14" rx="1.5" />
+      </svg>
+    );
+  }
+  if (id === 'gmail') {
+    return (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+        <rect width="20" height="16" x="2" y="4" rx="2" />
+        <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+      </svg>
+    );
+  }
+  if (id === 'sheets') {
+    return (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+        <rect width="18" height="18" x="3" y="3" rx="2" />
+        <line x1="3" x2="21" y1="9" y2="9" />
+        <line x1="3" x2="21" y1="15" y2="15" />
+        <line x1="9" x2="9" y1="3" y2="21" />
+      </svg>
+    );
+  }
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+    </svg>
+  );
+}
+
+export default function App() {
+  const [tenants, setTenants] = useState<TenantSummary[]>(DEFAULT_TENANTS);
+  const [activeTenantId, setActiveTenantId] = useState<string>(readInitialTenant);
+  const [vault, setVault] = useState<VaultSnapshot>(() => ({
+    tenantId: readInitialTenant(),
+    tenant: null,
+    logs: [],
+    status: 'loading',
+  }));
+  const [vaultEpoch, setVaultEpoch] = useState(0);
+  const [mode, setMode] = useState<ConnectionMode | 'connecting'>('connecting');
+
+  // Simulation form state
   const [callerName, setCallerName] = useState('Alex Rivers');
   const [callerContact, setCallerContact] = useState('+1 (555) 321-9876');
   const [rawQuery, setRawQuery] = useState(
@@ -89,19 +162,36 @@ export default function App() {
   );
   const [isDispatching, setIsDispatching] = useState(false);
   const [dispatchStage, setDispatchStage] = useState<number>(0);
+  const [dispatchError, setDispatchError] = useState<string | null>(null);
 
-  // Filter & Search State
+  // Filter, search and tab state
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'simulator' | 'connectors'>('simulator');
+  const [activeTab, setActiveTab] = useState<LeftTab>(readInitialTab);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  // Initialize Lenis Smooth Scrolling
+  const activeTenantRef = useRef(activeTenantId);
+  const stageTimersRef = useRef<number[]>([]);
+
   useEffect(() => {
+    activeTenantRef.current = activeTenantId;
+  }, [activeTenantId]);
+
+  useEffect(
+    () => () => {
+      stageTimersRef.current.forEach(timer => window.clearTimeout(timer));
+    },
+    [],
+  );
+
+  // Lenis smooth scrolling (respect reduced-motion preference)
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
     const lenis = new Lenis({
       duration: 1.15,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: 'vertical',
       gestureOrientation: 'vertical',
       smoothWheel: true,
@@ -122,99 +212,248 @@ export default function App() {
     };
   }, []);
 
-  // Fetch Tenants
+  // Keep tenant and tab choices shareable through the URL
   useEffect(() => {
-    fetch('http://localhost:3001/api/tenants')
-      .then(res => res.json())
-      .then(data => {
-        if (data.tenants) {
-          setTenants(data.tenants);
-        }
-      })
-      .catch(err => console.error('Failed to load tenants:', err));
+    const url = new URL(window.location.href);
+    url.searchParams.set('tenant', activeTenantId);
+    url.searchParams.set('tab', activeTab);
+    window.history.replaceState({}, '', url);
+  }, [activeTenantId, activeTab]);
+
+  // Resolve tenant directory once, validating deep links
+  useEffect(() => {
+    let cancelled = false;
+    loadTenants().then(list => {
+      if (cancelled) return;
+      setTenants(list);
+      setMode(getConnectionMode());
+      setActiveTenantId(previous =>
+        list.some(tenant => tenant.id === previous) ? previous : list[0].id,
+      );
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  // Fetch Active Tenant Data & Logs
+  // Load only the active vault. The snapshot is keyed by tenant, so stale data
+  // from a previous tenant can never render while the next fetch is in flight.
   useEffect(() => {
-    if (!activeTenantId) return;
+    let cancelled = false;
 
-    fetch(`http://localhost:3001/api/tenants/${activeTenantId}`)
-      .then(res => res.json())
-      .then(data => setTenantData(data))
-      .catch(err => console.error('Error fetching tenant:', err));
+    Promise.all([loadTenant(activeTenantId), loadDispatchLogs(activeTenantId)])
+      .then(([tenant, nextLogs]) => {
+        if (cancelled || activeTenantRef.current !== activeTenantId) return;
+        setVault({ tenantId: activeTenantId, tenant, logs: nextLogs, status: 'ready' });
+        setMode(getConnectionMode());
+      })
+      .catch(() => {
+        if (cancelled || activeTenantRef.current !== activeTenantId) return;
+        setVault({ tenantId: activeTenantId, tenant: null, logs: [], status: 'error' });
+        setMode(getConnectionMode());
+      });
 
-    fetch(`http://localhost:3001/api/tenants/${activeTenantId}/logs`)
-      .then(res => res.json())
-      .then(data => setLogs(data.logs || []))
-      .catch(err => console.error('Error fetching logs:', err));
-  }, [activeTenantId]);
+    return () => {
+      cancelled = true;
+    };
+  }, [activeTenantId, vaultEpoch]);
+
+  const selectTenant = (tenantId: string) => {
+    if (tenantId === activeTenantId) return;
+    activeTenantRef.current = tenantId;
+    setActiveTenantId(tenantId);
+    setVault({ tenantId, tenant: null, logs: [], status: 'loading' });
+    setExpandedLogId(null);
+    setSelectedCategory('All');
+    setSearchQuery('');
+    setDispatchError(null);
+  };
 
   const handleApplyPreset = (preset: typeof PRESET_SCENARIOS[0]) => {
     playTap();
     setCallerName(preset.callerName);
     setCallerContact(preset.callerContact);
     setRawQuery(preset.query);
+    setDispatchError(null);
   };
 
-  const handleTriggerDispatch = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleTriggerDispatch = async (event: FormEvent) => {
+    event.preventDefault();
     if (!rawQuery.trim() || isDispatching) return;
 
+    const dispatchTenantId = activeTenantId;
     playDispatchLaunch();
     setIsDispatching(true);
+    setDispatchError(null);
     setDispatchStage(1);
     playStepTick(1);
 
-    const stageTimer1 = setTimeout(() => {
-      setDispatchStage(2);
-      playStepTick(2);
-    }, 260);
-    const stageTimer2 = setTimeout(() => {
-      setDispatchStage(3);
-      playStepTick(3);
-    }, 520);
-    const stageTimer3 = setTimeout(() => {
-      setDispatchStage(4);
-      playStepTick(4);
-    }, 780);
+    stageTimersRef.current = [
+      window.setTimeout(() => {
+        setDispatchStage(2);
+        playStepTick(2);
+      }, 260),
+      window.setTimeout(() => {
+        setDispatchStage(3);
+        playStepTick(3);
+      }, 520),
+      window.setTimeout(() => {
+        setDispatchStage(4);
+        playStepTick(4);
+      }, 780),
+    ];
 
     try {
-      const response = await fetch('http://localhost:3001/api/dispatch/trigger', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          tenantId: activeTenantId,
-          callerName,
-          callerContact,
-          rawQuery,
-        }),
+      const log = await triggerDispatch({
+        tenantId: dispatchTenantId,
+        callerName,
+        callerContact,
+        rawQuery,
       });
+      setMode(getConnectionMode());
 
-      const resData = await response.json();
-      if (resData.success && resData.log) {
-        setLogs(prev => [resData.log, ...prev]);
-        setExpandedLogId(resData.log.id);
+      if (activeTenantRef.current === dispatchTenantId) {
+        setVault(current =>
+          current.tenantId === dispatchTenantId
+            ? {
+                ...current,
+                logs: [log, ...current.logs.filter(item => item.id !== log.id)],
+              }
+            : current,
+        );
+        setExpandedLogId(log.id);
+        setSelectedCategory('All');
+        setSearchQuery('');
         playDispatchComplete();
       }
-    } catch (err) {
-      console.error('Dispatch trigger failed:', err);
+    } catch {
+      if (activeTenantRef.current === dispatchTenantId) {
+        setDispatchError('Dispatch could not reach a connector vault. Please try again.');
+      }
     } finally {
-      clearTimeout(stageTimer1);
-      clearTimeout(stageTimer2);
-      clearTimeout(stageTimer3);
-      setTimeout(() => {
+      stageTimersRef.current.forEach(timer => window.clearTimeout(timer));
+      stageTimersRef.current = [];
+      window.setTimeout(() => {
         setIsDispatching(false);
         setDispatchStage(0);
       }, 400);
     }
   };
 
+  const handleToggleIntegration = async (integration: IntegrationStatus) => {
+    if (!tenantData) return;
+
+    playTap();
+    const ownerId = tenantData.id;
+    const connected = !integration.connected;
+
+    setVault(current => {
+      if (current.tenantId !== ownerId || !current.tenant) return current;
+      return {
+        ...current,
+        tenant: {
+          ...current.tenant,
+          integrations: {
+            ...current.tenant.integrations,
+            [integration.id]: {
+              ...integration,
+              connected,
+              connectedAt: connected ? timestampNow() : undefined,
+            },
+          },
+        },
+      };
+    });
+
+    const updated = await setIntegration(
+      ownerId,
+      integration.id,
+      connected,
+      integration.accountEmail,
+    );
+    setMode(getConnectionMode());
+
+    if (updated && activeTenantRef.current === ownerId) {
+      setVault(current =>
+        current.tenantId === ownerId ? { ...current, tenant: updated } : current,
+      );
+    }
+  };
+
   const handleCopyId = (id: string) => {
     playTap();
-    navigator.clipboard.writeText(id);
+    navigator.clipboard.writeText(id).catch(() => {});
     setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 1500);
+    window.setTimeout(() => setCopiedId(null), 1500);
   };
+
+  const handleWorkspaceKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
+    const currentIndex = WORKSPACE_TABS.indexOf(activeTab);
+    let nextIndex = currentIndex;
+
+    if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+      nextIndex = (currentIndex + 1) % WORKSPACE_TABS.length;
+    } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+      nextIndex = (currentIndex - 1 + WORKSPACE_TABS.length) % WORKSPACE_TABS.length;
+    } else if (event.key === 'Home') {
+      nextIndex = 0;
+    } else if (event.key === 'End') {
+      nextIndex = WORKSPACE_TABS.length - 1;
+    } else {
+      return;
+    }
+
+    event.preventDefault();
+    const nextTab = WORKSPACE_TABS[nextIndex];
+    playTap();
+    setActiveTab(nextTab);
+    document.getElementById(`workspace-tab-${nextTab}`)?.focus();
+  };
+
+  const handleTenantKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
+    if (tenants.length < 2) return;
+    const currentIndex = Math.max(0, tenants.findIndex(tenant => tenant.id === activeTenantId));
+    let nextIndex = currentIndex;
+
+    if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+      nextIndex = (currentIndex + 1) % tenants.length;
+    } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+      nextIndex = (currentIndex - 1 + tenants.length) % tenants.length;
+    } else if (event.key === 'Home') {
+      nextIndex = 0;
+    } else if (event.key === 'End') {
+      nextIndex = tenants.length - 1;
+    } else {
+      return;
+    }
+
+    event.preventDefault();
+    const nextTenant = tenants[nextIndex];
+    playSwitch();
+    selectTenant(nextTenant.id);
+    document.getElementById(`tenant-tab-${nextTenant.id}`)?.focus();
+  };
+
+  const handleResetSandbox = () => {
+    playTap();
+    resetSandbox();
+    setActiveTab('simulator');
+    setSelectedCategory('All');
+    setSearchQuery('');
+    setExpandedLogId(null);
+    setDispatchError(null);
+    setVault({ tenantId: 'tenant-a', tenant: null, logs: [], status: 'loading' });
+    setVaultEpoch(previous => previous + 1);
+    if (activeTenantId !== 'tenant-a') {
+      activeTenantRef.current = 'tenant-a';
+      setActiveTenantId('tenant-a');
+    }
+  };
+
+  const isVaultCurrent = vault.tenantId === activeTenantId;
+  const tenantData = isVaultCurrent ? vault.tenant : null;
+  const logs = isVaultCurrent ? vault.logs : [];
+  const isTenantLoading = !isVaultCurrent || vault.status === 'loading';
 
   const filteredLogs = logs.filter(log => {
     const matchesCategory =
@@ -230,15 +469,31 @@ export default function App() {
   });
 
   const activeTenantName =
-    tenants.find(t => t.id === activeTenantId)?.name || 'Tenant';
+    tenants.find(tenant => tenant.id === activeTenantId)?.name || 'Tenant';
+  const activeTenantParts = splitTenantName(activeTenantName);
+  const activeTenantIndex = Math.max(
+    0,
+    tenants.findIndex(tenant => tenant.id === activeTenantId),
+  );
+  const integrationList = tenantData ? Object.values(tenantData.integrations) : [];
+  const connectedCount = integrationList.filter(integration => integration.connected).length;
+  const isFiltering = selectedCategory !== 'All' || searchQuery.trim().length > 0;
+
+  const modeLabel =
+    mode === 'live' ? 'Live API' : mode === 'demo' ? 'Demo Sandbox' : 'Connecting';
+  const modeTitle =
+    mode === 'live'
+      ? 'Connected to the Express dispatch API'
+      : mode === 'demo'
+        ? 'Running the in-browser sandbox vault. Deploy notes live in the README.'
+        : 'Resolving the dispatch API';
 
   return (
     <div className="layout-shell">
-      {/* Top Ambient Navigation Bar */}
       <header className="nav-bar">
         <div className="nav-brand">
           <div className="brand-symbol">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
               <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
               <line x1="12" x2="12" y1="19" y2="22" />
@@ -251,33 +506,56 @@ export default function App() {
               <span className="brand-sub">AI Voice Dispatcher</span>
               <span className="brand-pill">FastN Embedded</span>
             </div>
-            <p className="brand-desc">Multi-tenant automated voice ingestion, intent classification & connector routing</p>
+            <p className="brand-desc">Multi-tenant automated voice ingestion, intent classification &amp; connector routing</p>
           </div>
         </div>
 
-        {/* Apple-style Segmented Tenant Switcher */}
         <div className="tenant-control-panel">
+          <span className={`mode-pill ${mode}`} title={modeTitle}>
+            <span className="mode-dot" />
+            {modeLabel}
+          </span>
+
           <div className="tenant-status-pill">
             <span className="status-dot pulsing" />
-            <span className="tenant-isolation-tag">Vault: {activeTenantName.split(' ')[0]}</span>
+            <span className="tenant-isolation-tag">Vault: {activeTenantParts.alias}</span>
           </div>
-          <div className="segmented-track" role="tablist" aria-label="Tenant Selector">
-            {tenants.map(t => {
-              const isActive = activeTenantId === t.id;
+
+          <div
+            className="segmented-track"
+            role="tablist"
+            aria-label="Tenant vault"
+            style={
+              {
+                '--tab-count': Math.max(tenants.length, 1),
+                '--tab-index': activeTenantIndex,
+              } as CSSProperties
+            }
+          >
+            <span className="segmented-thumb" aria-hidden="true" />
+            {tenants.map(tenant => {
+              const isActive = activeTenantId === tenant.id;
+              const parts = splitTenantName(tenant.name);
               return (
                 <button
-                  key={t.id}
+                  key={tenant.id}
+                  id={`tenant-tab-${tenant.id}`}
+                  type="button"
                   role="tab"
                   aria-selected={isActive}
+                  aria-controls="tenant-vault-panel"
+                  tabIndex={isActive ? 0 : -1}
                   className={`segmented-pill ${isActive ? 'active' : ''}`}
                   onClick={() => {
+                    if (isActive) return;
                     playSwitch();
-                    setActiveTenantId(t.id);
+                    selectTenant(tenant.id);
                   }}
+                  onKeyDown={handleTenantKeyDown}
                 >
-                  <span className="tenant-pill-dot" />
-                  <span className="tenant-pill-text">{t.name.replace(/\s*\(.*\)/, '')}</span>
-                  <span className="tenant-pill-sub">{t.id === 'tenant-a' ? 'Acme' : 'Nexus'}</span>
+                  <span className="tenant-pill-dot" aria-hidden="true" />
+                  <span className="tenant-pill-text">{parts.label}</span>
+                  <span className="tenant-pill-sub">{parts.alias}</span>
                 </button>
               );
             })}
@@ -285,20 +563,30 @@ export default function App() {
         </div>
       </header>
 
-      {/* Main Workspace Layout */}
-      <main className="content-container">
-        {/* Left Column: Interactive Simulation & Connectors */}
-        <section className="left-panel">
-          {/* Mode Switcher Tabs */}
-          <div className="subnav-tabs">
+      <main
+        className="content-container"
+        id="tenant-vault-panel"
+        role="tabpanel"
+        aria-labelledby={`tenant-tab-${activeTenantId}`}
+        tabIndex={-1}
+      >
+        <section className="left-panel" aria-label="Dispatch workspace">
+          <div className="subnav-tabs" role="tablist" aria-label="Workspace view">
             <button
+              id="workspace-tab-simulator"
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'simulator'}
+              aria-controls="workspace-panel-simulator"
+              tabIndex={activeTab === 'simulator' ? 0 : -1}
               className={`subnav-btn ${activeTab === 'simulator' ? 'active' : ''}`}
               onClick={() => {
                 playTap();
                 setActiveTab('simulator');
               }}
+              onKeyDown={handleWorkspaceKeyDown}
             >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
                 <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
                 <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
@@ -306,232 +594,257 @@ export default function App() {
               <span>Voice Simulation</span>
             </button>
             <button
+              id="workspace-tab-connectors"
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'connectors'}
+              aria-controls="workspace-panel-connectors"
+              tabIndex={activeTab === 'connectors' ? 0 : -1}
               className={`subnav-btn ${activeTab === 'connectors' ? 'active' : ''}`}
               onClick={() => {
                 playTap();
                 setActiveTab('connectors');
               }}
+              onKeyDown={handleWorkspaceKeyDown}
             >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <rect width="20" height="8" x="2" y="2" rx="2" />
                 <rect width="20" height="8" x="2" y="14" rx="2" />
                 <line x1="6" x2="6.01" y1="6" y2="6" />
                 <line x1="6" x2="6.01" y1="18" y2="18" />
               </svg>
-              <span>FastN Connectors ({tenantData ? Object.keys(tenantData.integrations).length : 5})</span>
+              <span>FastN Connectors</span>
+              <span className="subnav-count">{integrationList.length || 5}</span>
             </button>
           </div>
 
-          {activeTab === 'simulator' ? (
-            <div className="panel-card voice-card">
-              {/* Card Header with Real-time Voice Waveform */}
-              <div className="panel-header">
-                <div>
-                  <h2 className="panel-heading">Inbound Speech Dispatch</h2>
-                  <p className="panel-subtext">Transcribed speech is classified by Claude AI and dispatched via FastN.</p>
-                </div>
-                {/* Visual Audio Waveform */}
-                <div className={`audio-waveform ${isDispatching ? 'active' : ''}`}>
-                  <span className="wave-bar bar-1" />
-                  <span className="wave-bar bar-2" />
-                  <span className="wave-bar bar-3" />
-                  <span className="wave-bar bar-4" />
-                  <span className="wave-bar bar-5" />
-                </div>
-              </div>
-
-              {/* Quick Scenarios Bar */}
-              <div className="scenario-section">
-                <span className="scenario-label">Quick Presets</span>
-                <div className="preset-chip-list">
-                  {PRESET_SCENARIOS.map((preset, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      className="preset-chip"
-                      onClick={() => handleApplyPreset(preset)}
-                    >
-                      <span className="chip-cat">{preset.category}</span>
-                      <span className="chip-title">{preset.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Simulation Trigger Form */}
-              <form onSubmit={handleTriggerDispatch} className="voice-form">
-                <div className="form-row-dual">
-                  <div className="input-group">
-                    <label className="input-label" htmlFor="caller-name">Caller Identifier</label>
-                    <input
-                      id="caller-name"
-                      className="clean-input"
-                      value={callerName}
-                      onChange={e => setCallerName(e.target.value)}
-                      placeholder="e.g. Alex Rivers"
-                      required
-                    />
+          <div className="tab-stage">
+            <div
+              id="workspace-panel-simulator"
+              className="tab-panel"
+              role="tabpanel"
+              aria-labelledby="workspace-tab-simulator"
+              hidden={activeTab !== 'simulator'}
+            >
+              <div className="panel-card voice-card">
+                <div className="panel-header">
+                  <div>
+                    <h2 className="panel-heading">Inbound Speech Dispatch</h2>
+                    <p className="panel-subtext">Transcribed speech is classified by Claude AI and dispatched via FastN.</p>
                   </div>
-                  <div className="input-group">
-                    <label className="input-label" htmlFor="caller-contact">Return Contact</label>
-                    <input
-                      id="caller-contact"
-                      className="clean-input"
-                      value={callerContact}
-                      onChange={e => setCallerContact(e.target.value)}
-                      placeholder="Phone or Email"
-                      required
-                    />
+                  <div
+                    className={`audio-waveform ${isDispatching ? 'active' : ''}`}
+                    aria-hidden="true"
+                    title={isDispatching ? 'Listening · dispatch in progress' : 'Voice channel idle'}
+                  >
+                    <span className="wave-bar bar-1" />
+                    <span className="wave-bar bar-2" />
+                    <span className="wave-bar bar-3" />
+                    <span className="wave-bar bar-4" />
+                    <span className="wave-bar bar-5" />
                   </div>
                 </div>
 
-                <div className="input-group">
-                  <label className="input-label" htmlFor="raw-speech">
-                    <span>Voice Transcription Content</span>
-                    <span className="label-aux">Simulated Audio-to-Text</span>
-                  </label>
-                  <textarea
-                    id="raw-speech"
-                    className="clean-textarea"
-                    rows={4}
-                    value={rawQuery}
-                    onChange={e => setRawQuery(e.target.value)}
-                    placeholder="Transcribed voice stream..."
-                    required
-                  />
+                <div className="scenario-section">
+                  <span className="scenario-label">Quick Presets</span>
+                  <div className="preset-chip-list">
+                    {PRESET_SCENARIOS.map((preset, index) => (
+                      <button
+                        key={index}
+                        type="button"
+                        className="preset-chip"
+                        onClick={() => handleApplyPreset(preset)}
+                        aria-label={`Apply ${preset.label} preset`}
+                      >
+                        <span className="chip-cat">{preset.category}</span>
+                        <span className="chip-title">{preset.label}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
-                {/* Pipeline Progression Indicator */}
-                {isDispatching && (
-                  <div className="dispatch-stepper">
-                    <div className={`step-item ${dispatchStage >= 1 ? 'active' : ''}`}>
-                      <div className="step-circle">{dispatchStage > 1 ? '✓' : '1'}</div>
-                      <span className="step-label">Twilio Ingest</span>
+                <form onSubmit={handleTriggerDispatch} className="voice-form">
+                  <div className="form-row-dual">
+                    <div className="input-group">
+                      <label className="input-label" htmlFor="caller-name">Caller Identifier</label>
+                      <input
+                        id="caller-name"
+                        className="clean-input"
+                        value={callerName}
+                        onChange={event => setCallerName(event.target.value)}
+                        placeholder="e.g. Alex Rivers"
+                        required
+                      />
                     </div>
-                    <div className="step-line" />
-                    <div className={`step-item ${dispatchStage >= 2 ? 'active' : ''}`}>
-                      <div className="step-circle">{dispatchStage > 2 ? '✓' : '2'}</div>
-                      <span className="step-label">Claude AI Extract</span>
+                    <div className="input-group">
+                      <label className="input-label" htmlFor="caller-contact">Return Contact</label>
+                      <input
+                        id="caller-contact"
+                        className="clean-input"
+                        value={callerContact}
+                        onChange={event => setCallerContact(event.target.value)}
+                        placeholder="Phone or Email"
+                        required
+                      />
                     </div>
-                    <div className="step-line" />
-                    <div className={`step-item ${dispatchStage >= 3 ? 'active' : ''}`}>
-                      <div className="step-circle">{dispatchStage > 3 ? '✓' : '3'}</div>
-                      <span className="step-label">FastN Router</span>
+                  </div>
+
+                  <div className="input-group">
+                    <label className="input-label" htmlFor="raw-speech">
+                      <span>Voice Transcription Content</span>
+                      <span className="label-aux">Simulated Audio-to-Text</span>
+                    </label>
+                    <textarea
+                      id="raw-speech"
+                      className="clean-textarea"
+                      rows={4}
+                      value={rawQuery}
+                      onChange={event => setRawQuery(event.target.value)}
+                      placeholder="Transcribed voice stream..."
+                      required
+                    />
+                  </div>
+
+                  {isDispatching && (
+                    <div className="dispatch-stepper" role="status" aria-live="polite">
+                      <div className={`step-item ${dispatchStage >= 1 ? 'active' : ''}`}>
+                        <div className="step-circle">{dispatchStage > 1 ? '✓' : '1'}</div>
+                        <span className="step-label">Twilio Ingest</span>
+                      </div>
+                      <div className="step-line" />
+                      <div className={`step-item ${dispatchStage >= 2 ? 'active' : ''}`}>
+                        <div className="step-circle">{dispatchStage > 2 ? '✓' : '2'}</div>
+                        <span className="step-label">Claude AI Extract</span>
+                      </div>
+                      <div className="step-line" />
+                      <div className={`step-item ${dispatchStage >= 3 ? 'active' : ''}`}>
+                        <div className="step-circle">{dispatchStage > 3 ? '✓' : '3'}</div>
+                        <span className="step-label">FastN Router</span>
+                      </div>
+                      <div className="step-line" />
+                      <div className={`step-item ${dispatchStage >= 4 ? 'active' : ''}`}>
+                        <div className="step-circle">{dispatchStage >= 4 ? '✓' : '4'}</div>
+                        <span className="step-label">Sync Connectors</span>
+                      </div>
                     </div>
-                    <div className="step-line" />
-                    <div className={`step-item ${dispatchStage >= 4 ? 'active' : ''}`}>
-                      <div className="step-circle">{dispatchStage >= 4 ? '✓' : '4'}</div>
-                      <span className="step-label">Sync Connectors</span>
+                  )}
+
+                  {dispatchError && (
+                    <p className="form-error" role="alert">{dispatchError}</p>
+                  )}
+
+                  <button
+                    type="submit"
+                    className={`dispatch-button ${isDispatching ? 'loading' : ''}`}
+                    disabled={isDispatching}
+                    aria-busy={isDispatching}
+                  >
+                    {isDispatching ? (
+                      <span className="btn-contents">
+                        <span className="spinner-ring" />
+                        <span>Dispatching to FastN Vault...</span>
+                      </span>
+                    ) : (
+                      <span className="btn-contents">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <polygon points="5 3 19 12 5 21 5 3" />
+                        </svg>
+                        <span>Simulate Inbound Voice Dispatch</span>
+                      </span>
+                    )}
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            <div
+              id="workspace-panel-connectors"
+              className="tab-panel"
+              role="tabpanel"
+              aria-labelledby="workspace-tab-connectors"
+              hidden={activeTab !== 'connectors'}
+            >
+              <div className="panel-card connectors-card">
+                <div className="panel-header">
+                  <div>
+                    <h2 className="panel-heading">Connected FastN Endpoints</h2>
+                    <p className="panel-subtext">
+                      Tokens and dispatch streams are isolated to{' '}
+                      <strong className="inline-strong">{activeTenantName}</strong>. Toggle a connector to watch routing adapt.
+                    </p>
+                  </div>
+                  <div className="connector-header-meta">
+                    <span className="connector-live-count">
+                      {tenantData ? `${connectedCount}/${integrationList.length} live` : 'Syncing…'}
+                    </span>
+                    <div className="isolation-badge">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                        <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                      </svg>
+                      <span>Isolated</span>
                     </div>
+                  </div>
+                </div>
+
+                {!tenantData ? (
+                  <div className="connector-skeleton-stack" role="status" aria-live="polite">
+                    <span className="sr-only">Loading isolated connectors</span>
+                    {[0, 1, 2, 3, 4].map(index => (
+                      <div key={index} className="connector-skeleton" aria-hidden="true">
+                        <span className="skeleton-icon" />
+                        <span className="skeleton-lines">
+                          <span className="skeleton-line wide" />
+                          <span className="skeleton-line narrow" />
+                        </span>
+                        <span className="skeleton-pill" />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="connectors-stack">
+                    {integrationList.map(integration => (
+                      <div key={integration.id} className={`connector-card ${integration.connected ? '' : 'paused'}`}>
+                        <div className="connector-identity">
+                          <div className="connector-icon-wrap">
+                            <ConnectorGlyph id={integration.id} />
+                          </div>
+                          <div>
+                            <div className="connector-name">{integration.name}</div>
+                            <div className="connector-account">
+                              {integration.accountEmail || 'Unassigned channel'}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="connector-meta-right">
+                          <span className={`live-status-pill ${integration.connected ? 'is-connected' : 'is-disconnected'}`}>
+                            <span className="status-indicator-dot" aria-hidden="true" />
+                            <span>{integration.connected ? 'Connected' : 'Paused'}</span>
+                          </span>
+                          <button
+                            type="button"
+                            role="switch"
+                            aria-checked={integration.connected}
+                            aria-label={`${integration.connected ? 'Pause' : 'Resume'} ${integration.name}`}
+                            className={`connector-switch ${integration.connected ? 'on' : ''}`}
+                            onClick={() => handleToggleIntegration(integration)}
+                          >
+                            <span className="switch-thumb" aria-hidden="true" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
 
-                {/* Main Submit Action */}
-                <button
-                  type="submit"
-                  className={`dispatch-button ${isDispatching ? 'loading' : ''}`}
-                  disabled={isDispatching}
-                >
-                  {isDispatching ? (
-                    <span className="btn-contents">
-                      <span className="spinner-ring" />
-                      <span>Dispatching to FastN Vault...</span>
-                    </span>
-                  ) : (
-                    <span className="btn-contents">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                        <polygon points="5 3 19 12 5 21 5 3" />
-                      </svg>
-                      <span>Simulate Inbound Voice Dispatch</span>
-                    </span>
-                  )}
-                </button>
-              </form>
-            </div>
-          ) : (
-            /* FastN Connectors Panel */
-            <div className="panel-card connectors-card">
-              <div className="panel-header">
-                <div>
-                  <h2 className="panel-heading">Connected FastN Endpoints</h2>
-                  <p className="panel-subtext">
-                    All authentication tokens and dispatch streams are isolated to{' '}
-                    <strong style={{ color: 'var(--text-primary)' }}>{activeTenantName}</strong>.
-                  </p>
-                </div>
-                <div className="isolation-badge">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                  </svg>
-                  <span>Isolated</span>
-                </div>
-              </div>
-
-              <div className="connectors-stack">
-                {tenantData &&
-                  Object.values(tenantData.integrations).map(intg => (
-                    <div key={intg.id} className="connector-card">
-                      <div className="connector-identity">
-                        <div className="connector-icon-wrap">
-                          {intg.id === 'hubspot' && (
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <circle cx="12" cy="12" r="3" />
-                              <circle cx="19" cy="5" r="2" />
-                              <circle cx="5" cy="19" r="2" />
-                              <path d="m10.5 13.5-4 4" />
-                              <path d="m13.5 10.5 4-4" />
-                            </svg>
-                          )}
-                          {intg.id === 'slack' && (
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <rect width="3" height="8" x="14" y="2" rx="1.5" />
-                              <path d="M10 2a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1-3 0v-3A1.5 1.5 0 0 1 10 2z" />
-                              <path d="M4 10a1.5 1.5 0 0 1 1.5-1.5h3a1.5 1.5 0 0 1 0 3h-3A1.5 1.5 0 0 1 4 10z" />
-                              <rect width="8" height="3" x="2" y="14" rx="1.5" />
-                            </svg>
-                          )}
-                          {intg.id === 'gmail' && (
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <rect width="20" height="16" x="2" y="4" rx="2" />
-                              <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-                            </svg>
-                          )}
-                          {intg.id === 'sheets' && (
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <rect width="18" height="18" x="3" y="3" rx="2" />
-                              <line x1="3" x2="21" y1="9" y2="9" />
-                              <line x1="3" x2="21" y1="15" y2="15" />
-                              <line x1="9" x2="9" y1="3" y2="21" />
-                            </svg>
-                          )}
-                          {intg.id === 'twilio' && (
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                            </svg>
-                          )}
-                        </div>
-                        <div>
-                          <div className="connector-name">{intg.name}</div>
-                          <div className="connector-account">
-                            {intg.accountEmail || 'Unassigned channel'}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="connector-meta-right">
-                        <span className="live-status-pill">
-                          <span className="status-indicator-dot" />
-                          <span>Connected</span>
-                        </span>
-                      </div>
-                    </div>
-                  ))}
+                <p className="connectors-hint">
+                  Paused endpoints are skipped by the dispatcher until re-enabled.
+                </p>
               </div>
             </div>
-          )}
+          </div>
 
-          {/* Quick Metrics Strip */}
           <div className="metrics-strip">
             <div className="metric-box">
               <span className="metric-num">{logs.length}</span>
@@ -539,8 +852,8 @@ export default function App() {
             </div>
             <div className="metric-divider" />
             <div className="metric-box">
-              <span className="metric-num">5</span>
-              <span className="metric-label">FastN Connectors</span>
+              <span className="metric-num">{tenantData ? connectedCount : 5}</span>
+              <span className="metric-label">Active Connectors</span>
             </div>
             <div className="metric-divider" />
             <div className="metric-box">
@@ -550,36 +863,36 @@ export default function App() {
           </div>
         </section>
 
-        {/* Right Column: Live Dispatch Log & Event Stream */}
-        <section className="right-panel">
+        <section className="right-panel" aria-label="Live dispatch event stream">
           <div className="panel-card stream-card">
-            {/* Stream Header */}
             <div className="stream-header-row">
               <div className="stream-title-group">
                 <h2 className="panel-heading">Real-Time Event Stream</h2>
-                <span className="event-count-badge">{filteredLogs.length} events</span>
+                <span className="event-count-badge">
+                  {isFiltering ? `${filteredLogs.length}/${logs.length}` : logs.length}{' '}
+                  {!isFiltering && logs.length === 1 ? 'event' : 'events'}
+                </span>
               </div>
-              {/* Category Filter Pills */}
-              <div className="filter-chip-row">
-                {['All', 'Emergency', 'Technical Support', 'Billing', 'Sales Inquiry'].map(cat => (
+              <div className="filter-chip-row" role="group" aria-label="Filter by category">
+                {CATEGORY_FILTERS.map(category => (
                   <button
-                    key={cat}
+                    key={category}
                     type="button"
-                    className={`filter-chip ${selectedCategory === cat ? 'active' : ''}`}
+                    aria-pressed={selectedCategory === category}
+                    className={`filter-chip ${selectedCategory === category ? 'active' : ''}`}
                     onClick={() => {
                       playTap();
-                      setSelectedCategory(cat);
+                      setSelectedCategory(category);
                     }}
                   >
-                    {cat === 'Technical Support' ? 'Tech' : cat === 'Sales Inquiry' ? 'Sales' : cat}
+                    {category === 'Technical Support' ? 'Tech' : category === 'Sales Inquiry' ? 'Sales' : category}
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Quick Filter Search */}
             <div className="stream-search-wrap">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                 <circle cx="11" cy="11" r="8" />
                 <path d="m21 21-4.3-4.3" />
               </svg>
@@ -587,24 +900,33 @@ export default function App() {
                 className="search-input"
                 placeholder="Filter by caller, keyword or classification..."
                 value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
+                onChange={event => setSearchQuery(event.target.value)}
+                aria-label="Filter dispatches"
               />
               {searchQuery && (
                 <button
                   type="button"
                   className="search-clear-btn"
-                  onClick={() => setSearchQuery('')}
+                  onClick={() => {
+                    playTap();
+                    setSearchQuery('');
+                  }}
+                  aria-label="Clear search"
                 >
                   ×
                 </button>
               )}
             </div>
 
-            {/* Event List Feed */}
-            {filteredLogs.length === 0 ? (
+            {isTenantLoading ? (
+              <div className="stream-loading" role="status" aria-live="polite">
+                <span className="loading-ring" aria-hidden="true" />
+                <span>Syncing {activeTenantParts.alias} vault...</span>
+              </div>
+            ) : logs.length === 0 ? (
               <div className="empty-stream-state">
                 <div className="empty-glyph">
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <circle cx="12" cy="12" r="10" />
                     <line x1="12" x2="12" y1="8" y2="12" />
                     <line x1="12" x2="12.01" y1="16" y2="16" />
@@ -614,9 +936,43 @@ export default function App() {
                 <p className="empty-sub">
                   Trigger an inbound voice dispatch on the left to observe real-time classification and multi-tenant FastN connector routing.
                 </p>
+                <button
+                  type="button"
+                  className="empty-action-btn"
+                  onClick={() => {
+                    playTap();
+                    setActiveTab('simulator');
+                  }}
+                >
+                  Open the simulator
+                </button>
+              </div>
+            ) : filteredLogs.length === 0 ? (
+              <div className="empty-stream-state compact">
+                <div className="empty-glyph">
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" aria-hidden="true">
+                    <circle cx="11" cy="11" r="8" />
+                    <path d="m21 21-4.3-4.3" />
+                  </svg>
+                </div>
+                <h3 className="empty-title">No Matching Events</h3>
+                <p className="empty-sub">
+                  No dispatches in {activeTenantParts.alias} match this filter. Try another category or clear the search.
+                </p>
+                <button
+                  type="button"
+                  className="empty-action-btn"
+                  onClick={() => {
+                    playTap();
+                    setSelectedCategory('All');
+                    setSearchQuery('');
+                  }}
+                >
+                  Clear filters
+                </button>
               </div>
             ) : (
-              <div className="event-feed-scroll">
+              <div className="event-feed-scroll" data-lenis-prevent>
                 {filteredLogs.map(log => {
                   const isExpanded = expandedLogId === log.id;
                   const categoryName = log.classification.category;
@@ -631,7 +987,6 @@ export default function App() {
 
                   return (
                     <article key={log.id} className={`event-card ${isExpanded ? 'expanded' : ''}`}>
-                      {/* Top Meta Header */}
                       <div className="event-meta-bar">
                         <div className="event-tag-group">
                           <span className={`category-tag ${categoryClass}`}>
@@ -652,12 +1007,11 @@ export default function App() {
                         </div>
                       </div>
 
-                      {/* Caller Identification */}
                       <div className="caller-row">
                         <div className="caller-avatar">
                           {log.callerName
                             .split(' ')
-                            .map(n => n[0])
+                            .map(name => name[0])
                             .join('')
                             .slice(0, 2)
                             .toUpperCase()}
@@ -668,12 +1022,10 @@ export default function App() {
                         </div>
                       </div>
 
-                      {/* Speech Excerpt Quote */}
                       <blockquote className="speech-quote">
                         "{log.rawQuery}"
                       </blockquote>
 
-                      {/* Action Badges Output */}
                       <div className="action-badges-cluster">
                         {log.actionsTaken.hubspotTicketId && (
                           <div className="action-pill hubspot-pill">
@@ -701,7 +1053,6 @@ export default function App() {
                         )}
                       </div>
 
-                      {/* Inspector Toggle */}
                       <div className="expand-trigger-row">
                         <button
                           type="button"
@@ -710,6 +1061,7 @@ export default function App() {
                             playTap();
                             setExpandedLogId(isExpanded ? null : log.id);
                           }}
+                          aria-expanded={isExpanded}
                         >
                           <svg
                             width="12"
@@ -718,6 +1070,7 @@ export default function App() {
                             fill="none"
                             stroke="currentColor"
                             strokeWidth="2.4"
+                            aria-hidden="true"
                             style={{
                               transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
                               transition: 'transform 180ms ease-out',
@@ -732,12 +1085,12 @@ export default function App() {
                           type="button"
                           className="copy-id-btn"
                           onClick={() => handleCopyId(log.id)}
+                          aria-label={`Copy dispatch id ${log.id}`}
                         >
                           {copiedId === log.id ? 'Copied ✓' : log.id.slice(0, 14)}
                         </button>
                       </div>
 
-                      {/* Structured JSON Payload Inspector */}
                       {isExpanded && (
                         <div className="payload-inspector">
                           <div className="inspector-bar">
@@ -768,6 +1121,34 @@ export default function App() {
           </div>
         </section>
       </main>
+
+      <footer className="site-footer">
+        <div className="footer-brand">
+          <span className="footer-mark" aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+              <line x1="12" x2="12" y1="19" y2="22" />
+            </svg>
+          </span>
+          <span><strong>AEGIS</strong> · Voice dispatch infrastructure for multi-tenant SaaS.</span>
+        </div>
+        <div className="footer-meta">
+          <span>FastN Online Hackathon 2026</span>
+          <span className="footer-dot" aria-hidden="true" />
+          <a href="https://github.com/Chendline/ai-voice-dispatcher" target="_blank" rel="noreferrer">
+            Source
+          </a>
+          {mode === 'demo' && (
+            <>
+              <span className="footer-dot" aria-hidden="true" />
+              <button type="button" className="footer-btn" onClick={handleResetSandbox}>
+                Reset sandbox
+              </button>
+            </>
+          )}
+        </div>
+      </footer>
     </div>
   );
 }

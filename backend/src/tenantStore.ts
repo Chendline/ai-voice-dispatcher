@@ -26,6 +26,7 @@ export interface DispatchLog {
     category: 'Billing' | 'Technical Support' | 'Sales Inquiry' | 'Emergency';
     priority: 'low' | 'medium' | 'high' | 'urgent';
     summary: string;
+    source?: 'claude' | 'heuristic';
   };
   actionsTaken: {
     hubspotTicketId?: string;
@@ -91,10 +92,14 @@ export class TenantStore {
   public updateIntegration(tenantId: string, integrationId: IntegrationType, connected: boolean, accountEmail?: string) {
     const tenant = this.tenants.get(tenantId);
     if (!tenant) return null;
+    if (!Object.prototype.hasOwnProperty.call(tenant.integrations, integrationId)) return null;
+
+    const current = tenant.integrations[integrationId];
     tenant.integrations[integrationId] = {
-      ...tenant.integrations[integrationId],
+      ...current,
       connected,
-      accountEmail: connected ? accountEmail : undefined,
+      // Keep the channel identity so re-enabling restores the original account.
+      accountEmail: connected ? (accountEmail ?? current.accountEmail) : current.accountEmail,
       connectedAt: connected ? new Date().toISOString() : undefined,
     };
     return tenant;

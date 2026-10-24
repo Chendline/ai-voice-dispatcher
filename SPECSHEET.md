@@ -37,9 +37,11 @@ POST /api/dispatch/trigger
 | **Smooth Scrolling** | Lenis smooth scroll engine | **DONE** | Integrated with RAF loop & `lenis.css`. Fluid momentum. |
 | **Procedural Sound Engine** | Web Audio API audio-haptics | **DONE** | Zero-latency synthesized feedback (tenant switch, tap, launch, ticks, chime). |
 | **Event Stream & Inspection** | Live feed + search + payload trace | **DONE** | Filter by category, keyword search, and collapsible JSON inspector. |
-| **AI Classification** | Claude model | **WIP** | Regex/keyword logic active; direct Claude API hook ready in backend. |
+| **AI Classification** | Claude model | **DONE** | Claude Messages API with strict JSON parsing; deterministic fallback when no key/network. |
+| **Shareable Tabs & Deep Links** | `?tenant=&tab=` state | **DONE** | Tenant/tab state syncs to the URL; arrow/Home/End keyboard navigation; correct tab semantics. |
+| **Public Demo Resilience** | Static deploy parity | **DONE** | In-browser sandbox vault activates when the API is unreachable. Session-persisted logs and connector toggles. |
 | **Demo Video** | <= 3 min, English | **TODO** | Script prepared; ready to record dual-tenant test and audio demo. |
-| **Public Deployment** | Live URL | **TODO** | Local production build passing cleanly (`oxlint` + `vite build`). |
+| **Public Deployment** | Live URL | **READY** | `vercel.json` added; target `aivoicedispatcher.vercel.app`, custom domain `aivoicedispatcher.com`. |
 
 ---
 
@@ -49,7 +51,10 @@ POST /api/dispatch/trigger
 
 | Component / File | Location | Key Functionality |
 |---|---|---|
-| **`App.tsx`** | `frontend/src/App.tsx` | Main application dashboard, Apple segmented tenant switcher, voice simulation form, live audio waveform, quick preset chips, 4-step stepper, connectors panel, event feed stream, JSON payload inspector. |
+| **`App.tsx`** | `frontend/src/App.tsx` | Main application dashboard, Apple segmented tenant switcher, accessible workspace tabs, voice simulation form, live audio waveform, quick preset chips, 4-step stepper, connectors panel with live toggles, event feed stream, JSON payload inspector, shareable URL state. |
+| **`api.ts`** | `frontend/src/lib/api.ts` | Live Express API client with request timeouts and automatic switch to the browser sandbox when the API is unavailable. |
+| **`demoStore.ts`** | `frontend/src/lib/demoStore.ts` | Session-scoped in-browser tenant vault used by the static Vercel demo. Mirrors tenant seeds, classification, and connector routing. |
+| **`types.ts`** | `frontend/src/types.ts` | Shared tenant, integration, dispatch log, tab, and connection-mode types. |
 | **`soundEffects.ts`** | `frontend/src/utils/soundEffects.ts` | Zero-dependency procedural Web Audio synthesizer. Exports `playTap()`, `playSwitch()`, `playDispatchLaunch()`, `playStepTick()`, `playDispatchComplete()`. Automatically unlocks audio context on first user pointer event. |
 | **`index.css`** | `frontend/src/index.css` | Design tokens for the 5-color organic system (`--c-olive`, `--c-forest`, `--c-cornsilk`, `--c-caramel`, `--c-copper`), Lenis smooth scrolling rules, custom ergonomic scrollbar, and ambient radial background gradients. |
 | **`App.css`** | `frontend/src/App.css` | Glassmorphic layout surfaces, tactile button active states (`scale(0.98)`), audio waveform animation keyframes (`@keyframes wave-motion`), pipeline stepper lines, and responsive 2-column grid. |
@@ -59,12 +64,20 @@ POST /api/dispatch/trigger
 
 | Component / File | Location | Key Functionality |
 |---|---|---|
-| **`tenantStore.ts`** | `backend/src/tenantStore.ts` | In-memory multi-tenant state store. Houses seeded accounts for `tenant-a` (Acme Corp) and `tenant-b` (Nexus Logistics). Guarantees complete data isolation via `Map<string, Tenant>`. |
-| **`index.ts`** | `backend/src/index.ts` | Express server running on port 3001. Exposes `/api/tenants`, `/api/tenants/:id`, `/api/dispatch/trigger`, `/api/tenants/:id/logs`. |
+| **`tenantStore.ts`** | `backend/src/tenantStore.ts` | In-memory multi-tenant state store. Houses seeded accounts for `tenant-a` (Acme Corp) and `tenant-b` (Nexus Logistics). Guarantees complete data isolation via `Map<string, Tenant>`. Preserves channel identity across connector pauses. |
+| **`classifier.ts`** | `backend/src/classifier.ts` | Claude Messages API classifier with strict JSON validation, prompt-injection isolation, 7s timeout, and keyword fallback. |
+| **`index.ts`** | `backend/src/index.ts` | Express server running on port 3001. Exposes `/api/health`, `/api/tenants`, `/api/tenants/:id`, `/api/dispatch/trigger`, `/api/tenants/:id/logs`. |
 
 ---
 
 ## API CONTRACTS
+
+### 0. Health Probe
+`GET /api/health`
+
+```json
+{ "status": "ok", "service": "aegis-voice-dispatcher", "classifiers": ["claude", "heuristic"] }
+```
 
 ### 1. Inbound Dispatch Trigger
 `POST /api/dispatch/trigger`
@@ -94,7 +107,8 @@ POST /api/dispatch/trigger
     "classification": {
       "category": "Emergency",
       "priority": "urgent",
-      "summary": "Automated dispatch for: \"Production database cluster...\""
+      "summary": "Automated dispatch for: \"Production database cluster...\"",
+      "source": "claude"
     },
     "actionsTaken": {
       "hubspotTicketId": "HS-591240",
@@ -121,6 +135,7 @@ POST /api/dispatch/trigger
 ---
 
 ## UPCOMING MILESTONES
-1. **Direct Claude API Integration**: Replace mock classification logic in backend with `anthropic` SDK when `CLAUDE_API_KEY` is present.
-2. **FastN Webhook Handlers**: Support external inbound webhooks from FastN workflow events.
+1. **Live FastN Credentials**: Replace simulated connector payloads with real FastN workspace actions when keys are provisioned.
+2. **Persistent Storage**: Move the in-memory tenant store to Postgres/KV so logs survive API restarts.
 3. **Demo Video Recording**: 2-minute walkthrough showing dual-tenant isolation, audio feedback, and end-to-end dispatch execution.
+4. **Custom Domain**: Point `aivoicedispatcher.com` at the Vercel project and enable HTTPS.

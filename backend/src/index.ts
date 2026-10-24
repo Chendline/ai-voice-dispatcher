@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { tenantStore, IntegrationType } from './tenantStore.js';
+import { classifyIntent } from './classifier.js';
 
 dotenv.config({ path: '../.env' });
 
@@ -9,9 +10,18 @@ const app = express();
 const port = process.env.PORT || 3001;
 
 app.use(cors({
-  origin: '*',
+  origin: process.env.FRONTEND_URL || '*',
 }));
 app.use(express.json());
+
+// 0. Health probe (used by uptime checks and the deployment smoke test)
+app.get('/api/health', (_req: Request, res: Response) => {
+  res.json({
+    status: 'ok',
+    service: 'aegis-voice-dispatcher',
+    classifiers: process.env.CLAUDE_API_KEY ? ['claude', 'heuristic'] : ['heuristic'],
+  });
+});
 
 // 1. Get all available tenants
 app.get('/api/tenants', (req: Request, res: Response) => {
@@ -47,7 +57,7 @@ app.post('/api/tenants/:tenantId/integrations/:integrationId', (req: Request, re
 });
 
 // 4. Inbound Dispatch Trigger (Simulated Voice Agent or Fastn Webhook)
-app.post('/api/dispatch/trigger', (req: Request, res: Response) => {
+app.post('/api/dispatch/trigger', async (req: Request, res: Response) => {
   const { tenantId, callerName, callerContact, rawQuery } = req.body;
 
   if (!tenantId || !rawQuery) {
@@ -59,21 +69,8 @@ app.post('/api/dispatch/trigger', (req: Request, res: Response) => {
     return res.status(404).json({ error: `Tenant ${tenantId} not found` });
   }
 
-  // AI Classification logic (Mock/Claude Agent pipeline)
-  const lowerQuery = (rawQuery as string).toLowerCase();
-  let category: 'Billing' | 'Technical Support' | 'Sales Inquiry' | 'Emergency' = 'Technical Support';
-  let priority: 'low' | 'medium' | 'high' | 'urgent' = 'medium';
-
-  if (lowerQuery.includes('bill') || lowerQuery.includes('refund') || lowerQuery.includes('invoice') || lowerQuery.includes('charge')) {
-    category = 'Billing';
-    priority = 'medium';
-  } else if (lowerQuery.includes('emergency') || lowerQuery.includes('server down') || lowerQuery.includes('critical') || lowerQuery.includes('crash')) {
-    category = 'Emergency';
-    priority = 'urgent';
-  } else if (lowerQuery.includes('pricing') || lowerQuery.includes('demo') || lowerQuery.includes('quote') || lowerQuery.includes('buy')) {
-    category = 'Sales Inquiry';
-    priority = 'high';
-  }
+  // Claude classification with deterministic keyword fallback.
+  const classification = await classifyIntent(rawQuery as string);
 
   const dispatchId = `disp_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
   const timestamp = new Date().toISOString();
@@ -86,11 +83,7 @@ app.post('/api/dispatch/trigger', (req: Request, res: Response) => {
     callerName: callerName || 'Anonymous Caller',
     callerContact: callerContact || '+1 (555) 012-3456',
     rawQuery,
-    classification: {
-      category,
-      priority,
-      summary: `Automated dispatch for: "${rawQuery.substring(0, 60)}..."`,
-    },
+    classification,
     actionsTaken: {
       hubspotTicketId: tenant.integrations.hubspot.connected ? `HS-${Math.floor(100000 + Math.random() * 900000)}` : undefined,
       slackChannelNotified: tenant.integrations.slack.connected ? (tenant.integrations.slack.accountEmail || '#alerts') : undefined,
