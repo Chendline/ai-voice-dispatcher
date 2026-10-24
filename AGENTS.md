@@ -23,8 +23,8 @@ Rule: Consult skill files before writing new UI or animation code.
 # Backend
 cd backend
 npm install
-npm run dev      # runs tsx watch src/index.ts on :3001
-npm run build    # tsc -> dist/
+npm run dev      # runs tsx watch src/main.ts on :3001
+npm run build    # tsc -> dist/main.js
 
 # Frontend
 cd frontend
@@ -50,7 +50,7 @@ Live: https://aivoicedispatcher.vercel.app
    - `sheets` (audit logging)
    - `twilio` (voice ingestion trigger)
 5. Modifying Code:
-   - Backend changes -> update `backend/src/tenantStore.ts` and `backend/src/index.ts`.
+   - Backend changes -> update `backend/src/tenantStore.ts` and `backend/src/main.ts`.
    - Frontend changes -> follow the Component Map below.
 6. React 19 Watch-out: Ensure third-party UI libs/dependencies are React 19 compatible before npm install.
 7. Git Rules: NEVER push, PR, or merge without explicit user permission. ALWAYS use separate feature branches (`feat/*`, `fix/*`). Zero direct pushes to main.
@@ -127,8 +127,10 @@ Live: https://aivoicedispatcher.vercel.app
 ├── backend/
 │   ├── src/
 │   │   ├── classifier.ts         # Claude API classifier + heuristic fallback
-│   │   ├── index.ts              # Express API, dispatch trigger, tenant endpoints, health
+│   │   ├── main.ts               # Express API, dispatch trigger, tenant endpoints, health
 │   │   └── tenantStore.ts        # In-memory tenant store, isolation logic, dual seed
+│   ├── Dockerfile                # Multi-stage container build (Vercel backend service)
+│   ├── .dockerignore
 │   ├── package.json
 │   └── tsconfig.json
 ├── frontend/
@@ -160,7 +162,8 @@ Live: https://aivoicedispatcher.vercel.app
 - State loss on backend reload: `tenantStore.ts` is in-memory. Dev server restart resets logs to empty and tenant integrations to defaults. Keep seed data intact.
 - Missing tenantId in payload: All POST requests to `/api/dispatch/trigger` require `tenantId` and `rawQuery`.
 - Audio autoplay policy: AudioContext must be unlocked via user pointer gesture (handled in `soundEffects.ts`).
-- Vercel runs the frontend only: the public deploy intentionally uses `demoStore.ts` because Vercel's static build has no API routes. Set `VITE_API_BASE_URL` at build time to point at a separately hosted backend for live mode.
+- Vercel is full-stack: `vercel.json` declares a Vite `frontend` service and a containerized Express `backend` service; `/api/*` routes to the backend, everything else to the frontend. The live project sets `VITE_API_BASE_URL=/` so the built frontend calls the same-origin API. Without that env var, production falls back to `demoStore.ts` sandbox mode.
+- Container state is ephemeral: the API container can restart or scale to a new instance, so in-memory logs/connector toggles reset. Tenant seeds always return. Do not assume the API and sandbox logs stay identical.
 - Sandbox data is sessionStorage-scoped: demo logs/connector pauses survive reload but not a new browser tab/session. The footer "Reset sandbox" clears them.
 - Tab state lives in the URL: `?tenant=tenant-a|tenant-b&tab=simulator|connectors`. Do not remove `replaceState` sync or deep links regress.
-- Tenant switches must clear `tenantData`/`logs` before fetching. In-flight dispatches are guarded by `activeTenantRef`; preserve both to avoid cross-tenant bleed.
+- Tenant switches replace the vault snapshot keyed by `tenantId`; never render `tenantData`/`logs` unless `vault.tenantId === activeTenantId`. Preserve the snapshot guard and `activeTenantRef` dispatch guard to avoid cross-tenant bleed.

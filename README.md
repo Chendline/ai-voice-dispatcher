@@ -24,7 +24,7 @@ Built for the **FastN Online Hackathon 2026**.
 - **Two-tenant complete isolation** — Tenant A never sees or modifies Tenant B's data, connectors, or event feed.
 - **Tactile UI/UX** — Apple Design and Emil Kowalski design engineering principles, Lenis smooth scrolling, and zero-dependency Web Audio feedback.
 - **Shareable workspace state** — `?tenant=tenant-b&tab=connectors` deep links restore the exact vault and tab.
-- **Resilient public demo** — if the Express API is unreachable (for example a static Vercel deploy), the frontend switches to an in-browser sandbox vault instead of breaking.
+- **Resilient public demo** — if the Express API is unreachable (offline static preview, container cold failure), the frontend switches to an in-browser sandbox vault instead of breaking.
 
 ---
 
@@ -37,7 +37,7 @@ Built for the **FastN Online Hackathon 2026**.
 | Audio Engine | Zero-dependency Web Audio API procedural synthesis |
 | Integrations Platform | FastN (embedded connectors & routing) |
 | AI Classifier | Claude Messages API + heuristic fallback |
-| Deployment | Vercel (static frontend), optional Node host for the API |
+| Deployment | Vercel (Vite frontend + Express container API) |
 
 ---
 
@@ -104,7 +104,7 @@ PORT=3001
 FRONTEND_URL=http://localhost:5173
 ```
 
-For a split frontend/API deployment, set `VITE_API_BASE_URL` in the Vercel project:
+For a split frontend/API deployment, set `VITE_API_BASE_URL` in the Vercel project. The live project uses `/` so the frontend calls the same-origin container API:
 
 ```env
 VITE_API_BASE_URL=https://your-api-host.example.com
@@ -116,7 +116,12 @@ Without `CLAUDE_API_KEY`, classification falls back to the deterministic keyword
 
 ## Deploy to Vercel
 
-The repository ships with a root [`vercel.json`](./vercel.json) that declares a single `frontend` service (Vite) and routes every request to it. The Express backend is intentionally excluded so the public demo always runs the in-browser sandbox.
+The repository ships with a root [`vercel.json`](./vercel.json) that declares two services:
+
+- **`frontend`** — Vite build published from `frontend/dist`
+- **`backend`** — Express API built from `backend/Dockerfile` (container runtime)
+
+`/api/*` routes to the backend container; every other request goes to the frontend. The container image installs its own dependencies, so the API does not depend on Vercel's dependency tracing.
 
 ### Option A — CLI (fastest)
 
@@ -131,8 +136,8 @@ The project is already deployed at **https://aivoicedispatcher.vercel.app** (Ver
 ### Option B — Dashboard
 
 1. **Add New → Project** and import `Chendline/ai-voice-dispatcher`.
-2. Keep the root directory as `./` — `vercel.json` defines the `frontend` service under `services`.
-3. Add `VITE_API_BASE_URL` only if you host the Express backend separately.
+2. Keep the root directory as `./` — `vercel.json` defines both services.
+3. Add `VITE_API_BASE_URL=/` for **Production** and **Preview** so the frontend calls the same-origin API (already configured on the live project).
 4. Deploy.
 
 ### Custom domain
@@ -145,7 +150,11 @@ Alternative names: `aegis-voice-dispatcher.vercel.app`, `aegisdispatch.com`, `ai
 
 ### Deploying the API
 
-The Vercel configuration is intentionally static, so the public demo always works. To run the full live API, deploy `backend/` to Render, Railway, Fly.io, or any Node 20 host:
+The API runs in the same Vercel project as a container service defined by [`backend/Dockerfile`](./backend/Dockerfile). The image builds TypeScript in a first stage and ships production dependencies in the runtime stage. `vercel.json` routes `/api/*` to it.
+
+Set `VITE_API_BASE_URL=/` for Production and Preview so the built frontend calls that same-origin API. Without it, the frontend stays in sandbox mode.
+
+To host the API separately instead (Render, Railway, Fly.io, any Node 20 host):
 
 ```bash
 cd backend
@@ -156,6 +165,8 @@ npm start
 
 Then set `VITE_API_BASE_URL=https://your-api-host` in Vercel and redeploy. Keep `FRONTEND_URL` on the API set to your public domain so CORS stays scoped.
 
+> The tenant store is in-memory. Logs and connector toggles reset when the container restarts or scales to a new instance; the seeded tenants always remain available.
+
 ---
 
 ## Project Structure
@@ -164,9 +175,10 @@ Then set `VITE_API_BASE_URL=https://your-api-host` in Vercel and redeploy. Keep 
 ai-voice-dispatcher/
 ├── backend/
 │   ├── src/
-│   │   ├── index.ts              # Express API server (port 3001) + health probe
+│   │   ├── main.ts               # Express API server (port 3001) + health probe
 │   │   ├── classifier.ts         # Claude classifier with heuristic fallback
 │   │   └── tenantStore.ts        # In-memory tenant store & isolation logic
+│   ├── Dockerfile                # Multi-stage container build for Vercel
 │   ├── package.json
 │   └── tsconfig.json
 ├── frontend/
@@ -184,7 +196,7 @@ ai-voice-dispatcher/
 │   ├── index.html                # SEO, Open Graph, favicon, fonts
 │   ├── package.json
 │   └── vite.config.ts
-├── vercel.json                   # Vercel services config (frontend service + routing)
+├── vercel.json                   # Vercel services config (frontend + container API)
 ├── .env.example
 ├── README.md
 ├── AGENTS.md
