@@ -32,6 +32,7 @@ npm install
 npm run dev      # vite dev server on :5173
 npm run build    # tsc -b && vite build
 npm run lint     # oxlint
+npm test         # node --test test/tts.test.ts (TTS pure logic)
 
 # Deploy (from repo root; linked to chendline/aivoicedispatcher)
 vercel --prod
@@ -70,7 +71,7 @@ Live: https://aivoicedispatcher.vercel.app
   - `handleWorkspaceKeyDown()` / `handleTenantKeyDown()`: Arrow/Home/End tab navigation with focus handoff.
   - `handleResetSandbox()`: clears the session vault in demo mode.
 - **Lines 455–526**: **Header**: brand, API/sandbox mode pill, vault status, sliding segmented tenant tabs.
-- **Lines 528–825**: **Left Panel**: accessible subnav tabs, voice waveform, presets, form, stepper, connector toggles/skeletons, metrics strip.
+- **Lines 528–825**: **Left Panel**: accessible subnav tabs, voice waveform, presets, form, stepper, connector toggles/skeletons, metrics strip. Renders `<VoicePlayback text={rawQuery} />` directly under the form (component lives in `components/VoicePlayback.tsx`).
 - **Lines 826–1083**: **Right Panel**: category filters, search, loading/empty/no-match states, event cards, JSON payload inspector.
 - **Lines 1085–1112**: Footer with domain-ready attribution and sandbox reset.
 
@@ -87,6 +88,16 @@ Live: https://aivoicedispatcher.vercel.app
 - `playStepTick(stepIndex)`: Pentatonic acoustic ticks (440Hz, 523Hz, 659Hz, 784Hz). Used across the 4 pipeline steps.
 - `playDispatchComplete()`: Warm triad chord chime (587Hz, 740Hz, 880Hz, 300ms tail). Used on successful dispatch logging.
 
+### 3b. Voice Playback / Browser TTS
+- `utils/tts.ts`: the whole speech engine.
+  - `detectCapabilities()`, `toVoiceOptions()`, `pickVoice()`, `pickFallbackVoice()`, `chunkText()` (~180 chars, sentence → word → hard split), `describeSpeechError()`, `troubleshootingHint()`.
+  - `SpeechPlaybackController`: generation token invalidates stale `onend`/`onerror` callbacks, 8s start watchdog, 2.5s resume watchdog, `cancel()` + generation bump before a voice fallback, voice polling with backoff (250ms → 4s) alongside `voiceschanged`.
+- `hooks/useSpeechPlayback.ts`: controller lifecycle, persisted settings (`aegis.tts.settings.v1`), derived `effectiveVoiceURI` so a vanished voice never leaves a stale `<select>` value.
+- `components/VoicePlayback.tsx`: voice selector grouped by language, rate/pitch/volume, Play/Pause/Resume/Stop/Replay/Test Voice, status chip, chunk progress, error + Retry, `<details>` Audio Diagnostics.
+- Mounted in `App.tsx` inside the simulator panel, fed by `rawQuery`.
+- **No cloud TTS is configured.** `actionsTaken.mode`-style honesty applies here too: never label system voices as cloud/neural audio.
+- Tests: `frontend/test/tts.test.ts` (`npm test`) covers chunking, voice selection, fallback selection, browser detection, error mapping, hints.
+
 ### 4. Styling & Color Tokens (`frontend/src/index.css` & `frontend/src/App.css`)
 - **Color Palette (Refreshing Organic Aesthetic)**:
   - `--c-olive`: `#606c38` (Olive Leaf - badges, waveform, secondary text)
@@ -101,6 +112,7 @@ Live: https://aivoicedispatcher.vercel.app
   - Base: Cornsilk (`#fefae0`) with ambient radial gradients.
   - Panels: Frosted white glass `rgba(255, 255, 255, 0.86)` with `backdrop-filter: blur(20px)`.
   - Specular sheen: `inset 0 1px 0 0 rgba(255, 255, 255, 0.95)`.
+- **App.css section map**: `7b. Voice Playback (Browser TTS)` holds every `.tts-*` class (status chips, sliders, buttons, notice/error, diagnostics grid). Reuse those tokens; do not introduce a second color system for TTS.
 
 ### 5. Backend Engine (`backend/src`)
 - `tenantStore.ts`:
@@ -161,13 +173,20 @@ Live: https://aivoicedispatcher.vercel.app
 │   │   ├── lib/
 │   │   │   ├── api.ts            # Live API client + automatic sandbox fallback
 │   │   │   └── demoStore.ts      # Session-scoped in-browser tenant vault
+│   │   ├── components/
+│   │   │   └── VoicePlayback.tsx # TTS controls, status, error/retry, diagnostics
+│   │   ├── hooks/
+│   │   │   └── useSpeechPlayback.ts # TTS state, persisted settings, lifecycle
 │   │   ├── utils/
-│   │   │   └── soundEffects.ts   # Web Audio procedural sound engine (zero assets)
+│   │   │   ├── soundEffects.ts   # Web Audio procedural sound engine (zero assets)
+│   │   │   └── tts.ts            # Speech engine, chunking, voice fallback, hints
 │   │   ├── types.ts              # Shared frontend domain contracts
 │   │   ├── App.tsx               # Primary dashboard, simulator, tabs, live stream
 │   │   ├── App.css               # Component styling, animations, waveform keyframes
 │   │   ├── index.css             # Organic color tokens, Lenis styles, scrollbars
 │   │   └── main.tsx
+│   ├── test/
+│   │   └── tts.test.ts           # node:test coverage for TTS pure logic
 │   ├── index.html                # Title, favicon, SEO/OG meta, font preconnects
 │   ├── package.json              # React 19, Lenis, TypeScript, Vite
 │   └── vite.config.ts
@@ -193,3 +212,9 @@ Live: https://aivoicedispatcher.vercel.app
 - FastN `auto` mode is simulated until at least one `FASTN_WORKFLOW_*` id exists. Never label simulated results as live: `actionsTaken.mode` must stay truthful and the UI shows a Sandbox badge.
 - FastN `202` means queued, not done. There is no documented polling endpoint, so queued connectors stay `pending` and the log becomes `partial`, never `dispatched`.
 - Frontend API errors: structured `ApiError` responses (4xx/5xx) must propagate to the UI. Only network/timeout/non-JSON failures may fall back to `demoStore.ts`; falling back after a real connector failure would fabricate success.
+- TTS voices load asynchronously: Opera/Edge can return `[]` from `getVoices()` on first paint even though `speechSynthesis` exists. Never assume voices are ready at mount, never wait only on `voiceschanged`, and never disable Play permanently because the first read was empty. `tts.ts` polls with backoff and exposes "Refresh voices".
+- TTS stale callbacks: `cancel()` still fires `onend`/`onerror` for the old utterance in Chromium. Every playback run must carry a generation token; without it a late event flips the UI back to "Completed"/"Error" during a newer playback.
+- TTS resume is unreliable: Chromium/Opera can accept `resume()` and never continue. The 2.5s watchdog restarts the current chunk; do not remove it or the UI sticks on "Speaking".
+- TTS voice fallback must change the voice, not just clear it: clearing `voiceURI` while keeping the failed voice's `lang` makes `pickVoice()` re-select the same network voice, so the retry fails identically. `pickFallbackVoice()` prefers local voices and the controller bumps the generation before retrying.
+- No cloud TTS: there is no provider key or server endpoint. Never claim system voices are cloud/neural, and never fake success when `speechSynthesis` is missing (`Unsupported` state is correct).
+- TTS tests run on Node's native TS stripping (`node --test test/tts.test.ts`). Keep `tts.ts` free of DOM-only top-level side effects or the test run breaks.

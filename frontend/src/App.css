@@ -859,6 +859,435 @@
 }
 
 /* --------------------------------------------------------------------------
+   7b. Voice Playback (Browser TTS)
+   -------------------------------------------------------------------------- */
+.voice-playback-card {
+  margin-top: 16px;
+}
+
+.voice-playback-card .panel-header {
+  margin-bottom: 14px;
+}
+
+.tts-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border-medium);
+  background: rgba(96, 108, 56, 0.08);
+  color: var(--text-secondary);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.tts-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.tts-status.speaking {
+  color: var(--c-copper);
+  border-color: rgba(188, 108, 37, 0.4);
+  background: rgba(188, 108, 37, 0.1);
+}
+
+.tts-status.speaking .tts-status-dot {
+  animation: tts-pulse 1.4s var(--ease-smooth) infinite;
+}
+
+.tts-status.paused {
+  color: #8c5519;
+  border-color: rgba(221, 161, 94, 0.5);
+  background: rgba(221, 161, 94, 0.16);
+}
+
+.tts-status.completed {
+  color: var(--c-olive);
+  border-color: rgba(96, 108, 56, 0.35);
+  background: rgba(96, 108, 56, 0.1);
+}
+
+.tts-status.error {
+  color: #9a3f18;
+  border-color: rgba(188, 108, 37, 0.45);
+  background: rgba(188, 108, 37, 0.12);
+}
+
+.tts-status.unsupported {
+  color: var(--text-muted);
+  border-color: var(--border-hairline);
+  background: rgba(40, 54, 24, 0.04);
+}
+
+@keyframes tts-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.45; transform: scale(0.82); }
+}
+
+.tts-meta-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.tts-engine-badge {
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--c-olive);
+  background: rgba(96, 108, 56, 0.1);
+  border: 1px solid rgba(96, 108, 56, 0.24);
+  border-radius: 5px;
+  padding: 2px 7px;
+}
+
+.tts-voice-count,
+.tts-chunk-progress {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+.tts-chunk-progress {
+  color: var(--c-copper);
+  margin-left: auto;
+}
+
+.tts-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.tts-select {
+  width: 100%;
+  cursor: pointer;
+}
+
+.tts-slider-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.tts-slider {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.tts-slider-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.tts-slider-label output {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  color: var(--c-olive);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.tts-slider input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(96, 108, 56, 0.18);
+  outline: none;
+  cursor: pointer;
+}
+
+.tts-slider input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--c-copper);
+  border: 2px solid var(--c-cornsilk);
+  box-shadow: 0 1px 4px rgba(40, 54, 24, 0.25);
+  transition: transform var(--duration-press) var(--ease-out);
+}
+
+.tts-slider input[type='range']::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--c-copper);
+  border: 2px solid var(--c-cornsilk);
+  box-shadow: 0 1px 4px rgba(40, 54, 24, 0.25);
+}
+
+.tts-slider input[type='range']:active::-webkit-slider-thumb {
+  transform: scale(1.15);
+}
+
+.tts-slider input[type='range']:focus-visible {
+  box-shadow: 0 0 0 3px rgba(188, 108, 37, 0.18);
+}
+
+.tts-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tts-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 9px;
+  border: 1px solid var(--border-medium);
+  background: var(--bg-surface-elevated);
+  color: var(--c-forest);
+  font-family: inherit;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform var(--duration-press) var(--ease-out),
+              background var(--duration-state) var(--ease-out),
+              border-color var(--duration-state) var(--ease-out),
+              color var(--duration-state) var(--ease-out);
+}
+
+.tts-btn:hover:not(:disabled) {
+  border-color: var(--c-copper);
+  color: var(--c-copper);
+  background: var(--bg-surface-subtle);
+}
+
+.tts-btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.tts-btn:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.tts-btn.primary {
+  background: var(--c-copper);
+  border-color: var(--c-copper);
+  color: var(--c-cornsilk);
+}
+
+.tts-btn.primary:hover:not(:disabled) {
+  background: #a85f20;
+  border-color: #a85f20;
+  color: var(--c-cornsilk);
+}
+
+.tts-btn.ghost {
+  background: transparent;
+}
+
+.tts-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.tts-notice,
+.tts-hint {
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: #7a4a12;
+  background: rgba(221, 161, 94, 0.12);
+  border: 1px solid rgba(221, 161, 94, 0.35);
+  border-radius: 8px;
+  padding: 7px 10px;
+  margin-top: 10px;
+}
+
+.tts-hint {
+  color: var(--text-secondary);
+  background: rgba(96, 108, 56, 0.06);
+  border-color: var(--border-hairline);
+}
+
+.tts-hint code {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  background: rgba(40, 54, 24, 0.06);
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+
+.tts-error {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(188, 108, 37, 0.4);
+  background: rgba(188, 108, 37, 0.1);
+  color: #8f2f12;
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.tts-error p {
+  flex: 1;
+}
+
+.tts-retry-btn {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(188, 108, 37, 0.5);
+  background: #ffffff;
+  color: #8f2f12;
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.tts-retry-btn:active {
+  transform: scale(0.97);
+}
+
+.tts-diagnostics {
+  margin-top: 14px;
+  border-top: 1px solid var(--border-hairline);
+  padding-top: 10px;
+}
+
+.tts-diagnostics summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.tts-diagnostics summary::-webkit-details-marker {
+  display: none;
+}
+
+.tts-diagnostics summary::before {
+  content: '+';
+  font-family: var(--font-mono);
+  color: var(--c-copper);
+  font-size: 0.8rem;
+}
+
+.tts-diagnostics[open] summary::before {
+  content: '−';
+}
+
+.tts-diagnostics summary:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.tts-diag-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 14px;
+  margin-top: 10px;
+}
+
+.tts-diag-grid div {
+  min-width: 0;
+}
+
+.tts-diag-grid dt {
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.tts-diag-grid dd {
+  font-size: 0.74rem;
+  color: var(--c-forest);
+  overflow-wrap: anywhere;
+}
+
+.tts-diag-error,
+.tts-diag-hint {
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: var(--text-secondary);
+  margin-top: 8px;
+}
+
+.tts-diag-refresh {
+  margin-top: 8px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border-medium);
+  background: transparent;
+  color: var(--c-olive);
+  font-family: inherit;
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tts-diag-refresh:active {
+  transform: scale(0.97);
+}
+
+.tts-diag-ua {
+  margin-top: 8px;
+  font-size: 0.64rem;
+  color: var(--text-dim);
+  overflow-wrap: anywhere;
+}
+
+.tts-diag-ua code {
+  font-family: var(--font-mono);
+}
+
+@media (max-width: 560px) {
+  .tts-slider-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tts-diag-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tts-controls .tts-btn {
+    flex: 1 1 calc(50% - 4px);
+  }
+}
+
+/* --------------------------------------------------------------------------
    8. Connectors Stack (FastN Multi-Tenant Connectors)
    -------------------------------------------------------------------------- */
 .isolation-badge {

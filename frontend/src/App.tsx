@@ -8,6 +8,7 @@ import {
   playStepTick,
   playDispatchComplete,
 } from './utils/soundEffects';
+import { VoicePlayback } from './components/VoicePlayback';
 import {
   getConnectionMode,
   loadDispatchLogs,
@@ -905,6 +906,8 @@ export default function App() {
                   </button>
                 </form>
               </div>
+
+              <VoicePlayback text={rawQuery} />
             </div>
 
             <div

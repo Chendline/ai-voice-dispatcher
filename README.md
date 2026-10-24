@@ -23,6 +23,7 @@ Built for the **FastN Online Hackathon 2026**.
 - **Truthful connector outcomes** — every dispatch records `success`, `failed`, `pending` (FastN queued the workflow) or `simulated` per connector. The UI never reports a sandbox or failed run as a real success.
 - **Two-tenant complete isolation** — Tenant A never sees or modifies Tenant B's data, connectors, or event feed.
 - **Tactile UI/UX** — Apple Design and Emil Kowalski design engineering principles, Lenis smooth scrolling, and zero-dependency Web Audio feedback.
+- **Voice playback (browser TTS)** — the transcription can be read aloud with any voice installed on the device, with speed/pitch/volume, pause/resume, replay, and an Audio Diagnostics panel. See [Voice Playback](#voice-playback-browser-tts).
 - **Shareable workspace state** — `?tenant=tenant-b&tab=connectors` deep links restore the exact vault and tab.
 - **Resilient public demo** — if the Express API is unreachable (offline static preview, container cold failure), the frontend switches to an in-browser sandbox vault instead of breaking.
 
@@ -35,6 +36,7 @@ Built for the **FastN Online Hackathon 2026**.
 | Frontend | React 19, TypeScript, Vite, Lenis Smooth Scroll |
 | Backend | Node.js, Express, TypeScript, `tsx` |
 | Audio Engine | Zero-dependency Web Audio API procedural synthesis |
+| Text-to-Speech | Native Web Speech API (`speechSynthesis`) — local system voices |
 | Integrations Platform | FastN (embedded connectors & routing) |
 | AI Classifier | Claude Messages API + heuristic fallback |
 | Deployment | Vercel (Vite frontend + Express container API) |
@@ -56,6 +58,29 @@ Built for the **FastN Online Hackathon 2026**.
   - Four-step dispatch stepper (Twilio → Claude → Router → Connectors)
   - Live event stream with category filters, search, and an expandable JSON trace inspector
 - **Accessibility**: real `tablist`/`tabpanel` semantics, arrow/Home/End keyboard navigation, visible focus rings, reduced-motion and reduced-transparency fallbacks.
+
+---
+
+## Voice Playback (Browser TTS)
+
+The **Voice Playback** card under the transcription form reads the message aloud using the browser's own speech engine.
+
+- **Engine**: native `window.speechSynthesis` only. There is **no cloud TTS provider configured** — audio is synthesized locally and never leaves the browser, and it is not presented as a cloud or neural voice.
+- **Controls**: voice selector (grouped by language, network voices labelled), speed `0.5–2×`, pitch `0–2`, volume `0–100%`, Play, Pause/Resume, Stop, Replay, and Test Voice.
+- **Status**: `Ready`, `Loading`, `Speaking`, `Paused`, `Completed`, `Error`, `Unsupported`. Every terminal event (`onend`, `onerror`, watchdog timeout) resolves the UI — it never hangs in "Speaking".
+- **Long text**: split at ~180 characters, sentence-first, then word boundaries, then hard slices. Chunks play sequentially, never overlapping.
+- **Voice loading**: voices arrive asynchronously. The engine listens for `voiceschanged`, then polls with backoff (250 ms → 4 s) and offers a manual **Refresh voices**. It never blocks on `voiceschanged` alone.
+- **Stale callbacks**: every playback run carries a generation token, so late `onend`/`onerror` events from a cancelled utterance cannot overwrite the current state.
+- **Pause/Resume**: Chromium/Opera can silently drop `resume()`; a 2.5 s watchdog restarts the current chunk instead of leaving the UI stuck.
+- **Fallback**: if a voice fails (`voice-unavailable`, `synthesis-failed`, …), the engine switches to a **local** voice and says so in a visible notice. It never silently changes the user's saved selection, and never retries the same network voice.
+- **Diagnostics**: the collapsible **Audio Diagnostics** panel shows browser, engine, voice counts, selected voice/language, state, active voice, chunk count, capability flags, last error, and a troubleshooting hint. No secrets, tokens, or request headers are displayed.
+- **Settings**: voice, rate, pitch, and volume persist in `localStorage` under `aegis.tts.settings.v1`.
+
+### Opera notes
+
+- Opera exposes `speechSynthesis` before any voices exist; `getVoices()` can return `[]` on first paint. This is handled, not hidden.
+- Pause/Resume works on current desktop Opera; older builds may not, so the button only renders when the API supports it.
+- If no voices appear, install one via **Windows Settings → Time & language → Speech**, then press **Refresh voices**.
 
 ---
 
@@ -88,6 +113,11 @@ npm run dev
 cd ../frontend
 npm install
 npm run dev
+
+# 3. Checks
+npm test        # TTS pure-logic tests (node:test)
+npm run lint    # oxlint
+npm run build   # tsc -b && vite build
 ```
 
 Open [http://localhost:5173](http://localhost:5173). The header badge shows **Live API** when the Express server is reachable and **Demo Sandbox** when it is not.
@@ -263,12 +293,19 @@ ai-voice-dispatcher/
 │   │   ├── lib/
 │   │   │   ├── api.ts            # Live API client with sandbox fallback
 │   │   │   └── demoStore.ts      # Session-scoped in-browser tenant vault
-│   │   ├── utils/soundEffects.ts # Web Audio procedural synthesis
+│   │   ├── components/
+│   │   │   └── VoicePlayback.tsx # TTS controls, status, diagnostics panel
+│   │   ├── hooks/
+│   │   │   └── useSpeechPlayback.ts # TTS React state + persisted settings
+│   │   ├── utils/
+│   │   │   ├── soundEffects.ts   # Web Audio procedural synthesis
+│   │   │   └── tts.ts            # Speech engine, chunking, fallback, diagnostics
 │   │   ├── types.ts              # Shared frontend domain types
 │   │   ├── App.tsx               # Dashboard, tabs, simulator, stream
 │   │   ├── App.css               # Component styling & motion
 │   │   ├── index.css             # Organic tokens & Lenis styles
 │   │   └── main.tsx
+│   ├── test/tts.test.ts          # node:test coverage for TTS pure logic
 │   ├── index.html                # SEO, Open Graph, favicon, fonts
 │   ├── package.json
 │   └── vite.config.ts
