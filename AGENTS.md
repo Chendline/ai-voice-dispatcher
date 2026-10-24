@@ -33,9 +33,11 @@ npm run dev      # vite dev server on :5173
 npm run build    # tsc -b && vite build
 npm run lint     # oxlint
 
-# Deploy (from repo root)
-npx vercel --prod
+# Deploy (from repo root; linked to chendline/aivoicedispatcher)
+vercel --prod
 ```
+
+Live: https://aivoicedispatcher.vercel.app
 
 ## AGENT OPERATING DIRECTIVES
 1. Zero Fluff: Code and docs stay compact. No unnecessary comments.
@@ -147,7 +149,7 @@ npx vercel --prod
 │   ├── package.json              # React 19, Lenis, TypeScript, Vite
 │   └── vite.config.ts
 ├── .env.example                  # FASTN_*, CLAUDE_*, VITE_API_BASE_URL
-├── vercel.json                   # Static frontend deploy config
+├── vercel.json                   # Vercel services config (frontend service + routing)
 ├── README.md                     # User-facing summary, domain & deploy guide
 ├── AGENTS.md                     # Agent operational runbook & codebase atlas (this file)
 └── SPECSHEET.md                  # Technical specs, architecture & progress tracker

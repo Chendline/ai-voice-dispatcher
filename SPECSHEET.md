@@ -41,7 +41,7 @@ POST /api/dispatch/trigger
 | **Shareable Tabs & Deep Links** | `?tenant=&tab=` state | **DONE** | Tenant/tab state syncs to the URL; arrow/Home/End keyboard navigation; correct tab semantics. |
 | **Public Demo Resilience** | Static deploy parity | **DONE** | In-browser sandbox vault activates when the API is unreachable. Session-persisted logs and connector toggles. |
 | **Demo Video** | <= 3 min, English | **TODO** | Script prepared; ready to record dual-tenant test and audio demo. |
-| **Public Deployment** | Live URL | **READY** | `vercel.json` added; target `aivoicedispatcher.vercel.app`, custom domain `aivoicedispatcher.com`. |
+| **Public Deployment** | Live URL | **DONE** | Deployed at `aivoicedispatcher.vercel.app` via Vercel services config. Custom domain target: `aivoicedispatcher.com`. |
 
 ---
 

@@ -6,7 +6,7 @@ Built for the **FastN Online Hackathon 2026**.
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Chendline/ai-voice-dispatcher&project-name=aivoicedispatcher&repository-name=ai-voice-dispatcher)
 
-**Live demo target:** [aivoicedispatcher.vercel.app](https://aivoicedispatcher.vercel.app)
+**Live demo:** [aivoicedispatcher.vercel.app](https://aivoicedispatcher.vercel.app) — deployed and publicly accessible.
 **Custom domain:** [aivoicedispatcher.com](https://aivoicedispatcher.com) (recommended upgrade)
 
 ---
@@ -116,22 +116,22 @@ Without `CLAUDE_API_KEY`, classification falls back to the deterministic keyword
 
 ## Deploy to Vercel
 
-The repository ships with a root [`vercel.json`](./vercel.json) that builds the frontend and publishes `frontend/dist`.
+The repository ships with a root [`vercel.json`](./vercel.json) that declares a single `frontend` service (Vite) and routes every request to it. The Express backend is intentionally excluded so the public demo always runs the in-browser sandbox.
 
 ### Option A — CLI (fastest)
 
 ```bash
-npx vercel login
-npx vercel link          # create a project named: aivoicedispatcher
-npx vercel --prod
+vercel login
+vercel link --project aivoicedispatcher   # one-time
+vercel --prod
 ```
 
-Vercel assigns `https://aivoicedispatcher.vercel.app` when that project name is available. If it is taken, use `aivoicedispatcher-app` or `aegis-voice-dispatcher`.
+The project is already deployed at **https://aivoicedispatcher.vercel.app** (Vercel account `chendline`, project `aivoicedispatcher`). Re-running `vercel --prod` from the repo root publishes the latest commit.
 
 ### Option B — Dashboard
 
 1. **Add New → Project** and import `Chendline/ai-voice-dispatcher`.
-2. Keep the root directory as `./` — `vercel.json` supplies the install/build commands.
+2. Keep the root directory as `./` — `vercel.json` defines the `frontend` service under `services`.
 3. Add `VITE_API_BASE_URL` only if you host the Express backend separately.
 4. Deploy.
 
@@ -184,7 +184,7 @@ ai-voice-dispatcher/
 │   ├── index.html                # SEO, Open Graph, favicon, fonts
 │   ├── package.json
 │   └── vite.config.ts
-├── vercel.json                   # One-click static deployment
+├── vercel.json                   # Vercel services config (frontend service + routing)
 ├── .env.example
 ├── README.md
 ├── AGENTS.md
