@@ -175,6 +175,11 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<LeftTab>(readInitialTab);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
+  // Browser speech recognition state
+  const [isListening, setIsListening] = useState(false);
+  const [speechError, setSpeechError] = useState<string | null>(null);
+  const recognitionRef = useRef<any>(null);
+
   const activeTenantRef = useRef(activeTenantId);
   const stageTimersRef = useRef<number[]>([]);
 
@@ -185,6 +190,13 @@ export default function App() {
   useEffect(
     () => () => {
       stageTimersRef.current.forEach(timer => window.clearTimeout(timer));
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.abort();
+        } catch {
+          // ignore
+        }
+      }
     },
     [],
   );
@@ -274,18 +286,100 @@ export default function App() {
     setDispatchNotice(null);
   };
 
+  const handleToggleListen = () => {
+    playTap();
+    setSpeechError(null);
+
+    if (isListening) {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.stop();
+        } catch {
+          // ignore
+        }
+      }
+      setIsListening(false);
+      return;
+    }
+
+    const SpeechRecognitionClass =
+      (window as unknown as { SpeechRecognition?: any; webkitSpeechRecognition?: any }).SpeechRecognition ||
+      (window as unknown as { SpeechRecognition?: any; webkitSpeechRecognition?: any }).webkitSpeechRecognition;
+
+    if (!SpeechRecognitionClass) {
+      setSpeechError('Speech recognition is not supported in this browser. Please use Chrome, Edge, or Safari.');
+      return;
+    }
+
+    try {
+      const recognition = new SpeechRecognitionClass();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
+
+      recognition.onstart = () => {
+        setIsListening(true);
+      };
+
+      recognition.onresult = (event: any) => {
+        let transcript = '';
+        for (let i = 0; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript;
+        }
+        if (transcript.trim()) {
+          setRawQuery(transcript.trim());
+        }
+      };
+
+      recognition.onerror = (event: any) => {
+        if (event.error !== 'no-speech') {
+          setSpeechError(`Microphone notice: ${event.error || 'could not capture speech'}`);
+        }
+        setIsListening(false);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognitionRef.current = recognition;
+      recognition.start();
+    } catch {
+      setSpeechError('Could not access microphone. Please check browser permissions.');
+      setIsListening(false);
+    }
+  };
+
   const handleApplyPreset = (preset: typeof PRESET_SCENARIOS[0]) => {
     playTap();
+    if (isListening && recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch {
+        // ignore
+      }
+      setIsListening(false);
+    }
     setCallerName(preset.callerName);
     setCallerContact(preset.callerContact);
     setRawQuery(preset.query);
     setDispatchError(null);
     setDispatchNotice(null);
+    setSpeechError(null);
   };
 
   const handleTriggerDispatch = async (event: FormEvent) => {
     event.preventDefault();
     if (!rawQuery.trim() || isDispatching) return;
+
+    if (isListening && recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch {
+        // ignore
+      }
+      setIsListening(false);
+    }
 
     const dispatchTenantId = activeTenantId;
     playDispatchLaunch();
@@ -662,9 +756,9 @@ export default function App() {
                     <p className="panel-subtext">Transcribed speech is classified by Claude AI and dispatched via FastN.</p>
                   </div>
                   <div
-                    className={`audio-waveform ${isDispatching ? 'active' : ''}`}
+                    className={`audio-waveform ${isDispatching || isListening ? 'active' : ''}`}
                     aria-hidden="true"
-                    title={isDispatching ? 'Listening · dispatch in progress' : 'Voice channel idle'}
+                    title={isListening ? 'Microphone active · listening to speech' : isDispatching ? 'Listening · dispatch in progress' : 'Voice channel idle'}
                   >
                     <span className="wave-bar bar-1" />
                     <span className="wave-bar bar-2" />
@@ -719,19 +813,40 @@ export default function App() {
                   </div>
 
                   <div className="input-group">
-                    <label className="input-label" htmlFor="raw-speech">
-                      <span>Voice Transcription Content</span>
-                      <span className="label-aux">Simulated Audio-to-Text</span>
-                    </label>
+                    <div className="input-label-row">
+                      <label className="input-label" htmlFor="raw-speech">
+                        <span>Voice Transcription Content</span>
+                        <span className="label-aux">Live Dictation / Audio-to-Text</span>
+                      </label>
+                      <button
+                        type="button"
+                        className={`mic-dictate-btn ${isListening ? 'listening' : ''}`}
+                        onClick={handleToggleListen}
+                        aria-pressed={isListening}
+                        aria-label={isListening ? 'Stop microphone listening' : 'Start microphone speech input'}
+                        title={isListening ? 'Click to stop listening' : 'Click to speak via microphone'}
+                      >
+                        <span className="mic-dot" aria-hidden="true" />
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+                          <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                          <line x1="12" x2="12" y1="19" y2="22" />
+                        </svg>
+                        <span>{isListening ? 'Listening...' : 'Speak to Mic'}</span>
+                      </button>
+                    </div>
                     <textarea
                       id="raw-speech"
-                      className="clean-textarea"
+                      className={`clean-textarea ${isListening ? 'recording-border' : ''}`}
                       rows={4}
                       value={rawQuery}
                       onChange={event => setRawQuery(event.target.value)}
-                      placeholder="Transcribed voice stream..."
+                      placeholder={isListening ? 'Listening to your speech in real-time...' : 'Transcribed voice stream...'}
                       required
                     />
+                    {speechError && (
+                      <p className="mic-error-notice" role="alert">{speechError}</p>
+                    )}
                   </div>
 
                   {isDispatching && (
