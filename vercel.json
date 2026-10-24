@@ -6,9 +6,19 @@
       "framework": "vite",
       "buildCommand": "npm run build",
       "outputDirectory": "dist"
+    },
+    "backend": {
+      "root": "backend/",
+      "runtime": "container"
     }
   },
   "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": {
+        "service": "backend"
+      }
+    },
     {
       "source": "/(.*)",
       "destination": {

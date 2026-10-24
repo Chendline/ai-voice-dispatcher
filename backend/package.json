@@ -2,11 +2,11 @@
   "name": "ai-voice-dispatcher-backend",
   "version": "1.0.0",
   "description": "Multi-tenant backend server for AI Voice Agent Dispatcher",
-  "main": "dist/index.js",
+  "main": "dist/main.js",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "tsx watch src/main.ts",
     "build": "tsc",
-    "start": "node dist/index.js"
+    "start": "node dist/main.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
