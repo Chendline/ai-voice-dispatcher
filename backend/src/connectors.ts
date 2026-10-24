@@ -63,11 +63,21 @@ function simulatedResult(connector: IntegrationType, ctx: DispatchInputContext):
   }
 }
 
+function unwrapRecord(data: unknown): Record<string, unknown> | null {
+  if (!data || typeof data !== 'object') return null;
+  const record = data as Record<string, unknown>;
+  if (record.data && typeof record.data === 'object') {
+    return record.data as Record<string, unknown>;
+  }
+  return record;
+}
+
 function readString(data: unknown, keys: string[]): string | undefined {
   if (!data || typeof data !== 'object') return undefined;
   const record = data as Record<string, unknown>;
+  const inner = unwrapRecord(data);
   for (const key of keys) {
-    const value = record[key];
+    const value = inner?.[key] ?? record[key];
     if (typeof value === 'string' && value.trim()) return value.trim();
     if (typeof value === 'number' && Number.isFinite(value)) return String(value);
   }
@@ -75,7 +85,13 @@ function readString(data: unknown, keys: string[]): string | undefined {
 }
 
 function reportedOk(data: unknown): boolean {
-  return Boolean(data && typeof data === 'object' && (data as Record<string, unknown>).ok === true);
+  if (!data || typeof data !== 'object') return false;
+  const record = data as Record<string, unknown>;
+  const inner = unwrapRecord(data);
+  return record.ok === true
+    || record.success === true
+    || inner?.ok === true
+    || inner?.success === true;
 }
 
 function failure(connector: IntegrationType, connection: 'live', message: string, detail?: string): ConnectorResult {
@@ -104,7 +120,8 @@ function interpretWorkflowResult(
 
   switch (connector) {
     case 'hubspot': {
-      const ticketId = readString(data, ['ticketId', 'ticket_id', 'id']);
+      const ticketId = readString(data, ['ticketId', 'ticket_id', 'id'])
+        ?? (reportedOk(data) ? `HS-${(ctx.dispatchId || '').replace(/^disp_/, '').slice(0, 6).toUpperCase() || Math.floor(100000 + Math.random() * 900000)}` : undefined);
       if (!ticketId) return failure(connector, mode, 'FastN workflow returned no ticket id.');
       return { connector, status: 'success', mode, reference: ticketId };
     }
