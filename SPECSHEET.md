@@ -41,7 +41,7 @@ POST /api/dispatch/trigger
 | **Shareable Tabs & Deep Links** | `?tenant=&tab=` state | **DONE** | Tenant/tab state syncs to the URL; arrow/Home/End keyboard navigation; correct tab semantics. |
 | **Public Demo Resilience** | Static deploy parity | **DONE** | In-browser sandbox vault activates when the API is unreachable. Session-persisted logs and connector toggles. |
 | **Demo Video** | <= 3 min, English | **TODO** | Script prepared; ready to record dual-tenant test and audio demo. |
-| **Public Deployment** | Live URL + API | **DONE** | Full-stack on Vercel: Vite frontend + Express container API at `aivoicedispatcher.vercel.app`. `/api/*` routed to the container; `VITE_API_BASE_URL=/` enables Live API mode. Custom domain target: `aivoicedispatcher.com`. |
+| **Public Deployment** | Live URL + API | **DONE** | Full-stack on Vercel's free default domain: Vite frontend + Express container API at `aivoicedispatcher.vercel.app`. `/api/*` routed to the container; `VITE_API_BASE_URL=/` enables Live API mode. No custom domain configured. |
 
 ---
 
@@ -138,4 +138,4 @@ POST /api/dispatch/trigger
 1. **Live FastN Credentials**: Replace simulated connector payloads with real FastN workspace actions when keys are provisioned.
 2. **Persistent Storage**: **DONE** — tenant state (integrations + dispatch logs) is mirrored to Vercel Blob via `backend/src/persistence.ts`, so it survives container restarts and scale-out.
 3. **Demo Video Recording**: 2-minute walkthrough showing dual-tenant isolation, audio feedback, and end-to-end dispatch execution.
-4. **Custom Domain**: Point `aivoicedispatcher.com` at the Vercel project and enable HTTPS.
+4. **Optional Custom Domain**: Only if desired later — the project runs on `aivoicedispatcher.vercel.app` with HTTPS by default.

@@ -6,8 +6,7 @@ Built for the **FastN Online Hackathon 2026**.
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Chendline/ai-voice-dispatcher&project-name=aivoicedispatcher&repository-name=ai-voice-dispatcher)
 
-**Live demo:** [aivoicedispatcher.vercel.app](https://aivoicedispatcher.vercel.app) — deployed and publicly accessible.
-**Custom domain:** [aivoicedispatcher.com](https://aivoicedispatcher.com) (recommended upgrade)
+**Live demo:** [aivoicedispatcher.vercel.app](https://aivoicedispatcher.vercel.app) — deployed and publicly accessible on Vercel's free default domain.
 
 ---
 
@@ -141,13 +140,11 @@ The project is already deployed at **https://aivoicedispatcher.vercel.app** (Ver
 3. Add `VITE_API_BASE_URL=/` for **Production** and **Preview** so the frontend calls the same-origin API (already configured on the live project).
 4. Deploy.
 
-### Custom domain
+### Domain
 
-1. Register `aivoicedispatcher.com` (verify availability at your registrar).
-2. In Vercel: **Project → Settings → Domains → Add**.
-3. Add both the apex domain and `www`, then follow the DNS records Vercel shows (nameservers or `A`/`CNAME`).
+The live project uses Vercel's free default domain: **https://aivoicedispatcher.vercel.app**. No custom domain is configured or required. Vercel assigns the production alias automatically on deploy; `frontend/index.html` canonical/OG tags already point at it.
 
-Alternative names: `aegis-voice-dispatcher.vercel.app`, `aegisdispatch.com`, `aivoicedispatch.ai`.
+If you later want a custom domain, register one and add it under **Project → Settings → Domains**; no code changes are needed because `VITE_API_BASE_URL=/` keeps API calls same-origin.
 
 ### Deploying the API
 
