@@ -1757,7 +1757,13 @@
     });
 
     window.addEventListener('pointerdown', () => { mousePos.isDown = true; });
-    window.addEventListener('pointerup', () => { mousePos.isDown = false; });
+    window.addEventListener('pointerup', (e) => {
+      mousePos.isDown = false;
+      if (e.pointerType === 'touch') {
+        mousePos.x = 99;
+        mousePos.y = 99;
+      }
+    });
     window.addEventListener('pointerleave', () => { mousePos.x = 99; mousePos.y = 99; });
 
     /* ----------------------------------------------------
@@ -1778,6 +1784,25 @@
         requestAnimationFrame(lerpScroll);
       }
     }, { passive: false });
+
+    // Smooth navigation anchor click handler
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', (e) => {
+        const targetId = anchor.getAttribute('href');
+        if (targetId === '#') return;
+        const targetElem = document.querySelector(targetId);
+        if (targetElem) {
+          e.preventDefault();
+          const targetTop = targetElem.getBoundingClientRect().top + window.scrollY;
+          const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+          targetScroll = Math.max(0, Math.min(targetTop, maxScroll));
+          if (!isSmoothScrolling) {
+            isSmoothScrolling = true;
+            requestAnimationFrame(lerpScroll);
+          }
+        }
+      });
+    });
 
     function lerpScroll() {
       const diff = targetScroll - currentScroll;
@@ -2140,6 +2165,7 @@
       let localStarted = control.started;
       let entranceStart = 0;
       let reportedReady = false;
+      let warmupFrames = 0;
 
       const diffVec = new THREE.Vector3();
       const collideDiff = new THREE.Vector3();
@@ -2166,7 +2192,8 @@
 
         if (!localStarted) {
           renderer.render(scene, camera);
-          if (!reportedReady) {
+          warmupFrames++;
+          if (!reportedReady && warmupFrames >= 18) {
             reportedReady = true;
             window.onSceneReady?.();
           }
