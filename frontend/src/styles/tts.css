@@ -1,0 +1,214 @@
+/* ==========================================================================
+   Browser speech synthesis controls
+   ========================================================================== */
+
+.speech-panel {
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-hairline);
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: var(--specular-top);
+  padding: 18px;
+}
+
+.settings-card .speech-panel {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+
+.speech-panel.compact {
+  padding: 15px;
+}
+
+.speech-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.speech-head h3 {
+  font-size: 13.5px;
+  letter-spacing: -0.02em;
+}
+
+.speech-head p {
+  margin-top: 4px;
+  max-width: 440px;
+  font-size: 11.4px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.speech-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  margin-bottom: 12px;
+  padding-bottom: 11px;
+  border-bottom: 1px solid var(--border-hairline);
+  font-size: 10.5px;
+  color: var(--text-dim);
+}
+
+.speech-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--bg-surface-subtle);
+  border: 1px solid var(--border-hairline);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--c-olive);
+}
+
+.speech-panel .field {
+  margin-bottom: 12px;
+}
+
+.speech-sliders {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.speech-slider {
+  display: grid;
+  gap: 2px;
+}
+
+.speech-slider > span {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.speech-slider output {
+  font-family: var(--font-mono);
+  font-size: 9.8px;
+  font-weight: 500;
+  color: var(--text-dim);
+}
+
+.speech-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-hairline);
+}
+
+.speech-notice,
+.speech-error {
+  margin-top: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border-hairline);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.speech-notice {
+  background: rgba(221, 161, 94, 0.08);
+  border-color: rgba(188, 108, 37, 0.2);
+  color: #7c4f19;
+}
+
+.speech-error {
+  background: rgba(163, 58, 43, 0.06);
+  border-color: rgba(163, 58, 43, 0.22);
+  color: #92342a;
+}
+
+.speech-diagnostics {
+  margin-top: 11px;
+  border-top: 1px solid var(--border-hairline);
+  padding-top: 10px;
+}
+
+.speech-diagnostics summary {
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.speech-diagnostics summary::-webkit-details-marker {
+  display: none;
+}
+
+.speech-diagnostics summary::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform var(--duration-state) var(--ease-out);
+}
+
+.speech-diagnostics[open] summary::before {
+  transform: rotate(45deg);
+}
+
+.speech-diagnostics dl {
+  margin-top: 9px;
+  display: grid;
+  gap: 4px;
+}
+
+.speech-diagnostics dl > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.speech-diagnostics dt {
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+.speech-diagnostics dd {
+  font-size: 10px;
+  color: var(--text-secondary);
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 64%;
+}
+
+.speech-hint {
+  margin-top: 7px;
+  font-size: 10.2px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.speech-ua {
+  margin-top: 6px;
+  font-size: 9.2px;
+  color: var(--text-dim);
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 560px) {
+  .speech-sliders {
+    grid-template-columns: 1fr;
+  }
+}

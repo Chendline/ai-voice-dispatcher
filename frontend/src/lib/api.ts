@@ -1,51 +1,38 @@
 import type {
-  ConnectionMode,
-  DispatchInput,
+  Agent,
+  AgentInput,
+  Conversation,
+  ConversationSummary,
   DispatchLog,
-  IntegrationId,
-  Tenant,
-  TenantSummary,
+  DispatchPlan,
+  HealthResponse,
+  ProviderConfigResponse,
+  PublicDispatchTarget,
+  TargetInput,
+  WorkspaceBootstrap,
 } from '../types';
-import { demoApi } from './demoStore';
 
 const configuredBase = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim();
 const API_BASE =
   (configuredBase ? configuredBase.replace(/\/+$/, '') : '') ||
   (import.meta.env.DEV ? 'http://localhost:3001' : '');
 
-// Static deployments (for example the default Vercel build) go straight to the
-// browser sandbox instead of firing doomed requests at a non-existent /api.
-const API_ENABLED = Boolean(configuredBase) || import.meta.env.DEV;
+const DEFAULT_TIMEOUT = 8000;
+const AI_TIMEOUT = 65_000;
 
-const DEFAULT_TIMEOUT = 2500;
-const TRIGGER_TIMEOUT = 8000;
-
-let connectionMode: ConnectionMode | null = API_ENABLED ? null : 'demo';
-
-export function getConnectionMode(): ConnectionMode {
-  return connectionMode ?? 'demo';
-}
-
-/**
- * A structured response from the Express API. These must never fall back to the
- * browser sandbox: doing so would fabricate a successful dispatch after a real
- * upstream failure.
- */
 export class ApiError extends Error {
   readonly status: number;
+  readonly code?: string;
 
-  constructor(message: string, status: number) {
+  constructor(message: string, status: number, code?: string) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
+    this.code = code;
   }
 }
 
-async function request<T>(
-  path: string,
-  init?: RequestInit,
-  timeout = DEFAULT_TIMEOUT,
-): Promise<T> {
+async function request<T>(path: string, init?: RequestInit, timeout = DEFAULT_TIMEOUT): Promise<T> {
   const controller = new AbortController();
   const timer = window.setTimeout(() => controller.abort(), timeout);
 
@@ -61,112 +48,117 @@ async function request<T>(
 
     const contentType = response.headers.get('content-type') ?? '';
     const isJson = contentType.includes('application/json');
+    const body = isJson
+      ? ((await response.json().catch(() => null)) as { error?: unknown; code?: unknown } | null)
+      : null;
 
     if (!response.ok) {
-      let message = `${path} responded with ${response.status}`;
-      if (isJson) {
-        const body = (await response.json().catch(() => null)) as { error?: unknown } | null;
-        if (body && typeof body.error === 'string' && body.error.trim()) {
-          message = body.error;
-        }
-      }
-      throw new ApiError(message, response.status);
+      const message =
+        body && typeof body.error === 'string' && body.error.trim()
+          ? body.error
+          : `The AEGIS API responded with HTTP ${response.status}.`;
+      const code = body && typeof body.code === 'string' ? body.code : undefined;
+      throw new ApiError(message, response.status, code);
     }
 
     if (!isJson) {
-      throw new Error(`${path} is not serving the API`);
+      throw new ApiError('The AEGIS API is not reachable at this address.', response.status);
     }
 
-    return (await response.json()) as T;
+    return body as T;
+  } catch (error) {
+    if (error instanceof ApiError) throw error;
+    if (controller.signal.aborted) {
+      throw new ApiError('The request took too long. Please try again.', 0, 'timeout');
+    }
+    throw new ApiError('The AEGIS API is offline. Start the backend and reload.', 0, 'network');
   } finally {
     window.clearTimeout(timer);
   }
 }
 
-async function withFallback<T>(
-  live: () => Promise<T>,
-  sandbox: () => T,
-): Promise<T> {
-  if (connectionMode === 'demo') return sandbox();
-
-  try {
-    const result = await live();
-    connectionMode = 'live';
-    return result;
-  } catch (error) {
-    // The API answered, so the result is authoritative even when it is an error.
-    if (error instanceof ApiError) throw error;
-    connectionMode = 'demo';
-    return sandbox();
-  }
+function jsonBody(body: unknown): RequestInit {
+  return { method: 'POST', body: JSON.stringify(body) };
 }
 
-export async function loadTenants(): Promise<TenantSummary[]> {
-  return withFallback(
-    async () => {
-      const data = await request<{ tenants: TenantSummary[] }>('/api/tenants');
-      if (!Array.isArray(data.tenants) || data.tenants.length === 0) {
-        throw new Error('No tenants returned');
-      }
-      return data.tenants;
-    },
-    () => demoApi.getTenants(),
-  );
+function putBody(body: unknown): RequestInit {
+  return { method: 'PUT', body: JSON.stringify(body) };
 }
 
-export async function loadTenant(tenantId: string): Promise<Tenant | null> {
-  return withFallback(
-    () => request<Tenant>(`/api/tenants/${tenantId}`),
-    () => demoApi.getTenant(tenantId),
-  );
-}
+export const api = {
+  baseUrl: API_BASE || window.location.origin,
 
-export async function loadDispatchLogs(tenantId: string): Promise<DispatchLog[]> {
-  return withFallback(
-    async () => {
-      const data = await request<{ logs: DispatchLog[] }>(`/api/tenants/${tenantId}/logs`);
-      return Array.isArray(data.logs) ? data.logs : [];
-    },
-    () => demoApi.getLogs(tenantId),
-  );
-}
+  health: () => request<HealthResponse>('/api/health'),
 
-export async function triggerDispatch(input: DispatchInput): Promise<DispatchLog> {
-  return withFallback(
-    async () => {
-      const data = await request<{ success: boolean; outcome?: string; message?: string; log?: DispatchLog }>(
-        '/api/dispatch/trigger',
-        {
-          method: 'POST',
-          body: JSON.stringify(input),
-        },
-        TRIGGER_TIMEOUT,
-      );
-      // A failed dispatch is still a real, logged outcome. Return it so the UI can
-      // show the per-connector failure instead of inventing a sandbox success.
-      if (!data.log) throw new Error('Dispatch response contained no log.');
-      return data.log;
-    },
-    () => demoApi.trigger(input),
-  );
-}
+  workspace: () => request<WorkspaceBootstrap>('/api/workspace'),
 
-export async function setIntegration(
-  tenantId: string,
-  integrationId: IntegrationId,
-  connected: boolean,
-  accountEmail?: string,
-): Promise<Tenant | null> {
-  return withFallback(
-    () =>
-      request<Tenant>(`/api/tenants/${tenantId}/integrations/${integrationId}`, {
-        method: 'POST',
-        body: JSON.stringify({ connected, accountEmail }),
-      }),
-    () => demoApi.updateIntegration(tenantId, integrationId, connected, accountEmail),
-  );
-}
+  providers: () => request<ProviderConfigResponse>('/api/providers'),
 
-export function resetSandbox() {
-  demoApi.reset();
-}
+  listAgents: async () => (await request<{ agents: Agent[] }>('/api/agents')).agents,
+
+  createAgent: async (input: AgentInput) =>
+    (await request<{ agent: Agent }>('/api/agents', jsonBody(input))).agent,
+
+  updateAgent: async (agentId: string, input: AgentInput) =>
+    (await request<{ agent: Agent }>(`/api/agents/${agentId}`, putBody(input))).agent,
+
+  deleteAgent: (agentId: string) =>
+    request<{ deleted: boolean }>(`/api/agents/${agentId}`, { method: 'DELETE' }),
+
+  listConversations: async () =>
+    (await request<{ conversations: ConversationSummary[] }>('/api/conversations')).conversations,
+
+  getConversation: async (conversationId: string) =>
+    (await request<{ conversation: Conversation }>(`/api/conversations/${conversationId}`)).conversation,
+
+  createConversation: async (agentId: string) =>
+    (await request<{ conversation: Conversation }>('/api/conversations', jsonBody({ agentId })))
+      .conversation,
+
+  deleteConversation: (conversationId: string) =>
+    request<{ deleted: boolean }>(`/api/conversations/${conversationId}`, { method: 'DELETE' }),
+
+  chat: (input: { agentId: string; conversationId?: string; message: string }) =>
+    request<{ conversation: Conversation; reply: Conversation['messages'][number] }>(
+      '/api/chat',
+      jsonBody(input),
+      AI_TIMEOUT,
+    ),
+
+  planDispatch: (input: { instruction: string; agentId?: string }) =>
+    request<{ plan: DispatchPlan; targets: PublicDispatchTarget[] }>(
+      '/api/dispatch/plan',
+      jsonBody(input),
+      AI_TIMEOUT,
+    ),
+
+  executeDispatch: (input: { plan: DispatchPlan; agentId?: string; targetIds?: string[] }) =>
+    request<{ success: boolean; status: string; message: string; log: DispatchLog }>(
+      '/api/dispatch/execute',
+      jsonBody(input),
+      AI_TIMEOUT,
+    ),
+
+  listDispatchLogs: async () =>
+    (await request<{ logs: DispatchLog[] }>('/api/dispatch/logs')).logs,
+
+  listTargets: async () =>
+    (await request<{ targets: PublicDispatchTarget[] }>('/api/targets')).targets,
+
+  createTarget: async (input: TargetInput) =>
+    (await request<{ target: PublicDispatchTarget }>('/api/targets', jsonBody(input))).target,
+
+  updateTarget: async (targetId: string, input: TargetInput) =>
+    (await request<{ target: PublicDispatchTarget }>(`/api/targets/${targetId}`, putBody(input)))
+      .target,
+
+  deleteTarget: (targetId: string) =>
+    request<{ deleted: boolean }>(`/api/targets/${targetId}`, { method: 'DELETE' }),
+
+  testTarget: (targetId: string) =>
+    request<{ result: DispatchLog['results'][number]; target: PublicDispatchTarget }>(
+      `/api/targets/${targetId}/test`,
+      { method: 'POST' },
+      30_000,
+    ),
+};

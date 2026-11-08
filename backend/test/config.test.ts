@@ -1,64 +1,78 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { connectorMode, describeFastn, readFastnConfig, workflowIdFor } from '../src/config.js';
+import { publicConfig, readConfig } from '../src/config.js';
 
-test('config: no credentials means simulated mode with warnings', () => {
-  const config = readFastnConfig({});
-  assert.equal(config.apiKey, null);
-  assert.equal(connectorMode(config), 'simulated');
-  assert.ok(config.warnings.some(w => w.includes('FASTN_API_KEY')));
+test('config: no provider keys means no default provider', () => {
+  const config = readConfig({});
+  assert.equal(config.defaultProvider, null);
+  assert.equal(config.defaultModel, null);
+  assert.ok(config.providers.every(provider => !provider.apiKey));
+  assert.ok(config.warnings.some(warning => warning.includes('not configured')));
 });
 
-test('config: auto mode is live once a workflow id exists', () => {
-  const config = readFastnConfig({
-    FASTN_API_KEY: 'fsk_live_example',
-    FASTN_WORKSPACE_ID: 'personal_example',
-    FASTN_WORKFLOW_HUBSPOT: 'wf_abc123456',
+test('config: first configured provider becomes the default', () => {
+  const config = readConfig({ OPENAI_API_KEY: 'sk-test-openai' });
+  assert.equal(config.defaultProvider, 'openai');
+  assert.equal(config.defaultModel, 'gpt-4.1');
+  assert.equal(config.providers.find(provider => provider.id === 'openai')?.apiKey, 'sk-test-openai');
+});
+
+test('config: explicit default provider must be configured', () => {
+  const config = readConfig({
+    ANTHROPIC_API_KEY: 'sk-ant-test',
+    AI_DEFAULT_PROVIDER: 'openai',
   });
-  assert.equal(connectorMode(config), 'live');
-  assert.equal(workflowIdFor(config, 'hubspot'), 'wf_abc123456');
-  assert.equal(workflowIdFor(config, 'slack'), undefined);
+  assert.equal(config.defaultProvider, 'anthropic');
+  assert.ok(config.warnings.some(warning => warning.includes('AI_DEFAULT_PROVIDER')));
 });
 
-test('config: explicit simulated mode wins over workflow ids', () => {
-  const config = readFastnConfig({
-    FASTN_API_KEY: 'fsk_live_example',
-    FASTN_WORKFLOW_HUBSPOT: 'wf_abc123456',
-    FASTN_MODE: 'simulated',
+test('config: custom default model wins over the provider default', () => {
+  const config = readConfig({
+    ANTHROPIC_API_KEY: 'sk-ant-test',
+    AI_DEFAULT_MODEL: 'claude-custom-model',
   });
-  assert.equal(connectorMode(config), 'simulated');
+  assert.equal(config.defaultModel, 'claude-custom-model');
 });
 
-test('config: invalid workflow ids are rejected, not used', () => {
-  const config = readFastnConfig({ FASTN_WORKFLOW_HUBSPOT: 'https://evil.example/x' });
-  assert.equal(workflowIdFor(config, 'hubspot'), undefined);
-  assert.ok(config.warnings.some(w => w.includes('FASTN_WORKFLOW_HUBSPOT')));
+test('config: placeholder keys are rejected', () => {
+  const config = readConfig({ ANTHROPIC_API_KEY: 'your_anthropic_api_key_here' });
+  assert.equal(config.providers.find(provider => provider.id === 'anthropic')?.apiKey, null);
+  assert.equal(config.defaultProvider, null);
 });
 
-test('config: invalid mode falls back to auto', () => {
-  const config = readFastnConfig({ FASTN_MODE: 'definitely-not-a-mode' });
-  assert.equal(config.modeSetting, 'auto');
-  assert.ok(config.warnings.some(w => w.includes('FASTN_MODE')));
+test('config: malformed timeouts fall back with a warning', () => {
+  const config = readConfig({ AI_TIMEOUT_MS: '10', DISPATCH_TIMEOUT_MS: '999999' });
+  assert.equal(config.aiTimeoutMs, 45_000);
+  assert.equal(config.dispatchTimeoutMs, 8_000);
+  assert.ok(config.warnings.some(warning => warning.includes('AI_TIMEOUT_MS')));
+  assert.ok(config.warnings.some(warning => warning.includes('DISPATCH_TIMEOUT_MS')));
 });
 
-test('config: timeout bounds are enforced', () => {
-  assert.equal(readFastnConfig({ FASTN_TIMEOUT_MS: '999999' }).timeoutMs, 7000);
-  assert.equal(readFastnConfig({ FASTN_TIMEOUT_MS: '5000' }).timeoutMs, 5000);
+test('config: non-https compatible base URLs are ignored', () => {
+  const config = readConfig({
+    AI_COMPATIBLE_BASE_URL: 'http://example.com/v1',
+    AI_COMPATIBLE_API_KEY: 'test',
+  });
+  assert.equal(config.providers.some(provider => provider.id === 'compatible'), false);
+  assert.ok(config.warnings.some(warning => warning.includes('AI_COMPATIBLE_BASE_URL')));
 });
 
-test('config: non-https base url is ignored', () => {
-  const config = readFastnConfig({ FASTN_API_BASE_URL: 'http://insecure.example' });
-  assert.equal(config.apiBaseUrl, 'https://api.fastn.dev');
+test('config: local OpenAI-compatible endpoints are allowed', () => {
+  const config = readConfig({
+    AI_COMPATIBLE_BASE_URL: 'http://localhost:11434/v1',
+    AI_COMPATIBLE_API_KEY: 'local',
+    AI_COMPATIBLE_MODEL: 'qwen3',
+  });
+  const compatible = config.providers.find(provider => provider.id === 'compatible');
+  assert.ok(compatible);
+  assert.equal(compatible?.defaultModel, 'qwen3');
+  assert.equal(config.defaultProvider, 'compatible');
+  assert.equal(config.providers.find(provider => provider.id === 'anthropic')?.apiKey, null);
 });
 
-test('config: health descriptor never exposes the api key', () => {
-  const descriptor = describeFastn(readFastnConfig({
-    FASTN_API_KEY: 'fsk_live_super_secret',
-    FASTN_WORKSPACE_ID: 'personal_example',
-    FASTN_WORKFLOW_HUBSPOT: 'wf_abc123456',
-  }));
-  assert.equal(descriptor.configured, true);
-  assert.equal(descriptor.workspaceConfigured, true);
-  assert.deepEqual(descriptor.workflows, ['hubspot']);
-  assert.equal(JSON.stringify(descriptor).includes('fsk_live_super_secret'), false);
+test('config: public config never exposes credentials', () => {
+  const config = readConfig({ ANTHROPIC_API_KEY: 'sk-ant-secret-value' });
+  const safe = publicConfig(config);
+  assert.equal(JSON.stringify(safe).includes('sk-ant-secret-value'), false);
+  assert.equal(safe.providers.find(provider => provider.id === 'anthropic')?.configured, true);
 });

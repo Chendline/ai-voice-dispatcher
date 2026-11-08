@@ -1,65 +1,167 @@
-export type IntegrationId = 'hubspot' | 'slack' | 'gmail' | 'sheets' | 'twilio';
+export type Priority = 'low' | 'medium' | 'high' | 'urgent';
+export type TargetType = 'webhook' | 'slack';
+export type DispatchStatus = 'dispatched' | 'partial' | 'failed' | 'skipped';
 
-export interface IntegrationStatus {
-  id: IntegrationId;
-  name: string;
-  connected: boolean;
-  accountEmail?: string;
-  connectedAt?: string;
+export interface ProviderInfo {
+  id: string;
+  label: string;
+  configured: boolean;
+  defaultModel: string;
+  models: string[];
+  compatible: boolean;
 }
 
-export interface Tenant {
+export interface ProviderConfigResponse {
+  defaultProvider: string | null;
+  defaultModel: string | null;
+  aiTimeoutMs: number;
+  dispatchTimeoutMs: number;
+  providers: ProviderInfo[];
+}
+
+export interface Agent {
   id: string;
   name: string;
-  integrations: Record<IntegrationId, IntegrationStatus>;
+  description: string;
+  providerId: string;
+  modelId: string;
+  systemPrompt: string;
+  temperature: number;
+  maxTokens: number;
+  voiceRate: number;
+  voicePitch: number;
+  targetIds: string[];
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface TenantSummary {
+export interface AgentInput {
+  name: string;
+  description: string;
+  providerId: string;
+  modelId: string;
+  systemPrompt: string;
+  temperature: number;
+  maxTokens: number;
+  voiceRate: number;
+  voicePitch: number;
+  targetIds: string[];
+}
+
+export interface ChatUsage {
+  inputTokens?: number;
+  outputTokens?: number;
+}
+
+export interface ConversationMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  createdAt: string;
+  providerId?: string;
+  modelId?: string;
+  usage?: ChatUsage;
+}
+
+export interface Conversation {
+  id: string;
+  title: string;
+  agentId: string;
+  agentName: string;
+  providerId: string;
+  modelId: string;
+  messages: ConversationMessage[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ConversationSummary {
+  id: string;
+  title: string;
+  agentId: string;
+  agentName: string;
+  providerId: string;
+  modelId: string;
+  messageCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PublicDispatchTarget {
   id: string;
   name: string;
+  type: TargetType;
+  host: string;
+  enabled: boolean;
+  createdAt: string;
+  updatedAt: string;
+  lastTestedAt?: string;
+  lastStatus?: 'success' | 'failed';
 }
 
-export type ConnectorOutcomeStatus = 'success' | 'failed' | 'pending' | 'simulated';
+export interface TargetInput {
+  name: string;
+  type: TargetType;
+  url: string;
+  enabled: boolean;
+}
 
-export interface ConnectorOutcome {
-  connector: IntegrationId;
-  status: ConnectorOutcomeStatus;
-  mode: 'live' | 'simulated';
-  reference?: string;
+export interface DispatchPlan {
+  id?: string;
+  title: string;
+  summary: string;
+  priority: Priority;
+  instruction: string;
+  targetIds: string[];
+  source: 'ai' | 'rules';
+  providerId?: string;
+  modelId?: string;
+  createdAt?: string;
+  notice?: string;
+}
+
+export interface DispatchResult {
+  targetId: string;
+  targetName: string;
+  type: TargetType;
+  host: string;
+  status: 'success' | 'failed';
+  httpStatus?: number;
+  durationMs: number;
   detail?: string;
-  executionId?: string;
 }
 
 export interface DispatchLog {
   id: string;
   timestamp: string;
-  tenantId: string;
-  callerName: string;
-  callerContact: string;
-  rawQuery: string;
-  classification: {
-    category: 'Billing' | 'Technical Support' | 'Sales Inquiry' | 'Emergency' | string;
-    priority: 'low' | 'medium' | 'high' | 'urgent' | string;
-    summary: string;
-    source?: 'claude' | 'heuristic';
-  };
-  actionsTaken: {
-    hubspotTicketId?: string;
-    slackChannelNotified?: string;
-    gmailSentTo?: string;
-    sheetsRowAppended?: boolean;
-    mode?: 'live' | 'simulated';
-    results?: ConnectorOutcome[];
-  };
-  status?: 'processing' | 'dispatched' | 'partial' | 'failed' | string;
+  agentId?: string;
+  plan: DispatchPlan;
+  results: DispatchResult[];
+  status: DispatchStatus;
+  message: string;
 }
 
-export interface DispatchInput {
-  tenantId: string;
-  callerName: string;
-  callerContact: string;
-  rawQuery: string;
+export interface WorkspaceBootstrap {
+  config: ProviderConfigResponse;
+  storage: 'blob' | 'memory';
+  agents: Agent[];
+  conversations: ConversationSummary[];
+  targets: PublicDispatchTarget[];
+  logs: DispatchLog[];
 }
 
-export type LeftTab = 'simulator' | 'connectors';
-export type ConnectionMode = 'live' | 'demo';
+export interface HealthResponse {
+  status: string;
+  service: string;
+  version: string;
+  storage: 'blob' | 'memory';
+  ai: {
+    defaultProvider: string | null;
+    defaultModel: string | null;
+    providers: { id: string; label: string; configured: boolean }[];
+  };
+  dispatch: {
+    targets: number;
+    insecureWebhooks: boolean;
+  };
+}

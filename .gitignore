@@ -51,9 +51,7 @@ tmp/
 .eslintcache
 .oxlintcache
 
-# Fastn Secrets
-fastn.secret.json
-fastn-credentials.json
+# Local secrets
 secrets/
 *.pem
 *.key

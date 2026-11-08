@@ -4,40 +4,39 @@ import { once } from 'node:events';
 import type { AddressInfo } from 'node:net';
 import type { Server } from 'node:http';
 import { createApp, type AppDeps } from '../src/app.js';
-import { readFastnConfig } from '../src/config.js';
-import { TenantStore } from '../src/tenantStore.js';
+import { readConfig } from '../src/config.js';
+import { WorkspaceStore } from '../src/store.js';
 
-delete process.env.CLAUDE_API_KEY;
 delete process.env.FRONTEND_URL;
 
-const simulated = readFastnConfig({ FASTN_MODE: 'simulated' });
+const config = readConfig({
+  ANTHROPIC_API_KEY: 'sk-ant-integration-secret',
+  DISPATCH_ALLOW_INSECURE: 'true',
+});
 
-async function withServer(deps: AppDeps, run: (base: string) => Promise<void>) {
-  const app = createApp({
+function deps(overrides: AppDeps = {}): AppDeps {
+  return {
+    config,
+    store: new WorkspaceStore(config),
     hydrate: async () => {},
     persist: async () => {},
     rateLimit: false,
-    ...deps,
-  });
+    aiRateLimit: false,
+    ...overrides,
+  };
+}
+
+async function withServer(run: (base: string, appDeps: AppDeps) => Promise<void>, overrides: AppDeps = {}) {
+  const appDeps = deps(overrides);
+  const app = createApp(appDeps);
   const server: Server = app.listen(0);
   await once(server, 'listening');
   const { port } = server.address() as AddressInfo;
   try {
-    await run(`http://127.0.0.1:${port}`);
+    await run(`http://127.0.0.1:${port}`, appDeps);
   } finally {
     await new Promise<void>(resolve => server.close(() => resolve()));
   }
-}
-
-function deps(overrides: AppDeps = {}): AppDeps {
-  return {
-    config: simulated,
-    store: new TenantStore(),
-    hydrate: async () => {},
-    persist: async () => {},
-    rateLimit: false,
-    ...overrides,
-  };
 }
 
 function post(base: string, path: string, body: unknown) {
@@ -48,169 +47,270 @@ function post(base: string, path: string, body: unknown) {
   });
 }
 
+function put(base: string, path: string, body: unknown) {
+  return fetch(`${base}${path}`, {
+    method: 'PUT',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+}
+
 test('api: health reports readiness without exposing credentials', async () => {
-  await withServer(deps({
-    config: readFastnConfig({
-      FASTN_API_KEY: 'fsk_live_do_not_leak',
-      FASTN_WORKSPACE_ID: 'personal_example',
-      FASTN_WORKFLOW_HUBSPOT: 'wf_abc123456',
-    }),
-  }), async base => {
+  await withServer(async base => {
     const response = await fetch(`${base}/api/health`);
     assert.equal(response.status, 200);
     const text = await response.text();
-    assert.equal(text.includes('fsk_live_do_not_leak'), false);
-    const body = JSON.parse(text);
-    assert.equal(body.status, 'ok');
-    assert.equal(body.fastn.configured, true);
-    assert.equal(body.fastn.mode, 'live');
+    assert.equal(text.includes('sk-ant-integration-secret'), false);
+    const payload = JSON.parse(text) as {
+      status: string;
+      service: string;
+      ai: { providers: { id: string; configured: boolean }[] };
+      dispatch: { targets: number };
+    };
+    assert.equal(payload.status, 'ok');
+    assert.equal(payload.service, 'aegis');
+    assert.equal(payload.ai.providers.find(provider => provider.id === 'anthropic')?.configured, true);
+    assert.equal(payload.dispatch.targets, 0);
   });
 });
 
-test('api: tenant directory lists both seeded tenants', async () => {
-  await withServer(deps(), async base => {
-    const response = await fetch(`${base}/api/tenants`);
-    const body = await response.json();
+test('api: workspace bootstrap includes the seeded agent and safe defaults', async () => {
+  await withServer(async base => {
+    const response = await fetch(`${base}/api/workspace`);
     assert.equal(response.status, 200);
-    assert.deepEqual(body.tenants.map((t: { id: string }) => t.id), ['tenant-a', 'tenant-b']);
+    const payload = (await response.json()) as {
+      agents: { id: string; name: string }[];
+      targets: unknown[];
+      conversations: unknown[];
+      config: { providers: { id: string }[] };
+      storage: string;
+    };
+    assert.equal(payload.agents.length, 1);
+    assert.equal(payload.agents[0].name, 'Dispatch Operator');
+    assert.deepEqual(payload.targets, []);
+    assert.deepEqual(payload.conversations, []);
+    assert.equal(payload.storage, 'memory');
+    assert.ok(payload.config.providers.length >= 5);
   });
 });
 
-test('api: unknown tenant returns 404 without internals', async () => {
-  await withServer(deps(), async base => {
-    const response = await fetch(`${base}/api/tenants/tenant-zzz`);
-    const body = await response.json();
-    assert.equal(response.status, 404);
-    assert.equal(body.error, 'Tenant not found.');
-    assert.equal(body.stack, undefined);
+test('api: agent validation rejects malformed payloads', async () => {
+  await withServer(async base => {
+    const response = await post(base, '/api/agents', { name: '' });
+    assert.equal(response.status, 400);
   });
 });
 
-test('api: dispatch rejects missing and oversized input', async () => {
-  await withServer(deps(), async base => {
-    const missing = await post(base, '/api/dispatch/trigger', { tenantId: 'tenant-a' });
-    assert.equal(missing.status, 400);
-
-    const long = await post(base, '/api/dispatch/trigger', {
-      tenantId: 'tenant-a',
-      rawQuery: 'x'.repeat(2001),
+test('api: agents can be created, updated and protected from deletion', async () => {
+  await withServer(async base => {
+    const created = await post(base, '/api/agents', {
+      name: 'Billing Agent',
+      description: 'Handles billing questions.',
+      providerId: 'anthropic',
+      modelId: 'claude-sonnet-4-5',
+      systemPrompt: 'You handle billing.',
+      temperature: 0.3,
+      maxTokens: 500,
+      targetIds: [],
     });
-    assert.equal(long.status, 400);
+    assert.equal(created.status, 201);
+    const createdBody = (await created.json()) as { agent: { id: string } };
 
-    const badTenant = await post(base, '/api/dispatch/trigger', {
-      tenantId: '../../etc/passwd',
-      rawQuery: 'hello',
+    const updated = await put(base, `/api/agents/${createdBody.agent.id}`, {
+      name: 'Billing Agent v2',
+      description: 'Handles billing questions.',
+      providerId: 'anthropic',
+      modelId: 'claude-haiku-4-5',
+      systemPrompt: 'You handle billing precisely.',
+      temperature: 0.2,
+      maxTokens: 600,
+      targetIds: [],
     });
-    assert.equal(badTenant.status, 400);
+    assert.equal(updated.status, 200);
+    const updatedBody = (await updated.json()) as { agent: { name: string; modelId: string } };
+    assert.equal(updatedBody.agent.name, 'Billing Agent v2');
+    assert.equal(updatedBody.agent.modelId, 'claude-haiku-4-5');
+
+    const deleted = await fetch(`${base}/api/agents/${createdBody.agent.id}`, { method: 'DELETE' });
+    assert.equal(deleted.status, 200);
+
+    const defaultAgentId = 'agent_default';
+    const lastDelete = await fetch(`${base}/api/agents/${defaultAgentId}`, { method: 'DELETE' });
+    assert.equal(lastDelete.status, 409);
   });
 });
 
-test('api: simulated dispatch logs a truthful simulated result', async () => {
-  await withServer(deps(), async base => {
-    const response = await post(base, '/api/dispatch/trigger', {
-      tenantId: 'tenant-a',
-      rawQuery: 'I was double charged on my last invoice.',
-      callerName: 'Marcus Vance',
-      callerContact: 'billing@acme.example',
+test('api: chat returns 503 when the selected provider has no key', async () => {
+  const noKeyConfig = readConfig({});
+  await withServer(async (base, appDeps) => {
+    const store = appDeps.store as WorkspaceStore;
+    const agent = store.listAgents()[0];
+    const response = await post(base, '/api/chat', { agentId: agent.id, message: 'hello' });
+    assert.equal(response.status, 503);
+    const body = (await response.json()) as { code: string };
+    assert.equal(body.code, 'not_configured');
+  }, { config: noKeyConfig, store: new WorkspaceStore(noKeyConfig) });
+});
+
+test('api: chat calls the provider and persists the conversation', async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async (input: string | URL | Request, init?: RequestInit) => {
+    const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
+    if (url.includes('/api/')) return originalFetch(input, init);
+    return new Response(
+      JSON.stringify({ content: [{ type: 'text', text: 'Acknowledged.' }] }),
+      { status: 200, headers: { 'content-type': 'application/json' } },
+    );
+  }) as typeof fetch;
+
+  try {
+    await withServer(async (base, appDeps) => {
+      const store = appDeps.store as WorkspaceStore;
+      const agent = store.listAgents()[0];
+      const response = await post(base, '/api/chat', {
+        agentId: agent.id,
+        message: 'Please summarize the incident.',
+      });
+      assert.equal(response.status, 200);
+      const payload = (await response.json()) as {
+        conversation: { id: string; messages: { role: string; content: string }[] };
+        reply: { content: string };
+      };
+      assert.equal(payload.reply.content, 'Acknowledged.');
+      assert.equal(payload.conversation.messages.length, 2);
+      assert.equal(store.listConversations().length, 1);
     });
-    const body = await response.json();
-
-    assert.equal(response.status, 201);
-    assert.equal(body.success, true);
-    assert.equal(body.outcome, 'dispatched');
-    assert.equal(body.log.actionsTaken.mode, 'simulated');
-    assert.ok(body.log.actionsTaken.results.every((r: { status: string }) => r.status === 'simulated'));
-    assert.equal(body.log.classification.category, 'Billing');
-  });
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
 });
 
-test('api: failed live dispatch is not reported as success', async () => {
-  const liveWithoutWorkflows = readFastnConfig({
-    FASTN_API_KEY: 'fsk_live_test_only',
-    FASTN_MODE: 'live',
-  });
-
-  await withServer(deps({ config: liveWithoutWorkflows }), async base => {
-    const response = await post(base, '/api/dispatch/trigger', {
-      tenantId: 'tenant-a',
-      rawQuery: 'Production database is down.',
+test('api: target URLs are stored server-side and never echoed', async () => {
+  await withServer(async base => {
+    const created = await post(base, '/api/targets', {
+      name: 'Ops webhook',
+      type: 'webhook',
+      url: 'http://127.0.0.1:9/hook?token=super-secret',
+      enabled: true,
     });
-    const body = await response.json();
+    assert.equal(created.status, 201);
+    const text = await created.text();
+    assert.equal(text.includes('super-secret'), false);
 
-    assert.equal(response.status, 201);
-    assert.equal(body.success, false);
-    assert.equal(body.outcome, 'failed');
-    assert.equal(body.log.status, 'failed');
-    assert.match(body.message, /failed/i);
-    assert.ok(body.log.actionsTaken.results.every((r: { status: string }) => r.status === 'failed'));
+    const list = await fetch(`${base}/api/targets`);
+    const listText = await list.text();
+    assert.equal(listText.includes('super-secret'), false);
+    const payload = JSON.parse(listText) as { targets: { host: string; url?: string }[] };
+    assert.equal(payload.targets.length, 1);
+    assert.equal(payload.targets[0].url, undefined);
+    assert.match(payload.targets[0].host, /127\.0\.0\.1/);
   });
 });
 
-test('api: dispatch logs stay isolated per tenant', async () => {
-  const store = new TenantStore();
-  await withServer(deps({ store }), async base => {
-    await post(base, '/api/dispatch/trigger', { tenantId: 'tenant-a', rawQuery: 'Billing issue' });
+test('api: dispatch plans fall back to rules and execute against selected targets', async () => {
+  const originalFetch = globalThis.fetch;
+  let externalCalls = 0;
+  globalThis.fetch = (async (input: string | URL | Request, init?: RequestInit) => {
+    const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
+    if (url.includes('/api/')) return originalFetch(input, init);
+    externalCalls += 1;
+    if (url.includes('api.anthropic.com')) {
+      return new Response(
+        JSON.stringify({
+          content: [
+            {
+              type: 'text',
+              text: '{"title":"Escalate production outage","summary":"Production is down and requires escalation.","priority":"urgent","targetIds":[]}',
+            },
+          ],
+        }),
+        { status: 200, headers: { 'content-type': 'application/json' } },
+      );
+    }
+    return new Response('{"delivered":true}', { status: 200 });
+  }) as typeof fetch;
 
-    const logsA = await (await fetch(`${base}/api/tenants/tenant-a/logs`)).json();
-    const logsB = await (await fetch(`${base}/api/tenants/tenant-b/logs`)).json();
+  try {
+    await withServer(async (base, appDeps) => {
+      const store = appDeps.store as WorkspaceStore;
+      const created = await post(base, '/api/targets', {
+        name: 'Ops webhook',
+        type: 'webhook',
+        url: 'http://127.0.0.1:9/hook',
+        enabled: true,
+      });
+      const target = (await created.json()) as { target: { id: string } };
 
-    assert.equal(logsA.logs.length, 1);
-    assert.equal(logsA.logs[0].tenantId, 'tenant-a');
-    assert.equal(logsB.logs.length, 0);
+      const planned = await post(base, '/api/dispatch/plan', {
+        instruction: 'Escalate the production outage immediately.',
+        agentId: store.listAgents()[0].id,
+      });
+      assert.equal(planned.status, 200);
+      const planPayload = (await planned.json()) as {
+        plan: { title: string; priority: string; source: string; targetIds: string[]; notice?: string };
+      };
+      assert.equal(planPayload.plan.source, 'ai');
+      assert.equal(planPayload.plan.priority, 'urgent');
+
+      const executed = await post(base, '/api/dispatch/execute', {
+        plan: {
+          ...planPayload.plan,
+          targetIds: [target.target.id],
+        },
+        agentId: store.listAgents()[0].id,
+      });
+      assert.equal(executed.status, 200);
+      const executedPayload = (await executed.json()) as {
+        success: boolean;
+        status: string;
+        log: { results: { status: string; host: string }[] };
+      };
+      assert.equal(executedPayload.success, true);
+      assert.equal(executedPayload.status, 'dispatched');
+      assert.equal(executedPayload.log.results[0].status, 'success');
+      assert.equal(externalCalls, 2);
+    });
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('api: executing with no targets reports skipped honestly', async () => {
+  await withServer(async base => {
+    const response = await post(base, '/api/dispatch/execute', {
+      plan: {
+        title: 'No targets',
+        summary: 'Nothing to deliver to.',
+        priority: 'low',
+        instruction: 'Record this only.',
+        targetIds: [],
+        source: 'rules',
+      },
+    });
+    assert.equal(response.status, 200);
+    const payload = (await response.json()) as { success: boolean; status: string; message: string };
+    assert.equal(payload.success, false);
+    assert.equal(payload.status, 'skipped');
+    assert.match(payload.message, /No dispatch targets/);
   });
 });
 
-test('api: integration toggles are validated and persisted', async () => {
-  let persisted = 0;
-  await withServer(deps({ persist: async () => { persisted += 1; } }), async base => {
-    const badIntegration = await post(base, '/api/tenants/tenant-a/integrations/nope', { connected: false });
-    assert.equal(badIntegration.status, 404);
+test('api: validation and not-found responses are sanitized', async () => {
+  await withServer(async base => {
+    const badChat = await post(base, '/api/chat', {});
+    assert.equal(badChat.status, 400);
 
-    const badBody = await post(base, '/api/tenants/tenant-a/integrations/slack', { connected: 'yes' });
-    assert.equal(badBody.status, 400);
+    const missingTarget = await fetch(`${base}/api/targets/tgt_missing`, { method: 'DELETE' });
+    assert.equal(missingTarget.status, 404);
 
-    const ok = await post(base, '/api/tenants/tenant-a/integrations/slack', { connected: false });
-    assert.equal(ok.status, 200);
-    const tenant = await ok.json();
-    assert.equal(tenant.integrations.slack.connected, false);
-    assert.equal(tenant.integrations.slack.accountEmail, '#acme-dispatch');
-    assert.equal(persisted, 1);
-  });
-});
+    const unknownRoute = await fetch(`${base}/api/nope`);
+    assert.equal(unknownRoute.status, 404);
 
-test('api: unknown api routes return JSON 404', async () => {
-  await withServer(deps(), async base => {
-    const response = await fetch(`${base}/api/does-not-exist`);
-    assert.equal(response.status, 404);
-    assert.deepEqual(await response.json(), { error: 'Not found.' });
-  });
-});
-
-test('api: malformed JSON and oversized bodies get safe errors', async () => {
-  await withServer(deps(), async base => {
-    const malformed = await fetch(`${base}/api/dispatch/trigger`, {
+    const badJson = await fetch(`${base}/api/chat`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: '{"tenantId":',
+      body: '{oops',
     });
-    assert.equal(malformed.status, 400);
-    assert.deepEqual(await malformed.json(), { error: 'Request body must be valid JSON.' });
-
-    const oversized = await fetch(`${base}/api/dispatch/trigger`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ tenantId: 'tenant-a', rawQuery: 'x'.repeat(100_000) }),
-    });
-    assert.equal(oversized.status, 413);
-    assert.deepEqual(await oversized.json(), { error: 'Request body is too large.' });
-  });
-});
-
-test('api: rate limiting returns 429 but keeps health exempt', async () => {
-  await withServer(deps({ rateLimit: { windowMs: 60_000, limit: 2 } }), async base => {
-    assert.equal((await fetch(`${base}/api/tenants`)).status, 200);
-    assert.equal((await fetch(`${base}/api/tenants`)).status, 200);
-    assert.equal((await fetch(`${base}/api/tenants`)).status, 429);
-    assert.equal((await fetch(`${base}/api/health`)).status, 200);
+    assert.equal(badJson.status, 400);
   });
 });

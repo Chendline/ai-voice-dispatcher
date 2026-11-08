@@ -1,7 +1,7 @@
 {
   "name": "ai-voice-dispatcher-backend",
   "version": "1.0.0",
-  "description": "Multi-tenant backend server for AI Voice Agent Dispatcher",
+  "description": "AEGIS backend: multi-provider AI chat, browser voice turn storage, and governed dispatch",
   "main": "dist/main.js",
   "scripts": {
     "dev": "tsx watch src/main.ts",

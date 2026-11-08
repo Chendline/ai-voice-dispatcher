@@ -1,32 +1,66 @@
-# React + TypeScript + Vite
+# AEGIS frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+React 19 + TypeScript + Vite client for AEGIS.
 
-Currently, two official plugins are available:
+## Surfaces
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- `/` — landing page (`src/pages/LandingPage.tsx`).
+- `/app`, `/app/voice`, `/app/dispatch`, `/app/agents`, `/app/settings` — workspace (`src/pages/WorkspacePage.tsx`).
 
-## React Compiler
+Routing uses the History API in `src/lib/router.ts`. There is no router dependency. `scripts/postbuild.mjs` copies the built `index.html` to `dist/app/index.html` and `dist/404.html` so static hosts can boot deep links.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Commands
 
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+npm run dev      # http://localhost:5173
+npm test         # speech-engine tests
+npm run lint     # oxlint
+npm run build    # type-check + Vite build + /app fallback
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+The workspace expects the API on `http://localhost:3001` during development. Set `VITE_API_BASE_URL` to use another origin, or `/` when the API is same-origin in production.
+
+## Structure
+
+```
+src/
+  components/
+    Icons.tsx
+    ui.tsx
+    workspace/
+      AgentsPanel.tsx
+      ChatPanel.tsx
+      DispatchPanel.tsx
+      SettingsPanel.tsx
+      SpeechSettings.tsx
+      VoicePanel.tsx
+  hooks/
+    useSpeechPlayback.ts
+    useSpeechRecognition.ts
+    useWorkspaceData.ts
+  lib/
+    api.ts
+    router.ts
+  pages/
+    LandingPage.tsx
+    WorkspacePage.tsx
+  styles/
+    landing.css
+    tts.css
+    workspace.css
+  utils/
+    soundEffects.ts
+    tts.ts
+  App.tsx
+  index.css
+  main.tsx
+  types.ts
+```
+
+## Behavior notes
+
+- No demo or sandbox fallback. If the API is offline, the workspace shows a connection gate.
+- Provider keys and raw dispatch URLs never reach the browser.
+- Speech recognition and synthesis are browser-native. No cloud TTS is configured.
+- `utils/tts.ts` must stay free of DOM-only top-level side effects so Node can run its tests.

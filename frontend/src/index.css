@@ -1,46 +1,46 @@
 @import 'lenis/dist/lenis.css';
 
 :root {
-  /* User 5-Color Organic Refreshing System */
-  --c-olive: #606c38;        /* Olive Leaf */
-  --c-forest: #283618;       /* Black Forest */
-  --c-cornsilk: #fefae0;     /* Cornsilk */
-  --c-caramel: #dda15e;      /* Light Caramel */
-  --c-copper: #bc6c25;       /* Copper */
+  --c-olive: #606c38;
+  --c-forest: #283618;
+  --c-cornsilk: #fefae0;
+  --c-caramel: #dda15e;
+  --c-copper: #bc6c25;
 
-  /* Surface & Canvas System */
-  --bg-canvas: #fefae0;
-  --bg-surface: rgba(255, 255, 255, 0.86);
-  --bg-surface-solid: #ffffff;
-  --bg-surface-elevated: #ffffff;
-  --bg-surface-subtle: rgba(221, 161, 94, 0.12);
-  --bg-surface-olive: rgba(96, 108, 56, 0.08);
+  --bg-canvas: #fbf8ea;
+  --bg-surface: #ffffff;
+  --bg-surface-raised: #fffdf4;
+  --bg-surface-subtle: rgba(96, 108, 56, 0.07);
+  --bg-surface-warm: rgba(221, 161, 94, 0.14);
+  --bg-ink: #1e2917;
 
-  /* Text & Contrast Tokens */
-  --text-primary: #283618;    /* Black Forest for supreme readability */
-  --text-secondary: #4a592e;  /* Deep Olive Leaf */
-  --text-muted: #78705a;      /* Muted earth stone */
-  --text-dim: #9c927c;        /* Subtle placeholders */
-  --text-inverse: #fefae0;    /* Cornsilk over dark elements */
+  --text-primary: #222d18;
+  --text-secondary: #4a5738;
+  --text-muted: #76705c;
+  --text-dim: #a09a87;
+  --text-inverse: #fefae0;
 
-  /* Borders & Specular Sheen (Apple Light Material Depth) */
-  --border-hairline: rgba(40, 54, 24, 0.1);
-  --border-medium: rgba(96, 108, 56, 0.22);
-  --border-focus: rgba(188, 108, 37, 0.45);
-  --border-copper: rgba(188, 108, 37, 0.6);
-  --specular-top: inset 0 1px 0 0 rgba(255, 255, 255, 0.95);
-  --card-shadow: 0 4px 20px rgba(40, 54, 24, 0.05), 0 1px 3px rgba(40, 54, 24, 0.04);
-  --card-shadow-hover: 0 10px 30px rgba(40, 54, 24, 0.08), 0 2px 6px rgba(40, 54, 24, 0.04);
+  --border-hairline: rgba(40, 54, 24, 0.11);
+  --border-medium: rgba(40, 54, 24, 0.2);
+  --border-strong: rgba(40, 54, 24, 0.34);
+  --border-focus: rgba(188, 108, 37, 0.5);
 
-  /* Typography */
-  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
-  --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+  --shadow-sm: 0 1px 2px rgba(34, 45, 24, 0.06), 0 2px 8px rgba(34, 45, 24, 0.04);
+  --shadow-md: 0 8px 28px rgba(34, 45, 24, 0.09), 0 2px 6px rgba(34, 45, 24, 0.05);
+  --shadow-lg: 0 24px 70px rgba(34, 45, 24, 0.16), 0 6px 18px rgba(34, 45, 24, 0.08);
+  --specular-top: inset 0 1px 0 rgba(255, 255, 255, 0.9);
 
-  /* Physical Interaction Tokens */
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Consolas, monospace;
+
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
-  --ease-smooth: cubic-bezier(0.32, 0.72, 0, 1);
-  --duration-press: 120ms;
-  --duration-state: 200ms;
+  --ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
+  --duration-press: 110ms;
+  --duration-state: 190ms;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 26px;
 }
 
 * {
@@ -51,25 +51,90 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-html, body {
+html {
+  min-height: 100%;
+  background: var(--bg-canvas);
+}
+
+body {
   min-height: 100vh;
   background-color: var(--bg-canvas);
   color: var(--text-primary);
   font-family: var(--font-sans);
-  letter-spacing: -0.015em;
-  line-height: 1.5;
+  font-size: 15px;
+  line-height: 1.55;
+  letter-spacing: -0.012em;
 }
 
-body {
-  /* Refreshing, sun-dappled organic ambient lighting with Cornsilk base */
-  background-image: 
-    radial-gradient(ellipse 65% 45% at 50% -5%, rgba(96, 108, 56, 0.12) 0%, transparent 70%),
-    radial-gradient(ellipse 50% 35% at 90% 95%, rgba(221, 161, 94, 0.18) 0%, transparent 60%),
-    radial-gradient(ellipse 40% 30% at 10% 75%, rgba(188, 108, 37, 0.08) 0%, transparent 55%);
-  background-attachment: fixed;
+#root {
+  min-height: 100vh;
 }
 
-/* Lenis Smooth Scroll Ergonomics */
+h1, h2, h3, h4, h5 {
+  color: var(--text-primary);
+  line-height: 1.12;
+  letter-spacing: -0.035em;
+  font-weight: 650;
+}
+
+p {
+  color: var(--text-secondary);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button, input, select, textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  background: none;
+  border: 0;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  background: var(--bg-surface-subtle);
+  border: 1px solid var(--border-hairline);
+  padding: 0.1em 0.38em;
+  border-radius: 5px;
+  color: var(--c-forest);
+}
+
+::selection {
+  background: var(--c-caramel);
+  color: var(--c-forest);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(96, 108, 56, 0.22);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(96, 108, 56, 0.4);
+}
+
 html.lenis, html.lenis body {
   height: auto;
 }
@@ -86,23 +151,29 @@ html.lenis, html.lenis body {
   overflow: hidden;
 }
 
-/* Custom Ergonomic Scrollbar (Refreshing Caramel & Olive) */
-::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(96, 108, 56, 0.25);
-  border-radius: 999px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(96, 108, 56, 0.45);
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
-::selection {
-  background: var(--c-caramel);
-  color: var(--c-forest);
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.45; transform: scale(0.82); }
+}
+
+@keyframes typing {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.35; }
+  30% { transform: translateY(-4px); opacity: 1; }
+}
+
+@keyframes wave-drift {
+  0%, 100% { transform: scaleY(0.55); }
+  50% { transform: scaleY(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

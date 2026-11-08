@@ -1,259 +1,365 @@
-# AEGIS · AI Voice Agent Dispatcher
+# AEGIS
 
-A multi-tenant SaaS platform where businesses embed an AI-powered voice dispatch agent into their own product. Each customer connects their own communication and CRM tools through FastN — the agent handles call routing, ticket creation, notifications, and logging automatically.
+**AI voice conversations that end in a governed dispatch.**
 
-Built for the **FastN Online Hackathon 2026**.
+AEGIS is an independent AI workspace for teams that need a conversation to produce an action, not just a reply. Connect your own model provider, configure an agent, talk or type, then review a structured dispatch before anything is sent to an HTTPS webhook or a Slack incoming webhook.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Chendline/ai-voice-dispatcher&project-name=aivoicedispatcher&repository-name=ai-voice-dispatcher)
+The product has two surfaces:
 
-**Live demo:** [aivoicedispatcher.vercel.app](https://aivoicedispatcher.vercel.app) — deployed and publicly accessible on Vercel's free default domain.
-
----
-
-## What it does
-
-- **Receive inbound voice requests** — real-time simulation with an active audio waveform and preset enterprise scenarios.
-- **Classify & route** — Claude AI intent classification (with deterministic keyword fallback) into Emergency, Technical Support, Billing, and Sales Inquiry.
-- **FastN multi-tenant connector dispatch**:
-  - **HubSpot** — creates a support ticket with a unique ID.
-  - **Slack** — posts to the tenant's private channel (`#acme-dispatch` vs `#nexus-alerts`).
-  - **Gmail** — sends a dispatch receipt to the caller.
-  - **Google Sheets** — appends a row to the tenant's isolated audit ledger.
-  - **Twilio** — simulates inbound voice ingestion and telephone routing.
-- **Truthful connector outcomes** — every dispatch records `success`, `failed`, `pending` (FastN queued the workflow) or `simulated` per connector. The UI never reports a sandbox or failed run as a real success.
-- **Two-tenant complete isolation** — Tenant A never sees or modifies Tenant B's data, connectors, or event feed.
-- **Tactile UI/UX** — Apple Design and Emil Kowalski design engineering principles, Lenis smooth scrolling, and zero-dependency Web Audio feedback.
-- **Voice playback (browser TTS)** — the transcription can be read aloud with any voice installed on the device, with speed/pitch/volume, pause/resume, replay, and an Audio Diagnostics panel. See [Voice Playback](#voice-playback-browser-tts).
-- **Shareable workspace state** — `?tenant=tenant-b&tab=connectors` deep links restore the exact vault and tab.
-- **Resilient public demo** — if the Express API is unreachable (offline static preview, container cold failure), the frontend switches to an in-browser sandbox vault instead of breaking.
+- **Landing page** at `/` — what AEGIS is, how it works, which providers it supports, and what it deliberately does not do.
+- **Workspace** at `/app` — chat, voice sessions, dispatch workbench, agent configuration, providers, targets, speech settings, and history.
 
 ---
 
-## Tech Stack
+## Why AEGIS
 
-| Layer | Tool |
+Most AI chat products stop at text. Operational teams still have to copy the answer into a ticket, a channel, or an internal system. AEGIS keeps the conversation and the action in one loop:
+
+1. The agent answers with the configured provider.
+2. A separate dispatch planner turns an instruction into a reviewable plan.
+3. A human approves the targets.
+4. The server performs the HTTP request and records the real outcome.
+
+There is no simulated connector success. A missing provider key, a rejected webhook, a timeout, and a skipped dispatch are all visible as different states.
+
+### Who it is for
+
+- Operations and support teams that route incidents through chat and webhooks.
+- Teams that want to use their own model account instead of a bundled AI subscription.
+- Developers who need a small, inspectable reference implementation of AI planning plus disciplined execution.
+- Anyone evaluating voice-first workflows without buying a telephony or cloud-TTS contract.
+
+---
+
+## Features
+
+### Multi-provider AI
+
+A single adapter contract drives every provider. Agents store their own provider and model.
+
+| Provider | Adapter | Example default | Key variable |
+|---|---|---|---|
+| Anthropic | Messages API | `claude-sonnet-4-5` | `ANTHROPIC_API_KEY` |
+| OpenAI | Chat Completions | `gpt-4.1` | `OPENAI_API_KEY` |
+| Google Gemini | `generateContent` | `gemini-2.5-pro` | `GOOGLE_API_KEY` |
+| OpenRouter | OpenAI-compatible | `openai/gpt-4.1` | `OPENROUTER_API_KEY` |
+| Groq | OpenAI-compatible | `llama-3.3-70b-versatile` | `GROQ_API_KEY` |
+| Custom compatible | OpenAI-compatible | configurable | `AI_COMPATIBLE_API_KEY` |
+
+- Provider keys are read only by the backend.
+- Models can be chosen from the provider's known list or typed manually.
+- `AI_DEFAULT_PROVIDER` / `AI_DEFAULT_MODEL` set the initial defaults.
+- If no provider is configured, chat returns a clear configuration error. AEGIS does not generate a fake local model reply.
+
+### Agents
+
+Each agent owns:
+
+- name and description;
+- provider and model id;
+- system prompt;
+- temperature and max output tokens;
+- default voice rate and pitch;
+- suggested dispatch targets.
+
+Agents can be created, edited, and deleted. At least one agent always remains.
+
+### Chat and conversation history
+
+- Server-side conversation storage with titles derived from the first user message.
+- Resume any conversation from the history rail.
+- Delete individual conversations.
+- Dictate a message with the browser microphone.
+- Model metadata and token usage are attached to assistant messages when the provider returns them.
+
+### Voice
+
+- **Input:** Web Speech API recognition (`SpeechRecognition` / `webkitSpeechRecognition`), with interim transcript feedback.
+- **Output:** native `speechSynthesis`. Audio is synthesized locally on the device.
+- Push-to-talk and optional hands-free turn taking.
+- Per-agent rate and pitch, plus a global speed, pitch, and volume panel.
+- Voice diagnostics: supported engine, voice count, local vs network voices, chunk progress, last error, and troubleshooting hints.
+- No cloud TTS provider is configured or claimed.
+
+### Governed dispatch
+
+- **Plan:** the selected provider drafts a title, summary, priority, and suggested targets. If the provider is unavailable, a clearly labeled local rules planner is used instead.
+- **Review:** every field can be edited; target selection is explicit.
+- **Execute:** the backend posts the event server-side to each approved target.
+- **Record:** per-target HTTP status, latency, sanitized detail, aggregate status, and a permanent log entry.
+
+Supported target types:
+
+| Type | Request |
 |---|---|
-| Frontend | React 19, TypeScript, Vite, Lenis Smooth Scroll |
-| Backend | Node.js, Express, TypeScript, `tsx` |
-| Audio Engine | Zero-dependency Web Audio API procedural synthesis |
-| Text-to-Speech | Native Web Speech API (`speechSynthesis`) — local system voices |
-| Integrations Platform | FastN (embedded connectors & routing) |
-| AI Classifier | Claude Messages API + heuristic fallback |
-| Deployment | Vercel (Vite frontend + Express container API) |
-| Persistence | Vercel Blob (per-tenant JSON state; memory fallback) |
+| `webhook` | `POST` JSON with flat plan fields (`event`, `planId`, `title`, `summary`, `priority`, `instruction`, `source`, `createdAt`) |
+| `slack` | Slack incoming webhook JSON (`text` only) |
+
+Aggregate statuses are literal:
+
+- `dispatched` — every selected target returned 2xx.
+- `partial` — at least one target succeeded and at least one failed.
+- `failed` — no target succeeded.
+- `skipped` — no target was selected or available; nothing was sent.
+
+### Safety and honesty
+
+- Targets must be HTTPS by default. HTTP is only allowed when `DISPATCH_ALLOW_INSECURE=true` for local testing.
+- URLs with credentials are rejected.
+- Hostnames are DNS-checked and private / loopback / link-local addresses are rejected.
+- Redirects are disabled.
+- Requests have a hard timeout (`DISPATCH_TIMEOUT_MS`).
+- Saved target URLs are write-only. The API returns only the host after saving.
+- Provider and dispatch errors are sanitized; stack traces and secrets are never returned.
+- Rate limits apply to all API routes and, more tightly, to AI and dispatch routes.
+
+### Durable state (optional)
+
+Without storage configuration, agents, conversations, targets, and logs live in memory and reset on restart. Set `BLOB_READ_WRITE_TOKEN` to persist a workspace snapshot to Vercel Blob. `AEGIS_STATE_ID` names the stored workspace.
+
+**AEGIS is currently a single-workspace application.** There is no authentication yet, so it is not a multi-user SaaS. Do not expose it publicly with real credentials until authentication is added.
 
 ---
 
-## Design System & Refreshing Organic Aesthetic
+## Architecture
 
-- **Color Palette**:
-  - `Cornsilk` (`#fefae0`): sunlit organic canvas
-  - `Black Forest` (`#283618`): high-contrast typography and active controls
-  - `Olive Leaf` (`#606c38`): waveform bars, category tags, secondary text
-  - `Light Caramel` (`#dda15e`): warm neutral badges and borders
-  - `Copper` (`#bc6c25`): primary action buttons and focus rings
-- **Micro-interactions**:
-  - Procedural audio feedback for taps, tenant switches, pipeline ticks, and completion
-  - Sliding segmented tenant control with an isolated-vault status pill
-  - Four-step dispatch stepper (Twilio → Claude → Router → Connectors)
-  - Live event stream with category filters, search, and an expandable JSON trace inspector
-- **Accessibility**: real `tablist`/`tabpanel` semantics, arrow/Home/End keyboard navigation, visible focus rings, reduced-motion and reduced-transparency fallbacks.
+```
+Browser
+├── Landing page (React)
+└── Workspace (React)
+    ├── Chat panel ───────────────┐
+    ├── Voice panel ──────────────┤
+    ├── Dispatch workbench ───────┤
+    ├── Agents panel ─────────────┤
+    └── Settings panel ───────────┘
+                 │ JSON over HTTP
+                 ▼
+Express API
+├── Validation + rate limits + CORS + Helmet
+├── Provider registry
+│   ├── Anthropic adapter
+│   ├── OpenAI adapter
+│   ├── Google adapter
+│   └── OpenAI-compatible adapter (OpenRouter, Groq, custom)
+├── Chat service (conversation persistence + provider call)
+├── Dispatch engine (plan → approve → execute → log)
+├── Workspace store (agents, conversations, targets, logs)
+└── Persistence (optional Vercel Blob snapshot)
+                 │
+                 ▼
+External services
+├── AI provider APIs
+├── HTTPS webhook targets
+├── Slack incoming webhooks
+└── Vercel Blob (optional)
+```
+
+### Backend responsibilities
+
+- Read and validate environment configuration.
+- Hold provider credentials and dispatch URLs.
+- Validate every request body.
+- Build prompts and call provider adapters.
+- Plan and execute dispatches.
+- Persist workspace state when configured.
+- Return safe public representations of targets and configuration.
+
+### Frontend responsibilities
+
+- Render the landing page and workspace.
+- Manage interaction state, routing, and accessibility.
+- Perform browser speech recognition and synthesis.
+- Never receive provider keys or raw target URLs.
+- Show real errors and outcomes; never invent success.
 
 ---
 
-## Voice Playback (Browser TTS)
-
-The **Voice Playback** card under the transcription form reads the message aloud using the browser's own speech engine.
-
-- **Engine**: native `window.speechSynthesis` only. There is **no cloud TTS provider configured** — audio is synthesized locally and never leaves the browser, and it is not presented as a cloud or neural voice.
-- **Controls**: voice selector (grouped by language, network voices labelled), speed `0.5–2×`, pitch `0–2`, volume `0–100%`, Play, Pause/Resume, Stop, Replay, and Test Voice.
-- **Status**: `Ready`, `Loading`, `Speaking`, `Paused`, `Completed`, `Error`, `Unsupported`. Every terminal event (`onend`, `onerror`, watchdog timeout) resolves the UI — it never hangs in "Speaking".
-- **Long text**: split at ~180 characters, sentence-first, then word boundaries, then hard slices. Chunks play sequentially, never overlapping.
-- **Voice loading**: voices arrive asynchronously. The engine listens for `voiceschanged`, then polls with backoff (250 ms → 4 s) and offers a manual **Refresh voices**. It never blocks on `voiceschanged` alone.
-- **Stale callbacks**: every playback run carries a generation token, so late `onend`/`onerror` events from a cancelled utterance cannot overwrite the current state.
-- **Pause/Resume**: Chromium/Opera can silently drop `resume()`; a 2.5 s watchdog restarts the current chunk instead of leaving the UI stuck.
-- **Fallback**: if a voice fails (`voice-unavailable`, `synthesis-failed`, …), the engine switches to a **local** voice and says so in a visible notice. It never silently changes the user's saved selection, and never retries the same network voice.
-- **Diagnostics**: the collapsible **Audio Diagnostics** panel shows browser, engine, voice counts, selected voice/language, state, active voice, chunk count, capability flags, last error, and a troubleshooting hint. No secrets, tokens, or request headers are displayed.
-- **Settings**: voice, rate, pitch, and volume persist in `localStorage` under `aegis.tts.settings.v1`.
-
-### Opera notes
-
-- Opera exposes `speechSynthesis` before any voices exist; `getVoices()` can return `[]` on first paint. This is handled, not hidden.
-- Pause/Resume works on current desktop Opera; older builds may not, so the button only renders when the API supports it.
-- If no voices appear, install one via **Windows Settings → Time & language → Speech**, then press **Refresh voices**.
-
----
-
-## Two-Tenant Test
-
-1. **Tenant A (Acme Corp)**: `#acme-dispatch`, `support@acmecorp.com`, Acme audit sheet.
-2. **Tenant B (Nexus Logistics)**: `#nexus-alerts`, `dispatch@nexuslogistics.io`, Nexus fleet sheet.
-3. **Zero data bleed**: switching tenants immediately clears the previous feed while the new vault loads. In-flight dispatches are only committed to the tenant that started them.
-
-Open the deep link [`/?tenant=tenant-b&tab=connectors`](http://localhost:5173/?tenant=tenant-b&tab=connectors) to verify isolation in one click.
-
----
-
-## Getting Started
+## Getting started
 
 ### Prerequisites
 
-- Node.js 20+
-- npm
+- Node.js 20 or newer
+- npm 10 or newer
+- A modern browser (Chrome, Edge, or Safari) for voice features
 
-### Run locally
+### Install and run
 
 ```bash
-# 1. Backend (port 3001)
+# Backend — http://localhost:3001
 cd backend
 npm install
+cp ../.env.example ../.env    # Windows: copy ..\.env.example ..\.env
 npm run dev
 
-# 2. Frontend (port 5173)
+# Frontend — http://localhost:5173
 cd ../frontend
 npm install
 npm run dev
-
-# 3. Checks
-npm test        # TTS pure-logic tests (node:test)
-npm run lint    # oxlint
-npm run build   # tsc -b && vite build
 ```
 
-Open [http://localhost:5173](http://localhost:5173). The header badge shows **Live API** when the Express server is reachable and **Demo Sandbox** when it is not.
+Open:
 
-### Environment variables
+- Landing page: <http://localhost:5173/>
+- Workspace: <http://localhost:5173/app>
 
-Copy `.env.example` to `.env` at the repository root for the backend:
+The workspace needs the API. If the API is offline, it shows a connection gate instead of falling back to fabricated local data.
 
-```env
-FASTN_API_KEY=your_fastn_api_key_here
-FASTN_WORKSPACE_ID=your_fastn_workspace_id_here
-FASTN_WORKFLOW_HUBSPOT=wf_...
-FASTN_WORKFLOW_SLACK=wf_...
-FASTN_WORKFLOW_GMAIL=wf_...
-FASTN_WORKFLOW_SHEETS=wf_...
-FASTN_MODE=auto
-FASTN_TIMEOUT_MS=7000
-CLAUDE_API_KEY=your_claude_api_key_here
-CLAUDE_MODEL=claude-3-5-haiku-latest
-PORT=3001
-FRONTEND_URL=http://localhost:5173
-```
+### Add a provider
 
-For a split frontend/API deployment, set `VITE_API_BASE_URL` in the Vercel project. The live project uses `/` so the frontend calls the same-origin container API:
+1. Put one key in the root `.env`, for example:
+   ```env
+   ANTHROPIC_API_KEY=sk-ant-...
+   ```
+2. Restart the backend.
+3. Open **Settings → AI providers** to confirm the key is present.
+4. Open **Agents** and choose that provider for an agent.
 
-```env
-VITE_API_BASE_URL=https://your-api-host.example.com
-```
+Provider keys are never sent to the browser. The UI only reports whether a key exists.
 
-Without `CLAUDE_API_KEY`, classification falls back to the deterministic keyword engine. Without `VITE_API_BASE_URL`, the production build uses its in-browser sandbox.
+### Add a dispatch target
 
-### FastN workflow contract
+1. Open **Settings → Dispatch targets**.
+2. Choose `webhook` or `slack`.
+3. Enter an HTTPS URL.
+4. Save.
+5. Use **Send test** to verify the endpoint.
 
-FastN exposes no generic "run connector action" endpoint. The supported server-side surface is workflow execution:
-
-```
-POST https://api.fastn.dev/api/v1/workflows/{workflowId}/execute
-Authorization: Bearer $FASTN_API_KEY
-Content-Type: application/json
-
-{ "input": { ... } }
-```
-
-`FASTN_API_KEY` is read only on the server; it is never bundled into the frontend. The workspace id is **not** part of the execute URL — each connector needs its own published workflow id from the workflow's **API** tab.
-
-| Variable | Purpose |
-|---|---|
-| `FASTN_WORKFLOW_HUBSPOT` | Workflow that creates a HubSpot ticket |
-| `FASTN_WORKFLOW_SLACK` | Workflow that posts the channel alert |
-| `FASTN_WORKFLOW_GMAIL` | Workflow that sends the follow-up email |
-| `FASTN_WORKFLOW_SHEETS` | Workflow that appends the audit row |
-| `FASTN_WORKFLOW_TWILIO` | Optional inbound-call workflow (not used for outbound dispatch) |
-| `FASTN_MODE` | `auto` (default), `live` or `simulated` |
-| `FASTN_TIMEOUT_MS` | Per-workflow timeout, 1000–25000 ms (default 7000) |
-| `FASTN_ENV` | Optional `x-fastn-env` header value |
-
-**Dispatch input** sent to every workflow:
-
-```json
-{
-  "input": {
-    "tenantId": "tenant-a",
-    "tenantName": "Tenant A (Acme Corp)",
-    "connector": "hubspot",
-    "callerName": "Alex Rivers",
-    "callerContact": "+1 (555) 321-9876",
-    "rawQuery": "…",
-    "classification": { "category": "Emergency", "priority": "urgent", "summary": "…" },
-    "dispatch": { "id": "disp_…", "timestamp": "2026-…" }
-  }
-}
-```
-
-Each request also carries `x-end-org-ref: <tenantId>` so workflows can scope to the right customer. Test keys (`fsk_test_…`) automatically send `X-fastn-Test-Mode: true`.
-
-**Expected workflow output** (the dispatcher automatically unwraps FastN's `{ data: ... }` response envelope and refuses to claim success without confirmation):
-
-| Connector | Confirmed by |
-|---|---|
-| HubSpot | `ticketId`, `ticket_id`, `id`, or derived reference when `{ "success": true }` / `{ "ok": true }` |
-| Slack | `channel`, `channelId`, `reference`, `id`, or tenant channel when `{ "success": true }` / `{ "ok": true }` |
-| Gmail | `messageId` / `message_id` / `id`, or `{ "success": true }` / `{ "ok": true }` |
-| Sheets | `rowId` / `row_id` / `id`, or `{ "success": true }` / `{ "ok": true }` |
-
-**Modes and outcomes**
-
-- `auto` — live when at least one `FASTN_WORKFLOW_*` id is configured, otherwise simulated.
-- `live` — every enabled connector must have a workflow id; a missing id is a per-connector failure, never a fake success.
-- `simulated` — no FastN call is made; every result is labelled `mode: "simulated"` and the UI shows a **Sandbox** badge.
-- HTTP `202` means FastN queued the run; the connector is recorded as `pending` because FastN documents no polling endpoint for queued executions.
-- The log status becomes `dispatched` only when every target succeeded, `partial` when some failed or are pending, and `failed` when nothing completed. The API returns `201` with `success: false` for a failed dispatch.
-
-**Required FastN key scope:** the API key must include workflow execution (`workflows.execute`). A key without it returns `403 Permission denied by API key`; the backend surfaces that as a connector failure with the required permission in the detail. Workflows must also be **published**, otherwise FastN returns `WORKFLOW_NOT_PUBLISHED`.
+A target can be paused without deleting it. Agents can reference targets as defaults, but execution always requires an explicit selection in the dispatch workbench.
 
 ---
 
+## Environment variables
 
-## Deploy to Vercel
+Copy `.env.example` to `.env` at the repository root. The backend loads it from `../.env`.
 
-The repository ships with a root [`vercel.json`](./vercel.json) that declares two services:
+### Core
 
-- **`frontend`** — Vite build published from `frontend/dist`
-- **`backend`** — Express API built from `backend/Dockerfile` (container runtime)
+| Variable | Default | Purpose |
+|---|---|---|
+| `PORT` | `3001` | API port |
+| `FRONTEND_URL` | `http://localhost:5173` | Comma-separated CORS origins |
+| `VITE_API_BASE_URL` | dev: `http://localhost:3001` | Frontend API base. Use `/` when same-origin |
+| `AI_DEFAULT_PROVIDER` | first configured | Preferred provider id |
+| `AI_DEFAULT_MODEL` | provider default | Preferred model id |
+| `AI_TIMEOUT_MS` | `45000` | Provider request timeout (1–60 s) |
+| `DISPATCH_TIMEOUT_MS` | `8000` | Per-target timeout (1–60 s) |
+| `DISPATCH_ALLOW_INSECURE` | `false` | Allow HTTP targets for local testing only |
 
-`/api/*` routes to the backend container; every other request goes to the frontend. The container image installs its own dependencies, so the API does not depend on Vercel's dependency tracing.
+### Providers
 
-### Option A — CLI (fastest)
+| Variable | Purpose |
+|---|---|
+| `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`, `ANTHROPIC_MODELS`, `ANTHROPIC_BASE_URL` | Anthropic adapter |
+| `OPENAI_API_KEY`, `OPENAI_MODEL`, `OPENAI_MODELS`, `OPENAI_BASE_URL` | OpenAI adapter |
+| `GOOGLE_API_KEY` (or `GEMINI_API_KEY`), `GOOGLE_MODEL`, `GOOGLE_MODELS`, `GOOGLE_BASE_URL` | Gemini adapter |
+| `OPENROUTER_API_KEY`, `OPENROUTER_MODEL`, `OPENROUTER_MODELS`, `OPENROUTER_BASE_URL` | OpenRouter adapter |
+| `GROQ_API_KEY`, `GROQ_MODEL`, `GROQ_MODELS`, `GROQ_BASE_URL` | Groq adapter |
+| `AI_COMPATIBLE_NAME`, `AI_COMPATIBLE_BASE_URL`, `AI_COMPATIBLE_API_KEY`, `AI_COMPATIBLE_MODEL`, `AI_COMPATIBLE_MODELS` | Any OpenAI-compatible endpoint. HTTPS required; HTTP only for localhost |
+
+`*_MODELS` accepts a comma-separated list. The provider default is always included.
+
+### Storage
+
+| Variable | Purpose |
+|---|---|
+| `BLOB_READ_WRITE_TOKEN` | Enables Vercel Blob persistence |
+| `AEGIS_STATE_ID` | Workspace snapshot name, default `default` |
+
+---
+
+## API
+
+All endpoints return JSON. Errors use `{ "error": "..." }` and may include a safe `code`.
+
+| Method | Path | Purpose |
+|---|---|---|
+| `GET` | `/api/health` | Service, storage, provider presence, target count |
+| `GET` | `/api/workspace` | Full bootstrap: config, agents, conversations, targets, logs |
+| `GET` | `/api/providers` | Public provider configuration |
+| `GET` | `/api/agents` | List agents |
+| `POST` | `/api/agents` | Create an agent |
+| `PUT` | `/api/agents/:id` | Update an agent |
+| `DELETE` | `/api/agents/:id` | Delete an agent (last agent is protected) |
+| `GET` | `/api/conversations` | Conversation summaries |
+| `POST` | `/api/conversations` | Create an empty conversation |
+| `GET` | `/api/conversations/:id` | Full conversation |
+| `DELETE` | `/api/conversations/:id` | Delete a conversation |
+| `POST` | `/api/chat` | Send a message and receive an assistant reply |
+| `POST` | `/api/dispatch/plan` | Build a plan from an instruction |
+| `POST` | `/api/dispatch/execute` | Execute an approved plan |
+| `GET` | `/api/dispatch/logs` | Dispatch history |
+| `GET` | `/api/targets` | List targets (host only) |
+| `POST` | `/api/targets` | Create a target |
+| `PUT` | `/api/targets/:id` | Update a target |
+| `DELETE` | `/api/targets/:id` | Delete a target |
+| `POST` | `/api/targets/:id/test` | Send a test event |
+
+### Dispatch payload
+
+Execution sends this shape to webhook targets:
+
+```json
+{
+  "event": "aegis.dispatch",
+  "planId": "plan_...",
+  "title": "Escalate eu-west outage",
+  "summary": "Route the database outage to on-call.",
+  "priority": "urgent",
+  "instruction": "Original instruction",
+  "source": "ai",
+  "providerId": "anthropic",
+  "modelId": "claude-sonnet-4-5",
+  "createdAt": "2026-01-01T00:00:00.000Z"
+}
+```
+
+`source` is `"ai"` or `"rules"`, and `providerId`/`modelId` are only present when a model produced the plan. Requests also carry `x-aegis-event: aegis.dispatch` and `x-aegis-dispatch-id: <planId>` headers.
+
+Slack targets receive the same plan as a plain `{ "text": "..." }` incoming-webhook message: bold title, summary, priority, and instruction.
+
+---
+
+## Testing
 
 ```bash
-vercel login
-vercel link --project aivoicedispatcher   # one-time
+cd backend
+npm test          # config, provider client, dispatch safety, chat, API routes
+npm run build
+
+cd ../frontend
+npm test          # speech engine pure logic
+npm run lint      # oxlint
+npm run build     # type-check + Vite build + /app static fallback
+```
+
+Backend tests use Node's test runner through `tsx` and run without real network calls. The frontend speech tests run on Node's native TypeScript stripping, so `utils/tts.ts` must stay free of DOM-only top-level side effects.
+
+---
+
+## Deployment
+
+The repository includes a root `vercel.json` with two services:
+
+- `frontend` — Vite static build from `frontend/dist`.
+- `backend` — Express container from `backend/Dockerfile`.
+
+`/api/*` routes to the backend; all other paths route to the frontend. The build emits `dist/app/index.html` and `dist/404.html` so deep links such as `/app/settings` can boot the SPA on static hosts.
+
+### Vercel
+
+```bash
+vercel link
 vercel --prod
 ```
 
-The project is already deployed at **https://aivoicedispatcher.vercel.app** (Vercel account `chendline`, project `aivoicedispatcher`). The GitHub repository is connected, so pushes to `main` deploy to production automatically and other branches produce Preview deployments. `vercel --prod` remains available for manual deploys.
+Set these for the production environment:
 
-### Option B — Dashboard
+- `VITE_API_BASE_URL=/`
+- `FRONTEND_URL=https://your-domain`
+- At least one provider key
+- Optionally `BLOB_READ_WRITE_TOKEN`
 
-1. **Add New → Project** and import `Chendline/ai-voice-dispatcher`.
-2. Keep the root directory as `./` — `vercel.json` defines both services.
-3. Add `VITE_API_BASE_URL=/` for **Production** and **Preview** so the frontend calls the same-origin API (already configured on the live project).
-4. Deploy.
-
-### Domain
-
-The live project uses Vercel's free default domain: **https://aivoicedispatcher.vercel.app**. No custom domain is configured or required. Vercel assigns the production alias automatically on deploy; `frontend/index.html` canonical/OG tags already point at it.
-
-If you later want a custom domain, register one and add it under **Project → Settings → Domains**; no code changes are needed because `VITE_API_BASE_URL=/` keeps API calls same-origin.
-
-### Deploying the API
-
-The API runs in the same Vercel project as a container service defined by [`backend/Dockerfile`](./backend/Dockerfile). The image builds TypeScript in a first stage and ships production dependencies in the runtime stage. `vercel.json` routes `/api/*` to it.
-
-Set `VITE_API_BASE_URL=/` for Production and Preview so the built frontend calls that same-origin API. Without it, the frontend stays in sandbox mode.
-
-To host the API separately instead (Render, Railway, Fly.io, any Node 20 host):
+### Any Node host
 
 ```bash
 cd backend
@@ -262,66 +368,93 @@ npm run build
 npm start
 ```
 
-Then set `VITE_API_BASE_URL=https://your-api-host` in Vercel and redeploy. Keep `FRONTEND_URL` on the API set to your public domain so CORS stays scoped.
-
-> Dispatch logs and connector toggles are mirrored to a private Vercel Blob store (`tenants/<tenantId>.json`) whenever `BLOB_READ_WRITE_TOKEN` is present, so they survive container restarts and scale-out. Without that token the API degrades to memory-only state. The seeded tenants always remain available.
+Then build and serve `frontend/dist` with any static server, and set `VITE_API_BASE_URL` to the API origin before building.
 
 ---
 
-## Project Structure
+## Project structure
 
 ```
-ai-voice-dispatcher/
+aegis/
 ├── backend/
 │   ├── src/
-│   │   ├── main.ts               # Startup, config warnings, HTTP listen
-│   │   ├── app.ts                # Express app factory, routes, validation, limits
-│   │   ├── config.ts             # FastN env parsing, workflow ids, live/simulated mode
-│   │   ├── fastn.ts              # Workflow execute client, timeout, error taxonomy
-│   │   ├── connectors.ts         # Per-connector dispatch, result mapping, status
-│   │   ├── validation.ts         # Dispatch and integration payload validation
-│   │   ├── classifier.ts         # Claude classifier with heuristic fallback
-│   │   ├── persistence.ts        # Vercel Blob hydration & persistence
-│   │   └── tenantStore.ts        # Tenant store & isolation logic
-│   ├── test/                     # node:test suites (config, FastN, connectors, API)
-│   ├── Dockerfile                # Multi-stage container build for Vercel
-│   ├── package.json
-│   └── tsconfig.json
+│   │   ├── app.ts             # Express app factory, routes, middleware
+│   │   ├── chat.ts            # Conversation turn + provider call
+│   │   ├── config.ts          # Environment parsing and public config
+│   │   ├── dispatch.ts        # URL safety, planning, execution, results
+│   │   ├── main.ts            # Startup
+│   │   ├── persistence.ts     # Optional Vercel Blob snapshot
+│   │   ├── providers/
+│   │   │   ├── anthropic.ts
+│   │   │   ├── google.ts
+│   │   │   ├── openai.ts
+│   │   │   ├── registry.ts
+│   │   │   └── types.ts
+│   │   ├── store.ts           # Workspace state
+│   │   ├── types.ts
+│   │   └── validation.ts
+│   ├── test/
+│   ├── Dockerfile
+│   └── package.json
 ├── frontend/
-│   ├── public/favicon.svg        # Branded browser tab icon
+│   ├── scripts/postbuild.mjs  # /app and 404 SPA fallbacks
 │   ├── src/
-│   │   ├── lib/
-│   │   │   ├── api.ts            # Live API client with sandbox fallback
-│   │   │   └── demoStore.ts      # Session-scoped in-browser tenant vault
 │   │   ├── components/
-│   │   │   └── VoicePlayback.tsx # TTS controls, status, diagnostics panel
+│   │   │   ├── Icons.tsx
+│   │   │   ├── ui.tsx
+│   │   │   └── workspace/
+│   │   │       ├── AgentsPanel.tsx
+│   │   │       ├── ChatPanel.tsx
+│   │   │       ├── DispatchPanel.tsx
+│   │   │       ├── SettingsPanel.tsx
+│   │   │       ├── SpeechSettings.tsx
+│   │   │       └── VoicePanel.tsx
 │   │   ├── hooks/
-│   │   │   └── useSpeechPlayback.ts # TTS React state + persisted settings
+│   │   │   ├── useSpeechPlayback.ts
+│   │   │   ├── useSpeechRecognition.ts
+│   │   │   └── useWorkspaceData.ts
+│   │   ├── lib/
+│   │   │   ├── api.ts
+│   │   │   └── router.ts
+│   │   ├── pages/
+│   │   │   ├── LandingPage.tsx
+│   │   │   └── WorkspacePage.tsx
+│   │   ├── styles/
+│   │   │   ├── landing.css
+│   │   │   ├── tts.css
+│   │   │   └── workspace.css
 │   │   ├── utils/
-│   │   │   ├── soundEffects.ts   # Web Audio procedural synthesis
-│   │   │   └── tts.ts            # Speech engine, chunking, fallback, diagnostics
-│   │   ├── types.ts              # Shared frontend domain types
-│   │   ├── App.tsx               # Dashboard, tabs, simulator, stream
-│   │   ├── App.css               # Component styling & motion
-│   │   ├── index.css             # Organic tokens & Lenis styles
-│   │   └── main.tsx
-│   ├── test/tts.test.ts          # node:test coverage for TTS pure logic
-│   ├── index.html                # SEO, Open Graph, favicon, fonts
-│   ├── package.json
-│   └── vite.config.ts
-├── vercel.json                   # Vercel services config (frontend + container API)
+│   │   │   ├── soundEffects.ts
+│   │   │   └── tts.ts
+│   │   ├── App.tsx
+│   │   ├── index.css
+│   │   ├── main.tsx
+│   │   └── types.ts
+│   ├── test/tts.test.ts
+│   ├── index.html
+│   └── package.json
 ├── .env.example
-├── README.md
-├── AGENTS.md
-└── SPECSHEET.md
+├── AEGIS-Product-Plan.xlsx    # Roadmap, features, providers, testing, risks
+├── AGENTS.md                  # Engineering source of truth
+├── SPECSHEET.md               # Product and technical spec
+├── vercel.json
+└── README.md
 ```
 
 ---
 
-## Team
+## Current limitations
 
-- Muhammad Aqil
-- Rihix ([@rihix](https://github.com/rihix))
+- Single workspace, no authentication or per-user isolation.
+- Dispatch supports only generic HTTPS webhooks and Slack incoming webhooks.
+- No telephony ingestion, SMS, email, CRM, or spreadsheet connectors are implemented.
+- Speech recognition and synthesis depend on browser support. There is no cloud speech fallback.
+- Dispatch planning quality depends on the selected model. The local rules planner is intentionally simple and labeled as such.
+- Conversation and dispatch history are capped in memory.
+
+These are stated here because AEGIS does not label unbuilt integrations as available.
+
+---
 
 ## License
 

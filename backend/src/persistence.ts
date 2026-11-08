@@ -1,37 +1,36 @@
 import { get, put } from '@vercel/blob';
-import { tenantStore, type PersistedTenantState } from './tenantStore.js';
+import type { WorkspaceState } from './types.js';
+import type { WorkspaceStore } from './store.js';
 
 const token = process.env.BLOB_READ_WRITE_TOKEN;
 export const persistenceEnabled = Boolean(token);
 
-const pathnameFor = (tenantId: string) => `tenants/${tenantId}.json`;
+const stateId = (process.env.AEGIS_STATE_ID?.trim() || 'default').replace(/[^a-z0-9_-]/gi, '-');
+const pathname = `workspaces/${stateId}.json`;
 
-async function readState(tenantId: string): Promise<PersistedTenantState | null> {
+async function readState(): Promise<WorkspaceState | null> {
   if (!token) return null;
   try {
-    const result = await get(pathnameFor(tenantId), { access: 'private', useCache: false, token });
+    const result = await get(pathname, { access: 'private', useCache: false, token });
     if (!result || result.statusCode !== 200) return null;
     const text = await new Response(result.stream).text();
-    return JSON.parse(text) as PersistedTenantState;
+    return JSON.parse(text) as WorkspaceState;
   } catch (error) {
-    console.warn(`[persistence] read ${tenantId} failed:`, (error as Error).message);
+    console.warn('[persistence] workspace read failed:', (error as Error).message);
     return null;
   }
 }
 
-/** Merge durable state for a tenant into the in-memory store. */
-export async function hydrateTenant(tenantId: string): Promise<void> {
-  const state = await readState(tenantId);
-  if (state) tenantStore.mergePersisted(tenantId, state);
+export async function hydrateWorkspace(store: WorkspaceStore): Promise<void> {
+  const state = await readState();
+  if (state) store.mergePersisted(state);
 }
 
-/** Write the current in-memory snapshot for a tenant. Failures degrade to memory-only. */
-export async function persistTenant(tenantId: string): Promise<void> {
+/** Persist the whole workspace. Failures degrade to memory-only. */
+export async function persistWorkspace(store: WorkspaceStore): Promise<void> {
   if (!token) return;
-  const snapshot = tenantStore.snapshot(tenantId);
-  if (!snapshot) return;
   try {
-    await put(pathnameFor(tenantId), JSON.stringify(snapshot), {
+    await put(pathname, JSON.stringify(store.snapshot()), {
       access: 'private',
       token,
       addRandomSuffix: false,
@@ -40,6 +39,6 @@ export async function persistTenant(tenantId: string): Promise<void> {
       cacheControlMaxAge: 0,
     });
   } catch (error) {
-    console.warn(`[persistence] write ${tenantId} failed:`, (error as Error).message);
+    console.warn('[persistence] workspace write failed:', (error as Error).message);
   }
 }
