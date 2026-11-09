@@ -400,6 +400,7 @@ aegis/
 │   ├── scripts/postbuild.mjs  # /app and 404 SPA fallbacks
 │   ├── src/
 │   │   ├── components/
+│   │   │   ├── AegisFieldCanvas.tsx
 │   │   │   ├── Icons.tsx
 │   │   │   ├── ui.tsx
 │   │   │   └── workspace/
@@ -415,6 +416,8 @@ aegis/
 │   │   │   └── useWorkspaceData.ts
 │   │   ├── lib/
 │   │   │   ├── api.ts
+│   │   │   ├── gravityField.ts
+│   │   │   ├── gravityFieldMath.ts
 │   │   │   └── router.ts
 │   │   ├── pages/
 │   │   │   ├── LandingPage.tsx
@@ -430,7 +433,9 @@ aegis/
 │   │   ├── index.css
 │   │   ├── main.tsx
 │   │   └── types.ts
-│   ├── test/tts.test.ts
+│   ├── test/
+│   │   ├── gravityField.test.ts
+│   │   └── tts.test.ts
 │   ├── index.html
 │   └── package.json
 ├── .env.example

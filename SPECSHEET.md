@@ -463,8 +463,9 @@ No authentication exists. This is a documented limitation, not a hidden one.
 ### Frontend
 
 - `tts.ts`: chunking, voice pick, fallback pick, capability detection, error mapping, hints.
+- `gravityFieldMath.ts`: scroll stage weights, sphere budget, radius bands.
 - Router helpers.
-- Manual browser smoke test for voice, routing, and dispatch.
+- Manual browser smoke test for voice, routing, dispatch, the landing field, reduced motion, and the WebGL fallback.
 
 ### Required commands
 

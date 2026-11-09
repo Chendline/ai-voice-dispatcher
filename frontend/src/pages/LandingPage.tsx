@@ -88,7 +88,6 @@ export function LandingPage() {
   useEffect(() => {
     document.title = 'AEGIS — AI voice conversations and governed dispatch';
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
     const lenis = new Lenis({
       duration: 1.1,
       easing: (time: number) => Math.min(1, 1.001 - Math.pow(2, -10 * time)),
@@ -127,6 +126,19 @@ export function LandingPage() {
     };
   }, []);
 
+  // Deep links such as /#voice should land on the section even though React
+  // renders the landing page after the browser's initial anchor pass.
+  useEffect(() => {
+    const hash = window.location.hash.replace('#', '');
+    if (!hash) return;
+
+    const timer = window.setTimeout(() => {
+      document.getElementById(hash)?.scrollIntoView({ block: 'start', behavior: 'auto' });
+    }, 160);
+
+    return () => window.clearTimeout(timer);
+  }, []);
+
   const launch = () => {
     playTap();
     navigate('/app');
@@ -134,6 +146,9 @@ export function LandingPage() {
 
   return (
     <div className="landing" ref={containerRef}>
+      {/* PERSISTENT FULL-PAGE GRAVITY FIELD (BEHIND CONTENT) */}
+      <AegisFieldCanvas />
+
       {/* BACKGROUND AMBIENT GLOW BLOOMS */}
       <div className="landing-ambient-bloom-top" aria-hidden="true" />
       <div className="landing-ambient-bloom-mid" aria-hidden="true" />
@@ -179,11 +194,8 @@ export function LandingPage() {
       </header>
 
       <main>
-        {/* HERO SECTION WITH INTERACTIVE NODE FIELD */}
+        {/* HERO SECTION */}
         <section className="hero">
-          {/* Reactive Node Physics Field Canvas */}
-          <AegisFieldCanvas />
-
           <div className="hero-inner">
             <div className="hero-copy">
               <div className="eyebrow">
@@ -628,7 +640,7 @@ export function LandingPage() {
           </div>
         </section>
 
-        {/* MARQUEE TICKER (GRAVITY-INSPIRED) */}
+        {/* MARQUEE TICKER */}
         <div className="landing-marquee-wrapper" aria-hidden="true">
           <div className="landing-marquee-track">
             {TICKER_ITEMS.concat(TICKER_ITEMS).map((item, index) => (

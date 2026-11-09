@@ -89,6 +89,7 @@ frontend/
     components/
       Icons.tsx
       ui.tsx
+      AegisFieldCanvas.tsx
       workspace/
         AgentsPanel.tsx
         ChatPanel.tsx
@@ -102,6 +103,8 @@ frontend/
       useWorkspaceData.ts
     lib/
       api.ts
+      gravityField.ts
+      gravityFieldMath.ts
       router.ts
     pages/
       LandingPage.tsx
@@ -113,6 +116,7 @@ frontend/
     utils/
       soundEffects.ts
       tts.ts
+  test/gravityField.test.ts
   test/tts.test.ts
 ```
 
@@ -133,7 +137,7 @@ npm start         # node dist/main.js
 cd frontend
 npm install
 npm run dev       # Vite on :5173
-npm test          # node --test test/tts.test.ts
+npm test          # node --test test/tts.test.ts test/gravityField.test.ts
 npm run lint      # oxlint
 npm run build     # tsc -b && vite build && node scripts/postbuild.mjs
 ```
@@ -294,6 +298,14 @@ Targets support exactly two types today: `webhook` and `slack`. Do not add a con
 - Keep sounds quiet and optional. No sound on page load.
 - Do not add audio that implies success before a real result exists.
 
+### Landing field
+
+- `pages/LandingPage.tsx` mounts one persistent `<AegisFieldCanvas />`. It is a fixed, full-viewport WebGL layer behind the content; do not add a second per-section canvas or move it inside `.hero`.
+- `lib/gravityField.ts` owns the Three.js scene, materials, physics, scroll staging, pointer interaction, resize, and teardown. `lib/gravityFieldMath.ts` holds the DOM-free stage/radius helpers; keep those pure so `node --test test/gravityField.test.ts` works.
+- Three.js is loaded with a dynamic `import()` so the workspace bundle stays lean. Do not import `three` at module top level from any page entry.
+- The field must always be `pointer-events: none`, `aria-hidden="true"`, and behind text, buttons, and navigation. Content sections need a scrim or frosted surface where the field would reduce readability.
+- Handle WebGL-unavailable (`data-engine="css"` fallback orbs), `prefers-reduced-motion` (single settled frame, no animation loop), page visibility (pause the RAF), resize, and full unmount cleanup. Unsupported is a valid state.
+
 ### Styling and UX
 
 - Design tokens live in `index.css`; page styles live in `styles/landing.css`, `styles/workspace.css`, `styles/tts.css`.
@@ -391,6 +403,7 @@ Manual smoke test:
 - Prefer platform APIs and existing dependencies.
 - No router, state manager, form library, or UI kit for this scope.
 - Before adding a package: check React 19 compatibility, bundle impact, maintenance, and license.
+- `three` is the only graphics dependency, and only the landing page may load it, via dynamic `import()`. Keep it out of the workspace bundle path.
 - Do not add a cloud TTS, telephony, CRM, or email SDK unless that feature is being fully implemented and tested.
 
 ---
