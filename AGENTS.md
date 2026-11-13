@@ -47,6 +47,7 @@ backend (Express + TypeScript)
   ├── validation.ts        request contracts
   ├── config.ts            env parsing, provider metadata
   ├── db.ts                on-server relational SQLite database (node:sqlite)
+  ├── auth.ts              on-server scrypt password auth & sessions (node:crypto)
   ├── providers/           adapter contract + registry
   ├── chat.ts              conversation turn orchestration
   ├── dispatch.ts          URL safety, plan, execute, log
@@ -61,6 +62,7 @@ backend (Express + TypeScript)
 backend/
   src/
     app.ts
+    auth.ts
     chat.ts
     config.ts
     db.ts
@@ -95,6 +97,7 @@ frontend/
       AegisFieldCanvas.tsx
       workspace/
         AgentsPanel.tsx
+        AuthCard.tsx
         ChatPanel.tsx
         DispatchPanel.tsx
         SettingsPanel.tsx
@@ -355,13 +358,13 @@ When in doubt, show the failure.
 ## 7. Security
 
 - Keys and raw target URLs stay server-side.
+- Authentication: on-server user accounts with `scrypt` password hashing (random salt, constant-time verification) and HttpOnly session cookies.
 - CORS is restricted to `FRONTEND_URL` origins. Do not use `*` with credentials.
 - Helmet is enabled (CSP is disabled only because the app has no server-rendered inline policy needs; revisit before production hardening).
 - Rate limits: 120 req/min/IP for `/api`, 40 req/min/IP for AI and dispatch.
 - JSON bodies are capped at 128 kb.
 - Dispatch is SSRF-guarded: HTTPS, no credentials, DNS resolution, private-range rejection, redirects disabled, timeout.
 - Do not log secrets, full URLs with paths, prompts, or message content.
-- Authentication, per-user ownership, and audit export are not implemented. Do not deploy this publicly with real credentials without addressing that.
 
 ---
 
@@ -376,6 +379,7 @@ cd ../frontend && npm test && npm run lint && npm run build
 
 Backend coverage expectations:
 
+- On-server authentication, password hashing, session lifecycle, and RBAC.
 - Config parsing and warnings.
 - Provider request/response mapping and error taxonomy.
 - Dispatch URL rejection (HTTP, credentials, private ranges).

@@ -2,6 +2,22 @@ export type Priority = 'low' | 'medium' | 'high' | 'urgent';
 export type TargetType = 'webhook' | 'slack';
 export type DispatchStatus = 'dispatched' | 'partial' | 'failed' | 'skipped';
 
+export type UserRole = 'admin' | 'operator' | 'auditor';
+
+export interface PublicUser {
+  id: string;
+  email: string;
+  name: string;
+  role: UserRole;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AuthStatus {
+  initialized: boolean;
+  user: PublicUser | null;
+}
+
 export interface ProviderInfo {
   id: string;
   label: string;

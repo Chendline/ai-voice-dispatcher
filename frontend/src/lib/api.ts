@@ -1,6 +1,7 @@
 import type {
   Agent,
   AgentInput,
+  AuthStatus,
   Conversation,
   ConversationSummary,
   DispatchLog,
@@ -8,6 +9,7 @@ import type {
   HealthResponse,
   ProviderConfigResponse,
   PublicDispatchTarget,
+  PublicUser,
   TargetInput,
   WorkspaceBootstrap,
 } from '../types';
@@ -39,6 +41,7 @@ async function request<T>(path: string, init?: RequestInit, timeout = DEFAULT_TI
   try {
     const response = await fetch(`${API_BASE}${path}`, {
       ...init,
+      credentials: 'include',
       signal: controller.signal,
       headers: {
         'Content-Type': 'application/json',
@@ -161,4 +164,19 @@ export const api = {
       { method: 'POST' },
       30_000,
     ),
+
+  // Auth & User Management (On-Server SQLite)
+  getAuthStatus: () => request<AuthStatus>('/api/auth/status'),
+
+  setupAuth: (input: { email: string; password: string; name: string }) =>
+    request<{ user: PublicUser; token: string }>('/api/auth/setup', jsonBody(input)),
+
+  login: (input: { email: string; password: string }) =>
+    request<{ user: PublicUser; token: string }>('/api/auth/login', jsonBody(input)),
+
+  logout: () => request<{ ok: boolean }>('/api/auth/logout', { method: 'POST' }),
+
+  getMe: () => request<{ user: PublicUser }>('/api/auth/me'),
+
+  listUsers: () => request<{ users: PublicUser[] }>('/api/auth/users'),
 };

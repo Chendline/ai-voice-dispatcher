@@ -11,6 +11,15 @@ import { hydrateWorkspace as defaultHydrate, persistWorkspace as defaultPersist,
 import { WorkspaceStore, publicTarget } from './store.js';
 import type { DispatchPlan, DispatchTarget } from './types.js';
 import {
+  createAuthMiddleware,
+  formatClearCookie,
+  formatSessionCookie,
+  hashPassword,
+  requireRole,
+  toPublicUser,
+  verifyPassword,
+} from './auth.js';
+import {
   parseAgentRequest,
   parseChatRequest,
   parseConversationRequest,
@@ -111,6 +120,8 @@ export function createApp(deps: AppDeps = {}) {
     }));
   }
 
+  app.use(createAuthMiddleware(store));
+
   // Health never exposes keys, webhook URLs, prompts or conversation data.
   app.get('/api/health', (_req: Request, res: Response) => {
     res.json({
@@ -118,6 +129,9 @@ export function createApp(deps: AppDeps = {}) {
       service: 'aegis',
       version: '2.0.0',
       storage: persistenceEnabled ? 'blob' : 'memory',
+      auth: {
+        initialized: store.countUsers() > 0,
+      },
       ai: {
         defaultProvider: config.defaultProvider,
         defaultModel: config.defaultModel,
@@ -132,6 +146,117 @@ export function createApp(deps: AppDeps = {}) {
         insecureWebhooks: config.allowInsecureWebhooks,
       },
     });
+  });
+
+  // ---------------------------------------------------------------------
+  // Authentication & Users (Self-hosted on-server SQLite)
+  // ---------------------------------------------------------------------
+  app.get('/api/auth/status', (req, res) => {
+    res.json({
+      initialized: store.countUsers() > 0,
+      user: req.user || null,
+    });
+  });
+
+  app.post('/api/auth/setup', asyncHandler(async (req, res) => {
+    if (store.countUsers() > 0) {
+      return res.status(409).json({ error: 'System is already initialized with an admin account.' });
+    }
+    const { email, password, name } = req.body || {};
+    if (!email || typeof email !== 'string' || !email.includes('@')) {
+      return res.status(400).json({ error: 'Valid email address is required.' });
+    }
+    if (!password || typeof password !== 'string' || password.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters.' });
+    }
+    if (!name || typeof name !== 'string') {
+      return res.status(400).json({ error: 'Name is required.' });
+    }
+
+    const { hash, salt } = hashPassword(password);
+    const user = store.createUser({
+      email,
+      passwordHash: hash,
+      salt,
+      name,
+      role: 'admin',
+    });
+
+    const isSecure = req.secure || req.headers['x-forwarded-proto'] === 'https';
+    const { token } = store.createSession(user.id);
+    res.setHeader('Set-Cookie', formatSessionCookie(token, 7 * 24 * 60 * 60, isSecure));
+    res.status(201).json({ user: toPublicUser(user), token });
+  }));
+
+  app.post('/api/auth/login', asyncHandler(async (req, res) => {
+    const { email, password } = req.body || {};
+    if (!email || !password || typeof email !== 'string' || typeof password !== 'string') {
+      return res.status(400).json({ error: 'Email and password are required.' });
+    }
+
+    const user = store.getUserByEmail(email);
+    if (!user || !verifyPassword(password, user.passwordHash, user.salt)) {
+      return res.status(401).json({ error: 'Invalid email or password.' });
+    }
+
+    const isSecure = req.secure || req.headers['x-forwarded-proto'] === 'https';
+    const { token } = store.createSession(user.id);
+    res.setHeader('Set-Cookie', formatSessionCookie(token, 7 * 24 * 60 * 60, isSecure));
+    res.json({ user: toPublicUser(user), token });
+  }));
+
+  app.post('/api/auth/register', asyncHandler(async (req, res) => {
+    const hasUsers = store.countUsers() > 0;
+    if (hasUsers && (!req.user || req.user.role !== 'admin')) {
+      return res.status(403).json({ error: 'Only admins can register new users.' });
+    }
+
+    const { email, password, name, role } = req.body || {};
+    if (!email || typeof email !== 'string' || !email.includes('@')) {
+      return res.status(400).json({ error: 'Valid email is required.' });
+    }
+    if (!password || typeof password !== 'string' || password.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters.' });
+    }
+    if (!name || typeof name !== 'string') {
+      return res.status(400).json({ error: 'Name is required.' });
+    }
+
+    const existing = store.getUserByEmail(email);
+    if (existing) {
+      return res.status(409).json({ error: 'A user with this email already exists.' });
+    }
+
+    const userRole = hasUsers ? (role === 'admin' || role === 'auditor' ? role : 'operator') : 'admin';
+    const { hash, salt } = hashPassword(password);
+    const user = store.createUser({
+      email,
+      passwordHash: hash,
+      salt,
+      name,
+      role: userRole,
+    });
+
+    res.status(201).json({ user: toPublicUser(user) });
+  }));
+
+  app.post('/api/auth/logout', asyncHandler(async (req, res) => {
+    if (req.sessionToken) {
+      store.deleteSession(req.sessionToken);
+    }
+    res.setHeader('Set-Cookie', formatClearCookie());
+    res.json({ ok: true });
+  }));
+
+  app.get('/api/auth/me', (req, res) => {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Not authenticated.' });
+    }
+    res.json({ user: req.user });
+  });
+
+  app.get('/api/auth/users', requireRole('admin'), (_req, res) => {
+    res.json({ users: store.listUsers() });
   });
 
   app.get('/api/workspace', asyncHandler(async (_req, res) => {
