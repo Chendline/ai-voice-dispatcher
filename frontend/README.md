@@ -14,7 +14,7 @@ Routing uses the History API in `src/lib/router.ts`. There is no router dependen
 ```bash
 npm install
 npm run dev      # http://localhost:5173
-npm test         # speech-engine tests
+npm test         # speech-engine and landing field tests
 npm run lint     # oxlint
 npm run build    # type-check + Vite build + /app fallback
 ```
@@ -24,8 +24,11 @@ The workspace expects the API on `http://localhost:3001` during development. Set
 ## Structure
 
 ```
+scripts/
+  postbuild.mjs
 src/
   components/
+    AegisFieldCanvas.tsx
     Icons.tsx
     ui.tsx
     workspace/
@@ -41,6 +44,8 @@ src/
     useWorkspaceData.ts
   lib/
     api.ts
+    gravityField.ts
+    gravityFieldMath.ts
     router.ts
   pages/
     LandingPage.tsx
@@ -56,6 +61,9 @@ src/
   index.css
   main.tsx
   types.ts
+test/
+  gravityField.test.ts
+  tts.test.ts
 ```
 
 ## Behavior notes
@@ -63,4 +71,4 @@ src/
 - No demo or sandbox fallback. If the API is offline, the workspace shows a connection gate.
 - Provider keys and raw dispatch URLs never reach the browser.
 - Speech recognition and synthesis are browser-native. No cloud TTS is configured.
-- `utils/tts.ts` must stay free of DOM-only top-level side effects so Node can run its tests.
+- `utils/tts.ts` and `lib/gravityFieldMath.ts` must stay free of DOM-only top-level side effects so Node can run their tests directly.

@@ -327,12 +327,12 @@ npm test          # config, provider client, dispatch safety, chat, API routes
 npm run build
 
 cd ../frontend
-npm test          # speech engine pure logic
+npm test          # speech engine and landing field tests
 npm run lint      # oxlint
 npm run build     # type-check + Vite build + /app static fallback
 ```
 
-Backend tests use Node's test runner through `tsx` and run without real network calls. The frontend speech tests run on Node's native TypeScript stripping, so `utils/tts.ts` must stay free of DOM-only top-level side effects.
+Backend tests use Node's test runner through `tsx` and run without real network calls. The frontend tests run on Node's native TypeScript stripping, so `utils/tts.ts` and `lib/gravityFieldMath.ts` stay free of DOM-only top-level side effects.
 
 ---
 
@@ -442,6 +442,7 @@ aegis/
 ├── AEGIS-Product-Plan.xlsx    # Roadmap, features, providers, testing, risks
 ├── AGENTS.md                  # Engineering source of truth
 ├── SPECSHEET.md               # Product and technical spec
+├── VIDEO.md                   # Demo walkthrough video script
 ├── vercel.json
 └── README.md
 ```
