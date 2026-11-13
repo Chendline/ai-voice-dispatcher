@@ -114,9 +114,12 @@ Aggregate statuses are literal:
 - Provider and dispatch errors are sanitized; stack traces and secrets are never returned.
 - Rate limits apply to all API routes and, more tightly, to AI and dispatch routes.
 
-### Durable state (optional)
+### Relational on-server database (SQLite)
 
-Without storage configuration, agents, conversations, targets, and logs live in memory and reset on restart. Set `BLOB_READ_WRITE_TOKEN` to persist a workspace snapshot to Vercel Blob. `AEGIS_STATE_ID` names the stored workspace.
+Agents, conversations, messages, dispatch targets, and execution logs persist in an on-server SQLite database via Node's native `node:sqlite` engine.
+- Configurable via `AEGIS_DB_PATH` or `SQLITE_PATH` (defaults to `data/aegis.sqlite`, `:memory:` for automated tests).
+- High-concurrency WAL mode (`PRAGMA journal_mode = WAL;`) and cascading foreign key constraints are enabled.
+- Fully free, self-hosted, with zero external database subscriptions. Optional Vercel Blob synchronization is still supported for ephemeral serverless deployments via `BLOB_READ_WRITE_TOKEN`.
 
 **AEGIS is currently a single-workspace application.** There is no authentication yet, so it is not a multi-user SaaS. Do not expose it publicly with real credentials until authentication is added.
 
@@ -382,6 +385,7 @@ aegis/
 │   │   ├── app.ts             # Express app factory, routes, middleware
 │   │   ├── chat.ts            # Conversation turn + provider call
 │   │   ├── config.ts          # Environment parsing and public config
+│   │   ├── db.ts              # On-server SQLite database (node:sqlite)
 │   │   ├── dispatch.ts        # URL safety, planning, execution, results
 │   │   ├── main.ts            # Startup
 │   │   ├── persistence.ts     # Optional Vercel Blob snapshot
