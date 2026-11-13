@@ -46,10 +46,11 @@ frontend (React 19 + Vite + TypeScript)
 backend (Express + TypeScript)
   ├── validation.ts        request contracts
   ├── config.ts            env parsing, provider metadata
+  ├── db.ts                on-server relational SQLite database (node:sqlite)
   ├── providers/           adapter contract + registry
   ├── chat.ts              conversation turn orchestration
   ├── dispatch.ts          URL safety, plan, execute, log
-  ├── store.ts             in-memory workspace state
+  ├── store.ts             workspace store interface
   ├── persistence.ts       optional Vercel Blob snapshot
   └── app.ts               routes, CORS, Helmet, rate limits
 ```
@@ -62,6 +63,7 @@ backend/
     app.ts
     chat.ts
     config.ts
+    db.ts
     dispatch.ts
     main.ts
     persistence.ts
@@ -242,10 +244,11 @@ Targets support exactly two types today: `webhook` and `slack`. Do not add a con
 
 ### Store and persistence
 
-- `WorkspaceStore` is indexed by id only because the product is single-workspace. Do not add tenant parameters unless real authentication and isolation are implemented end to end.
-- Hard caps: 24 agents, 50 conversations, 200 messages per conversation, 100 logs, 24 targets.
+- `WorkspaceStore` / `SqliteWorkspaceStore` runs a free, local on-server SQLite database via `node:sqlite`.
+- Stores relational records for `agents`, `conversations`, `messages`, `dispatch_targets`, and `dispatch_logs`.
+- Database file path defaults to `data/aegis.sqlite`, configurable via `AEGIS_DB_PATH` or `SQLITE_PATH` (`:memory:` for automated tests).
+- WAL mode (`PRAGMA journal_mode = WAL;`) and cascading foreign keys (`PRAGMA foreign_keys = ON;`) are enabled.
 - `publicTarget()` strips the URL and adds `host`.
-- Persistence is best-effort. Blob failures must not crash a request; log a sanitized warning.
 - Never persist environment secrets.
 
 ### API responses

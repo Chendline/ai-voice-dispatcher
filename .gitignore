@@ -48,6 +48,13 @@ coverage/
 .cache/
 .temp/
 tmp/
+
+# SQLite Database
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+data/
+backend/data/
 .eslintcache
 .oxlintcache
 

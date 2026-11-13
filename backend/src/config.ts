@@ -26,6 +26,7 @@ export interface AppConfig {
   dispatchTimeoutMs: number;
   allowInsecureWebhooks: boolean;
   stateId: string;
+  dbPath: string;
   warnings: string[];
 }
 
@@ -198,6 +199,7 @@ export function readConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     dispatchTimeoutMs: readTimeout(env.DISPATCH_TIMEOUT_MS, 8000, 'DISPATCH_TIMEOUT_MS', warnings),
     allowInsecureWebhooks: /^(1|true|yes)$/i.test(env.DISPATCH_ALLOW_INSECURE ?? ''),
     stateId: env.AEGIS_STATE_ID?.trim() || 'default',
+    dbPath: env.AEGIS_DB_PATH?.trim() || env.SQLITE_PATH?.trim() || (process.env.NODE_ENV === 'test' ? ':memory:' : 'data/aegis.sqlite'),
     warnings,
   };
 }
