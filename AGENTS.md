@@ -380,6 +380,7 @@ Backend coverage expectations:
 Frontend coverage expectations:
 
 - Speech chunking, voice selection, fallback, capability detection, error mapping.
+- Gravity field stage helpers and radius distribution pure math.
 - Router path helpers if routing logic changes.
 - Keep tests dependent only on pure logic where possible.
 
