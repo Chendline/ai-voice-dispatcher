@@ -35,6 +35,7 @@ src/
     ui.tsx
     workspace/
       AgentsPanel.tsx
+      AuthCard.tsx
       ChatPanel.tsx
       DispatchPanel.tsx
       SettingsPanel.tsx

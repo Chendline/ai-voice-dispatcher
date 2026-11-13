@@ -9,6 +9,9 @@ import type {
   DispatchLog,
   DispatchTarget,
   PublicDispatchTarget,
+  PublicUser,
+  User,
+  UserRole,
   WorkspaceState,
 } from './types.js';
 import type { AppConfig } from './config.js';
@@ -135,6 +138,30 @@ export class SqliteWorkspaceStore {
       );
 
       CREATE INDEX IF NOT EXISTS idx_logs_timestamp ON dispatch_logs(timestamp DESC);
+
+      CREATE TABLE IF NOT EXISTS users (
+        id TEXT PRIMARY KEY,
+        email TEXT UNIQUE NOT NULL,
+        password_hash TEXT NOT NULL,
+        salt TEXT NOT NULL,
+        name TEXT NOT NULL,
+        role TEXT NOT NULL DEFAULT 'operator',
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+
+      CREATE TABLE IF NOT EXISTS sessions (
+        token TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        expires_at TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
+      CREATE INDEX IF NOT EXISTS idx_sessions_expires ON sessions(expires_at);
     `);
   }
 
@@ -546,6 +573,100 @@ export class SqliteWorkspaceStore {
       status: row.status as DispatchLog['status'],
       message: String(row.message),
     }));
+  }
+
+  /* ------------------- USERS & SESSIONS ------------------- */
+
+  countUsers(): number {
+    const row = this.db.prepare('SELECT COUNT(*) as count FROM users').get() as { count: number | bigint };
+    return Number(row.count);
+  }
+
+  listUsers(): PublicUser[] {
+    const rows = this.db.prepare('SELECT id, email, name, role, created_at, updated_at FROM users ORDER BY created_at ASC').all() as Record<string, unknown>[];
+    return rows.map(row => ({
+      id: String(row.id),
+      email: String(row.email),
+      name: String(row.name),
+      role: row.role as UserRole,
+      createdAt: String(row.created_at),
+      updatedAt: String(row.updated_at),
+    }));
+  }
+
+  getUserById(id: string): User | undefined {
+    const row = this.db.prepare('SELECT * FROM users WHERE id = ?').get(id) as Record<string, unknown> | undefined;
+    return row ? this.mapUser(row) : undefined;
+  }
+
+  getUserByEmail(email: string): User | undefined {
+    const row = this.db.prepare('SELECT * FROM users WHERE LOWER(email) = LOWER(?)').get(email) as Record<string, unknown> | undefined;
+    return row ? this.mapUser(row) : undefined;
+  }
+
+  createUser(input: { email: string; passwordHash: string; salt: string; name: string; role?: UserRole }): User {
+    const timestamp = now();
+    const newId = id('usr');
+    const role = input.role || 'operator';
+    this.db.prepare(`
+      INSERT INTO users (id, email, password_hash, salt, name, role, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      newId,
+      input.email.trim().toLowerCase(),
+      input.passwordHash,
+      input.salt,
+      input.name.trim(),
+      role,
+      timestamp,
+      timestamp,
+    );
+    return this.getUserById(newId)!;
+  }
+
+  createSession(userId: string, durationSeconds: number = 7 * 24 * 60 * 60): { token: string; expiresAt: string } {
+    const token = id('sess') + '_' + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+    const expiresAt = new Date(Date.now() + durationSeconds * 1000).toISOString();
+    const timestamp = now();
+
+    this.db.prepare(`
+      INSERT INTO sessions (token, user_id, expires_at, created_at)
+      VALUES (?, ?, ?, ?)
+    `).run(token, userId, expiresAt, timestamp);
+
+    return { token, expiresAt };
+  }
+
+  getUserBySessionToken(token: string): User | undefined {
+    const row = this.db.prepare(`
+      SELECT u.* FROM users u
+      JOIN sessions s ON s.user_id = u.id
+      WHERE s.token = ? AND s.expires_at > ?
+    `).get(token, now()) as Record<string, unknown> | undefined;
+
+    return row ? this.mapUser(row) : undefined;
+  }
+
+  deleteSession(token: string): boolean {
+    const result = this.db.prepare('DELETE FROM sessions WHERE token = ?').run(token);
+    return Number(result.changes) > 0;
+  }
+
+  deleteUserSessions(userId: string): void {
+    this.db.prepare('DELETE FROM sessions WHERE user_id = ?').run(userId);
+  }
+
+  private mapUser(row: Record<string, unknown>): User {
+    return {
+      id: String(row.id),
+      email: String(row.email),
+      passwordHash: String(row.password_hash),
+      salt: String(row.salt),
+      name: String(row.name),
+      role: row.role as UserRole,
+      createdAt: String(row.created_at),
+      updatedAt: String(row.updated_at),
+    };
   }
 
   /* ------------------- SNAPSHOT & STATE ------------------- */

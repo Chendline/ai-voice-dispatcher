@@ -278,6 +278,13 @@ All endpoints return JSON. Errors use `{ "error": "..." }` and may include a saf
 | Method | Path | Purpose |
 |---|---|---|
 | `GET` | `/api/health` | Service, storage, provider presence, target count |
+| `GET` | `/api/auth/status` | Auth status & current operator profile |
+| `POST` | `/api/auth/setup` | Create initial administrator account |
+| `POST` | `/api/auth/login` | Sign in with email and password |
+| `POST` | `/api/auth/register` | Register an operator account (admin only) |
+| `POST` | `/api/auth/logout` | Sign out and invalidate session cookie |
+| `GET` | `/api/auth/me` | Current authenticated user |
+| `GET` | `/api/auth/users` | List operator accounts (admin only) |
 | `GET` | `/api/workspace` | Full bootstrap: config, agents, conversations, targets, logs |
 | `GET` | `/api/providers` | Public provider configuration |
 | `GET` | `/api/agents` | List agents |
@@ -383,6 +390,7 @@ aegis/
 ├── backend/
 │   ├── src/
 │   │   ├── app.ts             # Express app factory, routes, middleware
+│   │   ├── auth.ts            # On-server scrypt password auth & sessions
 │   │   ├── chat.ts            # Conversation turn + provider call
 │   │   ├── config.ts          # Environment parsing and public config
 │   │   ├── db.ts              # On-server SQLite database (node:sqlite)
@@ -410,6 +418,7 @@ aegis/
 │   │   │   ├── ui.tsx
 │   │   │   └── workspace/
 │   │   │       ├── AgentsPanel.tsx
+│   │   │       ├── AuthCard.tsx
 │   │   │       ├── ChatPanel.tsx
 │   │   │       ├── DispatchPanel.tsx
 │   │   │       ├── SettingsPanel.tsx

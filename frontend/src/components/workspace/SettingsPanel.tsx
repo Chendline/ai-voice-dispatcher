@@ -6,6 +6,7 @@ import { useSpeechPlayback } from '../../hooks/useSpeechPlayback';
 import { CheckIcon, PlusIcon, RefreshIcon, SlackIcon, TrashIcon, WebhookIcon } from '../Icons';
 import { EmptyState, Notice, Pill, Spinner, formatRelative } from '../ui';
 import { SpeechSettingsPanel } from './SpeechSettings';
+import { AuthCard } from './AuthCard';
 import { playTap } from '../../utils/soundEffects';
 
 const ENV_KEYS: Record<string, string> = {
@@ -348,6 +349,8 @@ export function SettingsPanel({
       </div>
 
       <aside className="settings-side">
+        <AuthCard />
+
         <section className="settings-card compact">
           <h3>Runtime</h3>
           <dl className="runtime-list">

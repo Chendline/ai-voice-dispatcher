@@ -4,6 +4,29 @@ export type Priority = (typeof PRIORITIES)[number];
 export const TARGET_TYPES = ['webhook', 'slack'] as const;
 export type TargetType = (typeof TARGET_TYPES)[number];
 
+export const USER_ROLES = ['admin', 'operator', 'auditor'] as const;
+export type UserRole = (typeof USER_ROLES)[number];
+
+export interface User {
+  id: string;
+  email: string;
+  passwordHash: string;
+  salt: string;
+  name: string;
+  role: UserRole;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type PublicUser = Omit<User, 'passwordHash' | 'salt'>;
+
+export interface Session {
+  token: string;
+  userId: string;
+  expiresAt: string;
+  createdAt: string;
+}
+
 export interface Agent {
   id: string;
   name: string;
