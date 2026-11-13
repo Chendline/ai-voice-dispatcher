@@ -19,7 +19,7 @@ configure provider → configure agent → chat or speak → plan → approve ta
 Two surfaces:
 
 - `/` — public landing page. Product narrative, capabilities, provider list, architecture, roadmap.
-- `/terms`, `/privacy` — legal and governance pages (Terms of Service, Privacy Policy).
+- `/terms`, `/privacy`, `/cookies` — legal and governance pages (Terms of Service, Privacy Policy, Cookie Policy).
 - `/app`, `/app/voice`, `/app/dispatch`, `/app/agents`, `/app/settings` — the workspace.
 
 ### Non-goals
@@ -113,6 +113,7 @@ frontend/
       gravityFieldMath.ts
       router.ts
     pages/
+      CookiesPage.tsx
       LandingPage.tsx
       PrivacyPage.tsx
       TermsPage.tsx
@@ -270,8 +271,8 @@ Targets support exactly two types today: `webhook` and `slack`. Do not add a con
 
 - No router dependency. `lib/router.ts` uses the History API and a custom `aegis:navigate` event.
 - `App.tsx` selects `LandingPage` or `WorkspacePage` from `usePathname()`.
-- Canonical paths: `/`, `/app`, `/app/voice`, `/app/dispatch`, `/app/agents`, `/app/settings`.
-- `postbuild.mjs` copies `index.html` to `dist/app/index.html` and `dist/404.html` for static hosting.
+- Canonical paths: `/`, `/app`, `/app/voice`, `/app/dispatch`, `/app/agents`, `/app/settings`, `/terms`, `/privacy`, `/cookies`.
+- `postbuild.mjs` copies `index.html` to `dist/app/index.html`, `dist/terms/index.html`, `dist/privacy/index.html`, `dist/cookies/index.html`, and `dist/404.html` for static hosting.
 - Keep back/forward navigation working. Use `navigate()` rather than setting `location.href` for internal links.
 
 ### Data layer

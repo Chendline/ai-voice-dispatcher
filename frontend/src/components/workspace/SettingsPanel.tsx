@@ -415,6 +415,17 @@ export function SettingsPanel({
             >
               Privacy Policy
             </a>
+            <span style={{ color: 'var(--text-dim)' }}>·</span>
+            <a
+              href="/cookies"
+              className="text-link"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate('/cookies');
+              }}
+            >
+              Cookie Policy
+            </a>
           </div>
         </section>
       </aside>

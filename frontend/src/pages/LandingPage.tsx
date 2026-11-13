@@ -703,6 +703,15 @@ export function LandingPage() {
             >
               Privacy
             </a>
+            <a
+              href="/cookies"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate('/cookies');
+              }}
+            >
+              Cookies
+            </a>
             <button type="button" onClick={launch}>
               Launch
             </button>

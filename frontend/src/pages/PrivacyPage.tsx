@@ -67,6 +67,16 @@ export function PrivacyPage() {
             >
               Privacy Policy
             </a>
+            <a
+              href="/cookies"
+              className="legal-nav-link"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate('/cookies');
+              }}
+            >
+              Cookie Policy
+            </a>
           </nav>
 
           <button type="button" className="legal-launch-btn" onClick={launch}>
@@ -265,6 +275,15 @@ export function PrivacyPage() {
               }}
             >
               Privacy Policy
+            </a>
+            <a
+              href="/cookies"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate('/cookies');
+              }}
+            >
+              Cookie Policy
             </a>
             <button type="button" onClick={launch}>
               Launch Workspace
