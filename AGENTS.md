@@ -95,6 +95,7 @@ frontend/
       Icons.tsx
       ui.tsx
       AegisFieldCanvas.tsx
+      CookieNotice.tsx
       workspace/
         AgentsPanel.tsx
         AuthCard.tsx
@@ -119,14 +120,18 @@ frontend/
       TermsPage.tsx
       WorkspacePage.tsx
     styles/
+      cookieNotice.css
       landing.css
       legal.css
       tts.css
       workspace.css
     utils/
+      cookieConsent.ts
       soundEffects.ts
       tts.ts
+  test/cookieConsent.test.ts
   test/gravityField.test.ts
+  test/router.test.ts
   test/tts.test.ts
 ```
 
@@ -147,7 +152,7 @@ npm start         # node dist/main.js
 cd frontend
 npm install
 npm run dev       # Vite on :5173
-npm test          # node --test test/tts.test.ts test/gravityField.test.ts
+npm test          # node --test test/tts.test.ts test/gravityField.test.ts test/router.test.ts test/cookieConsent.test.ts
 npm run lint      # oxlint
 npm run build     # tsc -b && vite build && node scripts/postbuild.mjs
 ```

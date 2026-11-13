@@ -1,0 +1,199 @@
+/* AEGIS — Cookie & Storage Notice (First-Launch Banner) */
+
+.cookie-notice-banner {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  width: calc(100% - 3rem);
+  max-width: 400px;
+  z-index: 95;
+  background: rgba(254, 250, 224, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(40, 54, 24, 0.16);
+  border-radius: var(--radius-md);
+  box-shadow:
+    0 16px 40px rgba(34, 45, 24, 0.14),
+    0 2px 8px rgba(34, 45, 24, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  padding: 1.1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  animation: cookieNoticeSlideIn 260ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  pointer-events: auto;
+}
+
+.cookie-notice-banner.is-closing {
+  opacity: 0;
+  transform: translateY(10px) scale(0.98);
+  transition: opacity 190ms var(--ease-out), transform 190ms var(--ease-out);
+  pointer-events: none;
+}
+
+.cookie-notice-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.cookie-notice-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.cookie-notice-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  background: var(--c-forest);
+  color: var(--c-cornsilk);
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(40, 54, 24, 0.2);
+  flex-shrink: 0;
+}
+
+.cookie-notice-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.015em;
+}
+
+.cookie-notice-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  color: var(--text-muted);
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  transition: color var(--duration-state) var(--ease-out), background-color var(--duration-state) var(--ease-out);
+}
+
+.cookie-notice-close:hover {
+  color: var(--text-primary);
+  background: rgba(40, 54, 24, 0.07);
+}
+
+.cookie-notice-close:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 1px;
+}
+
+.cookie-notice-text {
+  font-size: 0.83rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.cookie-notice-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem;
+  margin-top: 0.2rem;
+  padding-top: 0.2rem;
+}
+
+.cookie-notice-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.45rem 1.05rem;
+  border-radius: 9999px;
+  font-size: 0.82rem;
+  font-weight: 650;
+  background: var(--c-forest);
+  color: var(--c-cornsilk);
+  border: 1px solid rgba(40, 54, 24, 0.22);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition:
+    background-color var(--duration-state) var(--ease-out),
+    transform var(--duration-press) var(--ease-spring),
+    box-shadow var(--duration-state) var(--ease-out);
+}
+
+.cookie-notice-btn:hover {
+  background: #1e2917;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(34, 45, 24, 0.12);
+}
+
+.cookie-notice-btn:active {
+  transform: scale(0.97);
+}
+
+.cookie-notice-btn:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.cookie-notice-link {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(40, 54, 24, 0.25);
+  cursor: pointer;
+  transition: color var(--duration-state) var(--ease-out), text-decoration-color var(--duration-state) var(--ease-out);
+}
+
+.cookie-notice-link:hover {
+  color: var(--c-copper);
+  text-decoration-color: var(--c-copper);
+}
+
+.cookie-notice-link:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+@keyframes cookieNoticeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 560px) {
+  .cookie-notice-banner {
+    bottom: 1rem;
+    left: 0.75rem;
+    right: 0.75rem;
+    width: auto;
+    max-width: none;
+    padding: 0.95rem 1.05rem;
+  }
+
+  .cookie-notice-banner.in-workspace {
+    bottom: 74px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cookie-notice-banner {
+    animation: none !important;
+  }
+
+  .cookie-notice-banner.is-closing {
+    transition: none !important;
+    opacity: 0 !important;
+  }
+}
