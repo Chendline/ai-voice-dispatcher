@@ -19,6 +19,7 @@ configure provider → configure agent → chat or speak → plan → approve ta
 Two surfaces:
 
 - `/` — public landing page. Product narrative, capabilities, provider list, architecture, roadmap.
+- `/terms`, `/privacy` — legal and governance pages (Terms of Service, Privacy Policy).
 - `/app`, `/app/voice`, `/app/dispatch`, `/app/agents`, `/app/settings` — the workspace.
 
 ### Non-goals
@@ -108,9 +109,12 @@ frontend/
       router.ts
     pages/
       LandingPage.tsx
+      PrivacyPage.tsx
+      TermsPage.tsx
       WorkspacePage.tsx
     styles/
       landing.css
+      legal.css
       tts.css
       workspace.css
     utils/

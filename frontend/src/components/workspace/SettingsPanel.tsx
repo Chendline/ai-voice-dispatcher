@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { PublicDispatchTarget, TargetInput, TargetType, WorkspaceBootstrap } from '../../types';
 import { api } from '../../lib/api';
+import { navigate } from '../../lib/router';
 import { useSpeechPlayback } from '../../hooks/useSpeechPlayback';
 import { CheckIcon, PlusIcon, RefreshIcon, SlackIcon, TrashIcon, WebhookIcon } from '../Icons';
 import { EmptyState, Notice, Pill, Spinner, formatRelative } from '../ui';
@@ -382,6 +383,36 @@ export function SettingsPanel({
           <Pill tone={data.storage === 'blob' ? 'ok' : 'warn'}>
             {data.storage === 'blob' ? 'Durable' : 'Memory only'}
           </Pill>
+        </section>
+
+        <section className="settings-card compact">
+          <h3>Governance & Policies</h3>
+          <p className="settings-copy">
+            Terms of service and privacy practices for governed dispatch.
+          </p>
+          <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.6rem', fontSize: '13px' }}>
+            <a
+              href="/terms"
+              className="text-link"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate('/terms');
+              }}
+            >
+              Terms of Service
+            </a>
+            <span style={{ color: 'var(--text-dim)' }}>·</span>
+            <a
+              href="/privacy"
+              className="text-link"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate('/privacy');
+              }}
+            >
+              Privacy Policy
+            </a>
+          </div>
         </section>
       </aside>
     </div>

@@ -685,6 +685,24 @@ export function LandingPage() {
             <a href="#voice">Voice</a>
             <a href="#dispatch">Dispatch</a>
             <a href="#architecture">Architecture</a>
+            <a
+              href="/terms"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate('/terms');
+              }}
+            >
+              Terms
+            </a>
+            <a
+              href="/privacy"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate('/privacy');
+              }}
+            >
+              Privacy
+            </a>
             <button type="button" onClick={launch}>
               Launch
             </button>
