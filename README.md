@@ -7,6 +7,7 @@ AEGIS is an independent AI workspace for teams that need a conversation to produ
 The product has two surfaces:
 
 - **Landing page** at `/` — what AEGIS is, how it works, which providers it supports, and what it deliberately does not do.
+- **Legal and governance** at `/terms` and `/privacy` — Terms of Service and Privacy Policy.
 - **Workspace** at `/app` — chat, voice sessions, dispatch workbench, agent configuration, providers, targets, speech settings, and history.
 
 ---
@@ -421,9 +422,12 @@ aegis/
 │   │   │   └── router.ts
 │   │   ├── pages/
 │   │   │   ├── LandingPage.tsx
+│   │   │   ├── PrivacyPage.tsx
+│   │   │   ├── TermsPage.tsx
 │   │   │   └── WorkspacePage.tsx
 │   │   ├── styles/
 │   │   │   ├── landing.css
+│   │   │   ├── legal.css
 │   │   │   ├── tts.css
 │   │   │   └── workspace.css
 │   │   ├── utils/

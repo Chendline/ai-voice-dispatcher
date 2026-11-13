@@ -35,6 +35,14 @@ export function isWorkspacePath(path: string): boolean {
   return path === '/app' || path.startsWith('/app/');
 }
 
+export function isTermsPath(path: string): boolean {
+  return path === '/terms' || path === '/terms/';
+}
+
+export function isPrivacyPath(path: string): boolean {
+  return path === '/privacy' || path === '/privacy/';
+}
+
 export type WorkspaceSection = 'chat' | 'voice' | 'dispatch' | 'agents' | 'settings';
 
 export function sectionFromPath(path: string): WorkspaceSection {
