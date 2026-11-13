@@ -43,6 +43,10 @@ export function isPrivacyPath(path: string): boolean {
   return path === '/privacy' || path === '/privacy/';
 }
 
+export function isCookiesPath(path: string): boolean {
+  return path === '/cookies' || path === '/cookies/';
+}
+
 export type WorkspaceSection = 'chat' | 'voice' | 'dispatch' | 'agents' | 'settings';
 
 export function sectionFromPath(path: string): WorkspaceSection {

@@ -7,9 +7,10 @@ React 19 + TypeScript + Vite client for AEGIS.
 - `/` — landing page (`src/pages/LandingPage.tsx`).
 - `/terms` — Terms of Service (`src/pages/TermsPage.tsx`).
 - `/privacy` — Privacy Policy (`src/pages/PrivacyPage.tsx`).
+- `/cookies` — Cookie Policy (`src/pages/CookiesPage.tsx`).
 - `/app`, `/app/voice`, `/app/dispatch`, `/app/agents`, `/app/settings` — workspace (`src/pages/WorkspacePage.tsx`).
 
-Routing uses the History API in `src/lib/router.ts`. There is no router dependency. `scripts/postbuild.mjs` copies the built `index.html` to `dist/app/index.html` and `dist/404.html` so static hosts can boot deep links.
+Routing uses the History API in `src/lib/router.ts`. There is no router dependency. `scripts/postbuild.mjs` copies the built `index.html` to `dist/app/index.html`, `dist/terms/index.html`, `dist/privacy/index.html`, `dist/cookies/index.html`, and `dist/404.html` so static hosts can boot deep links.
 
 ## Commands
 
@@ -51,6 +52,7 @@ src/
     gravityFieldMath.ts
     router.ts
   pages/
+    CookiesPage.tsx
     LandingPage.tsx
     PrivacyPage.tsx
     TermsPage.tsx

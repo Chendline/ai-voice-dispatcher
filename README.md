@@ -7,7 +7,7 @@ AEGIS is an independent AI workspace for teams that need a conversation to produ
 The product has two surfaces:
 
 - **Landing page** at `/` — what AEGIS is, how it works, which providers it supports, and what it deliberately does not do.
-- **Legal and governance** at `/terms` and `/privacy` — Terms of Service and Privacy Policy.
+- **Legal and governance** at `/terms`, `/privacy`, and `/cookies` — Terms of Service, Privacy Policy, and Cookie Policy.
 - **Workspace** at `/app` — chat, voice sessions, dispatch workbench, agent configuration, providers, targets, speech settings, and history.
 
 ---

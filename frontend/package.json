@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build && node scripts/postbuild.mjs",
     "lint": "oxlint",
-    "test": "node --test test/tts.test.ts test/gravityField.test.ts",
+    "test": "node --test test/tts.test.ts test/gravityField.test.ts test/router.test.ts",
     "preview": "vite preview"
   },
   "dependencies": {

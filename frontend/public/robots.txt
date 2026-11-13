@@ -2,5 +2,6 @@ User-agent: *
 Allow: /
 Allow: /terms
 Allow: /privacy
+Allow: /cookies
 Disallow: /api/
 Disallow: /app/
