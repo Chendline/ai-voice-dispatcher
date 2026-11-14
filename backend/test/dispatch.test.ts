@@ -167,6 +167,44 @@ test('dispatch: webhook and Slack payloads match the documented shapes', async (
   }
 });
 
+test('dispatch: multi-target dispatch executes concurrently', async () => {
+  const originalFetch = globalThis.fetch;
+  let activeConcurrency = 0;
+  let maxConcurrency = 0;
+
+  globalThis.fetch = (async () => {
+    activeConcurrency++;
+    if (activeConcurrency > maxConcurrency) {
+      maxConcurrency = activeConcurrency;
+    }
+    // Artificial small delay to test concurrent execution
+    await new Promise(resolve => setTimeout(resolve, 20));
+    activeConcurrency--;
+    return new Response('ok', { status: 200 });
+  }) as typeof fetch;
+
+  try {
+    const store = new WorkspaceStore(config);
+    const log = await executeDispatch({
+      plan: plan(),
+      targets: [
+        target({ id: 'tgt_1', name: 'Hook 1', url: 'http://127.0.0.1:9/1' }),
+        target({ id: 'tgt_2', name: 'Hook 2', url: 'http://127.0.0.1:9/2' }),
+        target({ id: 'tgt_3', name: 'Hook 3', url: 'http://127.0.0.1:9/3' }),
+      ],
+      store,
+      config,
+    });
+
+    assert.equal(log.status, 'dispatched');
+    assert.equal(log.results.length, 3);
+    // Concurrency must have reached 3 because they execute in parallel
+    assert.equal(maxConcurrency, 3);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test('dispatch: upstream failures are reported, never masked', async () => {
   const originalFetch = globalThis.fetch;
   globalThis.fetch = (async () => new Response('permission denied', { status: 403 })) as typeof fetch;

@@ -24,6 +24,20 @@ export interface ChatOutput {
   reply: ConversationMessage;
 }
 
+function buildBoundedHistory(conversation: Conversation): ChatMessage[] {
+  const history: ChatMessage[] = conversation.messages
+    .filter(message => message.role === 'user' || message.role === 'assistant')
+    .slice(-MAX_HISTORY_MESSAGES)
+    .map(message => ({ role: message.role, content: message.content.slice(0, 8000) }));
+
+  // Ensure first message has role 'user' (required by Anthropic and strict conversational contracts)
+  while (history.length > 0 && history[0].role === 'assistant') {
+    history.shift();
+  }
+
+  return history;
+}
+
 function buildSystemPrompt(agent: Agent): string {
   return [
     agent.systemPrompt.trim(),
@@ -67,10 +81,7 @@ export async function runChat(
   };
   store.appendMessage(conversation, userMessage);
 
-  const history: ChatMessage[] = conversation.messages
-    .filter(message => message.role === 'user' || message.role === 'assistant')
-    .slice(-MAX_HISTORY_MESSAGES)
-    .map(message => ({ role: message.role, content: message.content.slice(0, 8000) }));
+  const history = buildBoundedHistory(conversation);
 
   const adapter = registry.get(agent.providerId);
   const result = await adapter.chat({
@@ -130,10 +141,7 @@ export async function runChatStream(
   };
   store.appendMessage(conversation, userMessage);
 
-  const history: ChatMessage[] = conversation.messages
-    .filter(message => message.role === 'user' || message.role === 'assistant')
-    .slice(-MAX_HISTORY_MESSAGES)
-    .map(message => ({ role: message.role, content: message.content.slice(0, 8000) }));
+  const history = buildBoundedHistory(conversation);
 
   const adapter = registry.get(agent.providerId);
   const request = {

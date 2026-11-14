@@ -114,14 +114,16 @@ Aggregate statuses are literal:
 - Provider and dispatch errors are sanitized; stack traces and secrets are never returned.
 - Rate limits apply to all API routes and, more tightly, to AI and dispatch routes.
 
-### Relational on-server database (SQLite)
+### Relational on-server database (SQLite) & Data Protection
 
-Agents, conversations, messages, dispatch targets, and execution logs persist in an on-server SQLite database via Node's native `node:sqlite` engine.
+Agents, conversations, messages, dispatch targets, operator accounts, and execution logs persist in an on-server SQLite database via Node's native `node:sqlite` engine.
 - Configurable via `AEGIS_DB_PATH` or `SQLITE_PATH` (defaults to `data/aegis.sqlite`, `:memory:` for automated tests).
 - High-concurrency WAL mode (`PRAGMA journal_mode = WAL;`) and cascading foreign key constraints are enabled.
-- Fully free, self-hosted, with zero external database subscriptions. Optional Vercel Blob synchronization is still supported for ephemeral serverless deployments via `BLOB_READ_WRITE_TOKEN`.
+- Fully free, self-hosted, with zero external database subscriptions. Optional Vercel Blob synchronization is supported for ephemeral serverless deployments via `BLOB_READ_WRITE_TOKEN`.
+- **Target Secret Encryption:** Webhook & Slack target URLs are encrypted at rest with AES-256-GCM (`enc:v1:<iv>:<tag>:<ciphertext>`), derived from `AEGIS_ENCRYPTION_KEY` or `data/.aegis_key`.
+- **Operator Authentication & RBAC:** Local asynchronous `scrypt` password hashing (libuv thread pool), HttpOnly session cookies, and role-based access control (`admin`, `operator`, `viewer`).
 
-**AEGIS is currently a single-workspace application.** There is no authentication yet, so it is not a multi-user SaaS. Do not expose it publicly with real credentials until authentication is added.
+**AEGIS is a single-organization operational workspace.** On-server operator authentication guards the workspace perimeter, with an initial administrator setup wizard and RBAC permissions.
 
 ---
 
@@ -243,6 +245,9 @@ Copy `.env.example` to `.env` at the repository root. The backend loads it from 
 | `PORT` | `3001` | API port |
 | `FRONTEND_URL` | `http://localhost:5173` | Comma-separated CORS origins |
 | `VITE_API_BASE_URL` | dev: `http://localhost:3001` | Frontend API base. Use `/` when same-origin |
+| `AEGIS_DB_PATH` | `data/aegis.sqlite` | SQLite database file path |
+| `AEGIS_ENCRYPTION_KEY` | auto-generated (`data/.aegis_key`) | 256-bit AES key for target URL encryption |
+| `TRUST_PROXY` | `false` | Enable Express proxy trust (`true` for reverse proxies/Vercel) |
 | `AI_DEFAULT_PROVIDER` | first configured | Preferred provider id |
 | `AI_DEFAULT_MODEL` | provider default | Preferred model id |
 | `AI_TIMEOUT_MS` | `45000` | Provider request timeout (1–60 s) |
@@ -296,9 +301,11 @@ All endpoints return JSON. Errors use `{ "error": "..." }` and may include a saf
 | `GET` | `/api/conversations/:id` | Full conversation |
 | `DELETE` | `/api/conversations/:id` | Delete a conversation |
 | `POST` | `/api/chat` | Send a message and receive an assistant reply |
+| `POST` | `/api/chat/stream` | Stream tokens in real-time via Server-Sent Events (SSE) |
 | `POST` | `/api/dispatch/plan` | Build a plan from an instruction |
 | `POST` | `/api/dispatch/execute` | Execute an approved plan |
 | `GET` | `/api/dispatch/logs` | Dispatch history |
+| `GET` | `/api/dispatch/logs/export` | Export audit trail (JSON & RFC 4180 CSV) |
 | `GET` | `/api/targets` | List targets (host only) |
 | `POST` | `/api/targets` | Create a target |
 | `PUT` | `/api/targets/:id` | Update a target |
@@ -393,9 +400,10 @@ aegis/
 │   │   ├── auth.ts            # On-server scrypt password auth & sessions
 │   │   ├── chat.ts            # Conversation turn + provider call
 │   │   ├── config.ts          # Environment parsing and public config
+│   │   ├── crypto.ts          # AES-256-GCM target secret encryption & key derivation
 │   │   ├── db.ts              # On-server SQLite database (node:sqlite)
 │   │   ├── dispatch.ts        # URL safety, planning, execution, results
-│   │   ├── main.ts            # Startup
+│   │   ├── main.ts            # Startup & graceful shutdown
 │   │   ├── persistence.ts     # Optional Vercel Blob snapshot
 │   │   ├── providers/
 │   │   │   ├── anthropic.ts
@@ -407,13 +415,21 @@ aegis/
 │   │   ├── types.ts
 │   │   └── validation.ts
 │   ├── test/
+│   │   ├── api.test.ts
+│   │   ├── auth.test.ts
+│   │   ├── chat.test.ts
+│   │   ├── config.test.ts
+│   │   ├── crypto.test.ts
+│   │   └── dispatch.test.ts
 │   ├── Dockerfile
 │   └── package.json
 ├── frontend/
-│   ├── scripts/postbuild.mjs  # /app and 404 SPA fallbacks
+│   ├── scripts/postbuild.mjs  # /app, /terms, /privacy, /cookies, and 404 SPA fallbacks
 │   ├── src/
 │   │   ├── components/
 │   │   │   ├── AegisFieldCanvas.tsx
+│   │   │   ├── CookieNotice.tsx
+│   │   │   ├── ErrorBoundary.tsx
 │   │   │   ├── Icons.tsx
 │   │   │   ├── ui.tsx
 │   │   │   └── workspace/
@@ -434,16 +450,19 @@ aegis/
 │   │   │   ├── gravityFieldMath.ts
 │   │   │   └── router.ts
 │   │   ├── pages/
+│   │   │   ├── CookiesPage.tsx
 │   │   │   ├── LandingPage.tsx
 │   │   │   ├── PrivacyPage.tsx
 │   │   │   ├── TermsPage.tsx
 │   │   │   └── WorkspacePage.tsx
 │   │   ├── styles/
+│   │   │   ├── cookieNotice.css
 │   │   │   ├── landing.css
 │   │   │   ├── legal.css
 │   │   │   ├── tts.css
 │   │   │   └── workspace.css
 │   │   ├── utils/
+│   │   │   ├── cookieConsent.ts
 │   │   │   ├── soundEffects.ts
 │   │   │   └── tts.ts
 │   │   ├── App.tsx
@@ -451,12 +470,13 @@ aegis/
 │   │   ├── main.tsx
 │   │   └── types.ts
 │   ├── test/
+│   │   ├── cookieConsent.test.ts
 │   │   ├── gravityField.test.ts
+│   │   ├── router.test.ts
 │   │   └── tts.test.ts
 │   ├── index.html
 │   └── package.json
 ├── .env.example
-├── AEGIS-Product-Plan.xlsx    # Roadmap, features, providers, testing, risks
 ├── AGENTS.md                  # Engineering source of truth
 ├── SPECSHEET.md               # Product and technical spec (SRS)
 ├── vercel.json
@@ -467,9 +487,9 @@ aegis/
 
 ## Current limitations
 
-- Single workspace, no authentication or per-user isolation.
-- Dispatch supports only generic HTTPS webhooks and Slack incoming webhooks.
-- No telephony ingestion, SMS, email, CRM, or spreadsheet connectors are implemented.
+- Single-organization workspace with local on-server RBAC operator accounts (not a commercial multi-tenant billing platform).
+- Dispatch supports generic HTTPS webhooks and Slack incoming webhooks.
+- No telephony ingestion, SIP trunking, SMS, email, CRM, or spreadsheet connectors are implemented.
 - Speech recognition and synthesis depend on browser support. There is no cloud speech fallback.
 - Dispatch planning quality depends on the selected model. The local rules planner is intentionally simple and labeled as such.
 - Conversation and dispatch history are capped in memory.

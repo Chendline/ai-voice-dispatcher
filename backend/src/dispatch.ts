@@ -479,8 +479,26 @@ export async function executeDispatch({
     return log;
   }
 
-  for (const target of enabled) {
-    results.push(await postTarget(target, plan, config));
+  const settled = await Promise.allSettled(
+    enabled.map(target => postTarget(target, plan, config))
+  );
+
+  for (let i = 0; i < settled.length; i++) {
+    const item = settled[i];
+    if (item.status === 'fulfilled') {
+      results.push(item.value);
+    } else {
+      const target = enabled[i];
+      results.push({
+        targetId: target.id,
+        targetName: target.name,
+        type: target.type,
+        host: hostOf(target.url),
+        status: 'failed',
+        durationMs: 0,
+        detail: item.reason instanceof Error ? item.reason.message : 'Unexpected dispatch delivery rejection.',
+      });
+    }
   }
 
   const failed = results.filter(result => result.status === 'failed').length;

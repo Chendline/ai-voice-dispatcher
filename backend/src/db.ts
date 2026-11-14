@@ -687,6 +687,7 @@ export class SqliteWorkspaceStore {
   }
 
   createSession(userId: string, durationSeconds: number = 7 * 24 * 60 * 60): { token: string; expiresAt: string } {
+    this.pruneExpiredSessions();
     const token = id('sess') + '_' + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
     const expiresAt = new Date(Date.now() + durationSeconds * 1000).toISOString();
     const timestamp = now();
@@ -697,6 +698,11 @@ export class SqliteWorkspaceStore {
     `).run(token, userId, expiresAt, timestamp);
 
     return { token, expiresAt };
+  }
+
+  pruneExpiredSessions(): number {
+    const result = this.db.prepare('DELETE FROM sessions WHERE expires_at <= ?').run(now());
+    return Number(result.changes);
   }
 
   getUserBySessionToken(token: string): User | undefined {

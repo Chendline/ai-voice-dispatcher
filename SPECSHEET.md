@@ -25,7 +25,7 @@ Operational teams communicate incident context, customer escalations, and system
 ### 2.1 Implemented Capabilities
 - **Multi-Provider AI Registry:** Unified adapter contract driving Anthropic Messages API, OpenAI Chat Completions, Google Gemini (`generateContent`), OpenRouter, Groq, and custom OpenAI-compatible endpoints.
 - **On-Server Relational Database:** High-performance, zero-external-cost relational persistence using Node.js built-in `node:sqlite` (`DatabaseSync`), Write-Ahead Logging (WAL mode), cascading foreign keys, and indexes.
-- **On-Server Operator Authentication & RBAC:** Native `node:crypto` `scryptSync` password hashing with cryptographically secure random salts, constant-time `timingSafeEqual` verification, 256-bit opaque session tokens, `HttpOnly` `SameSite=Lax` cookies, and Role-Based Access Control (`admin`, `operator`, `viewer`).
+- **On-Server Operator Authentication & RBAC:** Native `node:crypto` asynchronous `scrypt` password hashing (libuv thread pool) with cryptographically secure random salts, constant-time `timingSafeEqual` verification, 256-bit opaque session tokens, `HttpOnly` `SameSite=Lax` cookies, and Role-Based Access Control (`admin`, `operator`, `viewer`).
 - **Voice-First Audio Pipeline:** Browser-native speech recognition (`webkitSpeechRecognition` / `SpeechRecognition`) with sentence-aware chunking, generation tokens to eliminate stale callbacks, watchdog recovery, and local speech synthesis.
 - **Governed Dispatch Engine:** Multi-target dispatch planning with labeled fallback heuristics, SSRF destination validation, and real-time execution logging.
 - **Legal & Governance Surfaces:** Complete Terms of Service (`/terms`), Privacy Policy (`/privacy`), Cookie & Storage Policy (`/cookies`), and first-launch Apple-grade cookie consent notice banner.
@@ -43,13 +43,13 @@ Operational teams communicate incident context, customer escalations, and system
   - Operator attribution (`operator_id`, `operator_name`, `operator_email`) attached to all dispatch executions and logs.
   - Audit Trail Export (JSON and RFC 4180 CSV formats) via `GET /api/dispatch/logs/export` with 1-click downloads in the Dispatch UI.
 
-### 2.3 Active Production Hardening Plan (Sprints 5 & 6)
-- **Sprint 5 (Auth Perimeter, Confidentiality & SSRF Hardening) [PLANNED]:**
+### 2.3 Production Hardening (Sprints 5 & 6)
+- **Sprint 5 (Auth Perimeter, Confidentiality & SSRF Hardening) [COMPLETED]:**
   - Workspace Auth Gate: Top-level dedicated authentication screen (`AuthCard`) when unauthenticated (`401 Unauthorized`) instead of offline error.
   - Encrypted Snapshot & Backup Hygiene: Retain AES-256-GCM ciphertext (`enc:v1:...`) in Vercel Blob snapshots and include operator accounts to prevent cold-start identity loss.
   - Complete IPv6 SSRF Shield: Explicitly parse and normalize IPv4-mapped IPv6 addresses (`::ffff:169.254.169.254`, `::ffff:172.16.0.0/12`) against metadata and private IP ranges.
   - Asynchronous Password Hashing & Login Rate Limiting: Move from `scryptSync` to async `crypto.scrypt` (libuv thread pool) and apply dedicated 10 req/min auth rate limiter.
-- **Sprint 6 (AI Stability, Concurrency & Operational Resilience) [PLANNED]:**
+- **Sprint 6 (AI Stability, Concurrency & Operational Resilience) [COMPLETED]:**
   - Anthropic History Normalization: Enforce leading user message role on sliced bounded histories to avoid upstream 400 errors on long conversations.
   - Header-Based Gemini Auth: Transmit Google API keys via `x-goog-api-key` header rather than URL query parameters.
   - Concurrent Multi-Target Dispatch Fanout: Parallelize target deliveries using `Promise.allSettled()`.
@@ -105,7 +105,7 @@ Operational teams communicate incident context, customer escalations, and system
 │                    Express Backend API                      │
 │                                                             │
 │  ├── validation.ts        Zod-like typed request validation │
-│  ├── auth.ts              scryptSync auth, sessions, RBAC   │
+│  ├── auth.ts              async scrypt auth, sessions, RBAC │
 │  ├── db.ts                node:sqlite (WAL mode, FK on)     │
 │  ├── config.ts            Provider metadata & env parsing   │
 │  ├── providers/           Adapter registry & normalization  │

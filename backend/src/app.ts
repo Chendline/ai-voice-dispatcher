@@ -84,7 +84,7 @@ export function createApp(deps: AppDeps = {}) {
 
   const app = express();
   app.disable('x-powered-by');
-  if (process.env.VERCEL) app.set('trust proxy', 1);
+  if (config.trustProxy) app.set('trust proxy', 1);
 
   app.use(helmet({
     contentSecurityPolicy: false,
@@ -258,7 +258,8 @@ export function createApp(deps: AppDeps = {}) {
     if (req.sessionToken) {
       store.deleteSession(req.sessionToken);
     }
-    res.setHeader('Set-Cookie', formatClearCookie());
+    const isSecure = req.secure || req.headers['x-forwarded-proto'] === 'https';
+    res.setHeader('Set-Cookie', formatClearCookie(isSecure));
     res.json({ ok: true });
   }));
 
