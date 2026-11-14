@@ -365,3 +365,63 @@ test('api: validation and not-found responses are sanitized', async () => {
     assert.equal(badJson.status, 400);
   });
 });
+
+test('api: dispatch audit logs export returns CSV and JSON formats', async () => {
+  await withServer(async (base, appDeps) => {
+    const store = appDeps.store as WorkspaceStore;
+    store.addDispatchLog({
+      id: 'disp_audit_test',
+      timestamp: new Date().toISOString(),
+      operatorId: 'usr_audit',
+      operatorName: 'Audit Officer',
+      operatorEmail: 'officer@aegis.local',
+      plan: {
+        id: 'plan_audit',
+        title: 'Outage escalation',
+        summary: 'Database cluster failover.',
+        priority: 'urgent',
+        instruction: 'Trigger failover hook',
+        targetIds: ['tgt_ops'],
+        source: 'rules',
+        createdAt: new Date().toISOString(),
+      },
+      results: [
+        {
+          targetId: 'tgt_ops',
+          targetName: 'Ops Webhook',
+          type: 'webhook',
+          host: 'hooks.example.com',
+          status: 'success',
+          httpStatus: 200,
+          durationMs: 45,
+        },
+      ],
+      status: 'dispatched',
+      message: 'Dispatch delivered to 1 target.',
+    });
+
+    // Test CSV export
+    const csvRes = await fetch(`${base}/api/dispatch/logs/export?format=csv`);
+    assert.equal(csvRes.status, 200);
+    assert.match(csvRes.headers.get('content-type') ?? '', /text\/csv/);
+    assert.match(csvRes.headers.get('content-disposition') ?? '', /attachment; filename="aegis-dispatch-audit-.*\.csv"/);
+
+    const csvText = await csvRes.text();
+    assert.ok(csvText.startsWith('id,timestamp,status,operator_id,operator_name,operator_email'));
+    assert.ok(csvText.includes('"disp_audit_test"'));
+    assert.ok(csvText.includes('"Audit Officer"'));
+    assert.ok(csvText.includes('"officer@aegis.local"'));
+    assert.ok(csvText.includes('"Outage escalation"'));
+
+    // Test JSON export
+    const jsonRes = await fetch(`${base}/api/dispatch/logs/export?format=json`);
+    assert.equal(jsonRes.status, 200);
+    assert.match(jsonRes.headers.get('content-type') ?? '', /application\/json/);
+    assert.match(jsonRes.headers.get('content-disposition') ?? '', /attachment; filename="aegis-dispatch-audit-.*\.json"/);
+
+    const logs = (await jsonRes.json()) as { id: string; operatorName: string }[];
+    assert.equal(logs.length, 1);
+    assert.equal(logs[0].id, 'disp_audit_test');
+    assert.equal(logs[0].operatorName, 'Audit Officer');
+  });
+});

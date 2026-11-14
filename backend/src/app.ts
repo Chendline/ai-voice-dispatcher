@@ -505,6 +505,9 @@ export function createApp(deps: AppDeps = {}) {
       store,
       config,
       agentId: parsed.value.agentId,
+      operatorId: req.user?.id,
+      operatorName: req.user?.name,
+      operatorEmail: req.user?.email,
     });
     await persist(store);
 
@@ -518,6 +521,66 @@ export function createApp(deps: AppDeps = {}) {
 
   app.get('/api/dispatch/logs', requireWorkspaceAuth(store), (_req, res) => {
     res.json({ logs: store.listDispatchLogs() });
+  });
+
+  app.get('/api/dispatch/logs/export', requireWorkspaceAuth(store), (req, res) => {
+    const format = req.query.format === 'csv' ? 'csv' : 'json';
+    const logs = store.listDispatchLogs();
+    const dateStamp = new Date().toISOString().slice(0, 10);
+
+    if (format === 'csv') {
+      const headers = [
+        'id',
+        'timestamp',
+        'status',
+        'operator_id',
+        'operator_name',
+        'operator_email',
+        'plan_id',
+        'plan_title',
+        'priority',
+        'target_count',
+        'target_names',
+        'results_summary',
+        'message',
+      ];
+
+      const toCsvField = (val: unknown): string => {
+        if (val === null || val === undefined) return '""';
+        const str = String(val).replace(/"/g, '""');
+        return `"${str}"`;
+      };
+
+      const rows = logs.map(log => {
+        const targetNames = log.results.map(r => r.targetName).join('; ');
+        const resultsSummary = log.results.map(r => `${r.targetName}: ${r.status} (${r.httpStatus ?? 'no response'})`).join('; ');
+        return [
+          toCsvField(log.id),
+          toCsvField(log.timestamp),
+          toCsvField(log.status),
+          toCsvField(log.operatorId ?? ''),
+          toCsvField(log.operatorName ?? ''),
+          toCsvField(log.operatorEmail ?? ''),
+          toCsvField(log.plan?.id ?? ''),
+          toCsvField(log.plan?.title ?? ''),
+          toCsvField(log.plan?.priority ?? ''),
+          toCsvField(log.results?.length ?? 0),
+          toCsvField(targetNames),
+          toCsvField(resultsSummary),
+          toCsvField(log.message ?? ''),
+        ].join(',');
+      });
+
+      const csvContent = [headers.join(','), ...rows].join('\r\n');
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="aegis-dispatch-audit-${dateStamp}.csv"`);
+      res.send(csvContent);
+      return;
+    }
+
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="aegis-dispatch-audit-${dateStamp}.json"`);
+    res.send(JSON.stringify(logs, null, 2));
   });
 
   // ---------------------------------------------------------------------

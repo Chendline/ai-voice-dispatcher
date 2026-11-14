@@ -1,17 +1,17 @@
 # Graph Report - ai-voice-dispatcher  (2026-11-15)
 
 ## Corpus Check
-- 91 files · ~82,375 words
+- 91 files · ~83,042 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 12 file(s) not represented in the graph (top: .css 7, (none) 4, .example 1)
 
 ## Summary
-- 1013 nodes · 1985 edges · 56 communities (54 shown, 2 thin omitted)
-- Extraction: 97% EXTRACTED · 3% INFERRED · 0% AMBIGUOUS · INFERRED: 55 edges (avg confidence: 0.92)
+- 1013 nodes · 1986 edges · 56 communities (54 shown, 2 thin omitted)
+- Extraction: 97% EXTRACTED · 3% INFERRED · 0% AMBIGUOUS · INFERRED: 56 edges (avg confidence: 0.92)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `0c9a4ee7`
+- Built from commit: `a6135af7`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -130,7 +130,7 @@ Cohesion: 0.10
 Nodes (34): 4. Backend rules, API responses, Chat, Configuration, Provider adapters, Store and persistence, Validation, buildSystemPrompt() (+26 more)
 
 ### Community 7 - "dispatch.ts"
-Cohesion: 0.13
+Cohesion: 0.14
 Nodes (26): Dispatch, AppConfig, checkTargetUrl(), executeDispatch(), ExecuteDispatchOptions, hostOf(), now(), parsePlannerJson() (+18 more)
 
 ### Community 8 - "validation.ts"
@@ -330,7 +330,7 @@ _Questions this graph is uniquely positioned to answer:_
 - **Why does `react` connect `react` to `tts.ts`, `SettingsPanel.tsx`, `Icons.tsx`, `gravityField.ts`, `frontend/package.json`, `DispatchPanel.tsx`, `WorkspacePage.tsx`, `The Design System Page`, `useSpeechRecognition.ts`, `ChatPanel.tsx`?**
   _High betweenness centrality (0.084) - this node is a cross-community bridge._
 - **Why does `main()` connect `AGENTS.md` to `app.ts`, `dispatch.test.ts`, `persistence.ts`?**
-  _High betweenness centrality (0.075) - this node is a cross-community bridge._
+  _High betweenness centrality (0.074) - this node is a cross-community bridge._
 - **Are the 2 inferred relationships involving `SqliteWorkspaceStore` (e.g. with `Codebase Intelligence & Graph Navigation (Mandatory First Step)` and `Store and persistence`) actually correct?**
   _`SqliteWorkspaceStore` has 2 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 9 inferred relationships involving `base()` (e.g. with ``info` — Project information` and `Switching Presets`) actually correct?**

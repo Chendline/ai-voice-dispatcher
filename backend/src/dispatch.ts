@@ -407,6 +407,9 @@ export interface ExecuteDispatchOptions {
   store: { addDispatchLog: (log: DispatchLog) => void };
   config: AppConfig;
   agentId?: string;
+  operatorId?: string;
+  operatorName?: string;
+  operatorEmail?: string;
 }
 
 export async function executeDispatch({
@@ -415,6 +418,9 @@ export async function executeDispatch({
   store,
   config,
   agentId,
+  operatorId,
+  operatorName,
+  operatorEmail,
 }: ExecuteDispatchOptions): Promise<DispatchLog> {
   const enabled = targets.filter(target => target.enabled);
   const results: DispatchResult[] = [];
@@ -424,6 +430,9 @@ export async function executeDispatch({
       id: id('disp'),
       timestamp: now(),
       agentId,
+      operatorId,
+      operatorName,
+      operatorEmail,
       plan,
       results: [],
       status: 'skipped',
@@ -455,6 +464,9 @@ export async function executeDispatch({
     id: id('disp'),
     timestamp: now(),
     agentId,
+    operatorId,
+    operatorName,
+    operatorEmail,
     plan,
     results,
     status,

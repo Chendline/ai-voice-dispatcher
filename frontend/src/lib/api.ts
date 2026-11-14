@@ -251,6 +251,9 @@ export const api = {
   listDispatchLogs: async () =>
     (await request<{ logs: DispatchLog[] }>('/api/dispatch/logs')).logs,
 
+  exportLogsUrl: (format: 'json' | 'csv' = 'json') =>
+    `${API_BASE}/api/dispatch/logs/export?format=${format}`,
+
   listTargets: async () =>
     (await request<{ targets: PublicDispatchTarget[] }>('/api/targets')).targets,
 

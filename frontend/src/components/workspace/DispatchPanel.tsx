@@ -247,6 +247,9 @@ export function DispatchPanel({
                 <Pill tone={statusTone(result.status)}>{result.status}</Pill>
                 <h3>{result.plan.title}</h3>
                 <p>{result.message}</p>
+                {result.operatorName ? (
+                  <span className="result-operator">Dispatched by {result.operatorName}</span>
+                ) : null}
               </div>
               <span className="result-time">{formatTime(result.timestamp)}</span>
             </div>
@@ -272,8 +275,30 @@ export function DispatchPanel({
 
       <aside className="dispatch-history">
         <div className="history-head">
-          <h3>Dispatch history</h3>
-          <span>{data.logs.length}</span>
+          <div className="history-title-group">
+            <h3>Dispatch history</h3>
+            <span>{data.logs.length}</span>
+          </div>
+          {data.logs.length > 0 ? (
+            <div className="history-actions">
+              <a
+                href={api.exportLogsUrl('csv')}
+                className="button button-quiet button-small"
+                title="Export audit log as CSV"
+                download="aegis-dispatch-audit.csv"
+              >
+                Export CSV
+              </a>
+              <a
+                href={api.exportLogsUrl('json')}
+                className="button button-quiet button-small"
+                title="Export audit log as JSON"
+                download="aegis-dispatch-audit.json"
+              >
+                Export JSON
+              </a>
+            </div>
+          ) : null}
         </div>
         {data.logs.length === 0 ? (
           <EmptyState icon={<DispatchIcon size={22} />} title="No dispatches yet.">
@@ -297,7 +322,11 @@ export function DispatchPanel({
                     <span className={`history-dot ${log.status}`} />
                     <span className="history-copy">
                       <strong>{log.plan.title}</strong>
-                      <em>{formatTime(log.timestamp)} · {log.results.length} target{log.results.length === 1 ? '' : 's'}</em>
+                      <em>
+                        {formatTime(log.timestamp)}
+                        {log.operatorName ? ` · by ${log.operatorName}` : ''}
+                        {` · ${log.results.length} target${log.results.length === 1 ? '' : 's'}`}
+                      </em>
                     </span>
                     <Pill tone={statusTone(log.status)}>{log.status}</Pill>
                     <ChevronIcon size={14} className={expanded ? 'rotated' : undefined} />
@@ -309,6 +338,9 @@ export function DispatchPanel({
                         <div><dt>Priority</dt><dd>{log.plan.priority}</dd></div>
                         <div><dt>Plan source</dt><dd>{log.plan.source}</dd></div>
                         <div><dt>Model</dt><dd>{log.plan.modelId ?? '—'}</dd></div>
+                        {log.operatorName ? (
+                          <div><dt>Operator</dt><dd>{log.operatorName}{log.operatorEmail ? ` (${log.operatorEmail})` : ''}</dd></div>
+                        ) : null}
                       </dl>
                       {log.results.map(item => (
                         <div key={item.targetId} className={`history-result ${item.status}`}>

@@ -39,9 +39,9 @@ Operational teams communicate incident context, customer escalations, and system
 - **Sprint 3 (Real-Time Performance) [COMPLETED]:**
   - Server-Sent Events (SSE) streaming (`POST /api/chat/stream`) across all AI providers (Anthropic, OpenAI, Google, Compatible).
   - Real-time token streaming and voice transcript feed reducing Time-To-First-Token (TTFT) from ~3s to ~250–400ms.
-- **Sprint 4 (Compliance & Operations) [NEXT]:**
-  - Operator attribution (`operator_id`, `operator_name`) attached to all dispatch logs and turns.
-  - Audit Trail Export (JSON and CSV formats) with filtering in the Dispatch UI.
+- **Sprint 4 (Compliance & Operations) [COMPLETED]:**
+  - Operator attribution (`operator_id`, `operator_name`, `operator_email`) attached to all dispatch executions and logs.
+  - Audit Trail Export (JSON and RFC 4180 CSV formats) via `GET /api/dispatch/logs/export` with 1-click downloads in the Dispatch UI.
 
 ### 2.3 Explicit Non-Goals
 - Consumer multi-tenant SaaS with billing or paid seat tiers.
@@ -199,11 +199,13 @@ CREATE TABLE IF NOT EXISTS dispatch_logs (
   id TEXT PRIMARY KEY,
   timestamp TEXT NOT NULL,
   agent_id TEXT REFERENCES agents(id) ON DELETE SET NULL,
+  operator_id TEXT REFERENCES users(id) ON DELETE SET NULL,
+  operator_name TEXT,
+  operator_email TEXT,
   plan_json TEXT NOT NULL,
   results_json TEXT NOT NULL,
   status TEXT NOT NULL CHECK(status IN ('dispatched', 'partial', 'failed', 'skipped')),
-  message TEXT NOT NULL,
-  operator_id TEXT REFERENCES users(id) ON DELETE SET NULL
+  message TEXT NOT NULL
 );
 ```
 
