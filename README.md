@@ -458,8 +458,7 @@ aegis/
 ├── .env.example
 ├── AEGIS-Product-Plan.xlsx    # Roadmap, features, providers, testing, risks
 ├── AGENTS.md                  # Engineering source of truth
-├── SPECSHEET.md               # Product and technical spec
-├── VIDEO.md                   # Demo walkthrough video script
+├── SPECSHEET.md               # Product and technical spec (SRS)
 ├── vercel.json
 └── README.md
 ```

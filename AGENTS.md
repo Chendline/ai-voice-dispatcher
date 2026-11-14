@@ -27,7 +27,7 @@ Two surfaces:
 - A consumer chatbot.
 - A fake “integration marketplace”.
 - A telephony product. There is no inbound call pipeline or phone number handling.
-- A multi-tenant SaaS. There is no authentication yet; it is a single workspace.
+- A multi-tenant SaaS with commercial billing. It is an independent, single-organization workspace.
 
 Do not reintroduce hackathon, judging, submission, tenant, or sponsor-platform framing. Those belonged to an earlier version of this repository.
 
