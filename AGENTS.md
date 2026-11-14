@@ -56,11 +56,12 @@ frontend (React 19 + Vite + TypeScript)
 backend (Express + TypeScript)
   ├── validation.ts        request contracts
   ├── config.ts            env parsing, provider metadata
+  ├── crypto.ts            AES-256-GCM target secret encryption & key derivation
   ├── db.ts                on-server relational SQLite database (node:sqlite)
   ├── auth.ts              on-server scrypt password auth & sessions (node:crypto)
   ├── providers/           adapter contract + registry
   ├── chat.ts              conversation turn orchestration
-  ├── dispatch.ts          URL safety, plan, execute, log
+  ├── dispatch.ts          URL safety, socket pinning, plan, execute, log
   ├── store.ts             workspace store interface
   ├── persistence.ts       optional Vercel Blob snapshot
   └── app.ts               routes, CORS, Helmet, rate limits
@@ -75,6 +76,7 @@ backend/
     auth.ts
     chat.ts
     config.ts
+    crypto.ts
     db.ts
     dispatch.ts
     main.ts
@@ -90,8 +92,10 @@ backend/
       types.ts
   test/
     api.test.ts
+    auth.test.ts
     chat.test.ts
     config.test.ts
+    crypto.test.ts
     dispatch.test.ts
 
 frontend/
@@ -267,7 +271,8 @@ Targets support exactly two types today: `webhook` and `slack`. Do not add a con
 - Stores relational records for `agents`, `conversations`, `messages`, `dispatch_targets`, and `dispatch_logs`.
 - Database file path defaults to `data/aegis.sqlite`, configurable via `AEGIS_DB_PATH` or `SQLITE_PATH` (`:memory:` for automated tests).
 - WAL mode (`PRAGMA journal_mode = WAL;`) and cascading foreign keys (`PRAGMA foreign_keys = ON;`) are enabled.
-- `publicTarget()` strips the URL and adds `host`.
+- Target secrets (`dispatch_targets.url`) are encrypted at rest with AES-256-GCM (`enc:v1:<iv>:<tag>:<ciphertext>`) using `crypto.ts`. Key resolves from `AEGIS_ENCRYPTION_KEY` or `data/.aegis_key` (`0o600`).
+- `publicTarget()` strips the URL and adds `host`. Plaintext or encrypted URLs never leak in API responses.
 - Never persist environment secrets.
 
 ### API responses
@@ -395,7 +400,8 @@ cd ../frontend && npm test && npm run lint && npm run build
 
 Backend coverage expectations:
 
-- On-server authentication, password hashing, session lifecycle, and RBAC.
+- On-server authentication, password hashing, session lifecycle, and RBAC perimeter authorization.
+- AES-256-GCM target secret encryption at rest, key derivation, and tamper rejection.
 - Config parsing and warnings.
 - Provider request/response mapping and error taxonomy.
 - Dispatch URL rejection (HTTP, credentials, private ranges).

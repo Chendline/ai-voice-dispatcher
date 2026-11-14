@@ -31,12 +31,12 @@ Operational teams communicate incident context, customer escalations, and system
 - **Legal & Governance Surfaces:** Complete Terms of Service (`/terms`), Privacy Policy (`/privacy`), Cookie & Storage Policy (`/cookies`), and first-launch Apple-grade cookie consent notice banner.
 
 ### 2.2 Active Remediation Plan (Sprints 1–4)
-- **Sprint 1 (Immediate Security):**
-  - Production SSRF Socket Pinning in `dispatch.ts` to eliminate Time-of-Check to Time-of-Use (TOCTOU) DNS rebinding risks.
-  - Perimeter Route Protection enforcing `requireAuth` and role-based permissions (`admin`, `operator`, `viewer`) across all workspace mutation endpoints.
-- **Sprint 2 (Data Confidentiality):**
-  - Target Secret Encryption at Rest: AES-256-GCM envelope encryption for webhook and Slack URLs in SQLite.
-- **Sprint 3 (Real-Time Performance):**
+- **Sprint 1 (Immediate Security) [COMPLETED]:**
+  - Production SSRF Socket Pinning in `dispatch.ts` (`pinnedFetch`) to eliminate Time-of-Check to Time-of-Use (TOCTOU) DNS rebinding risks.
+  - Perimeter Route Protection enforcing `requireWorkspaceAuth` and role-based permissions (`admin`, `operator`, `auditor`) across all workspace endpoints.
+- **Sprint 2 (Data Confidentiality) [COMPLETED]:**
+  - Target Secret Encryption at Rest: AES-256-GCM envelope encryption (`enc:v1:<iv>:<tag>:<ciphertext>`) for webhook and Slack URLs in SQLite (`crypto.ts`, `db.ts`).
+- **Sprint 3 (Real-Time Performance) [NEXT]:**
   - Server-Sent Events (SSE) streaming (`POST /api/chat/stream`) across all AI providers.
   - Real-time sentence-by-sentence voice synthesis chunking to reduce Time-To-First-Token (TTFT) from ~3s to ~250–400ms.
 - **Sprint 4 (Compliance & Operations):**
@@ -163,7 +163,7 @@ CREATE TABLE IF NOT EXISTS dispatch_targets (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
   type TEXT NOT NULL CHECK(type IN ('webhook', 'slack')),
-  url TEXT NOT NULL, -- To be encrypted at rest in Sprint 2
+  url TEXT NOT NULL, -- Encrypted at rest via AES-256-GCM (enc:v1:<iv>:<tag>:<ciphertext>)
   enabled INTEGER NOT NULL DEFAULT 1,
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL,
