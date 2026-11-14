@@ -120,3 +120,149 @@ test('auth: complete lifecycle (status -> setup -> me -> logout -> login)', asyn
     assert.equal(badLogin.status, 401);
   });
 });
+
+test('auth & rbac: perimeter route protection and role permissions', async () => {
+  await withAuthServer(async base => {
+    // 1. First-run bootstrap: when 0 users exist, workspace is accessible without auth
+    const bootstrapRes = await fetch(`${base}/api/workspace`);
+    assert.equal(bootstrapRes.status, 200);
+
+    // 2. Setup initial admin
+    const setupRes = await fetch(`${base}/api/auth/setup`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        email: 'admin@aegis.local',
+        password: 'admin-password-123',
+        name: 'Admin User',
+      }),
+    });
+    assert.equal(setupRes.status, 201);
+    const adminCookie = setupRes.headers.get('set-cookie')!;
+    assert.ok(adminCookie);
+
+    // 3. Now that a user exists, unauthenticated access is rejected with 401
+    const unauthWorkspace = await fetch(`${base}/api/workspace`);
+    assert.equal(unauthWorkspace.status, 401);
+    const unauthChat = await fetch(`${base}/api/chat`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ message: 'hello' }),
+    });
+    assert.equal(unauthChat.status, 401);
+
+    // 4. Admin creates an auditor user and an operator user
+    const createAuditorRes = await fetch(`${base}/api/auth/register`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        cookie: adminCookie,
+      },
+      body: JSON.stringify({
+        email: 'auditor@aegis.local',
+        password: 'auditor-pass-123',
+        name: 'Auditor User',
+        role: 'auditor',
+      }),
+    });
+    assert.equal(createAuditorRes.status, 201);
+
+    const createOperatorRes = await fetch(`${base}/api/auth/register`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        cookie: adminCookie,
+      },
+      body: JSON.stringify({
+        email: 'operator@aegis.local',
+        password: 'operator-pass-123',
+        name: 'Operator User',
+        role: 'operator',
+      }),
+    });
+    assert.equal(createOperatorRes.status, 201);
+
+    // Login as Auditor
+    const auditorLoginRes = await fetch(`${base}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        email: 'auditor@aegis.local',
+        password: 'auditor-pass-123',
+      }),
+    });
+    assert.equal(auditorLoginRes.status, 200);
+    const auditorCookie = auditorLoginRes.headers.get('set-cookie')!;
+
+    // Auditor can view workspace, agents, dispatch logs
+    const auditorWorkspace = await fetch(`${base}/api/workspace`, { headers: { cookie: auditorCookie } });
+    assert.equal(auditorWorkspace.status, 200);
+    const auditorLogs = await fetch(`${base}/api/dispatch/logs`, { headers: { cookie: auditorCookie } });
+    assert.equal(auditorLogs.status, 200);
+
+    // Auditor cannot mutate agents, targets, or invoke chat/dispatch (403 Forbidden)
+    const auditorCreateAgent = await fetch(`${base}/api/agents`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', cookie: auditorCookie },
+      body: JSON.stringify({ name: 'Hacked Agent' }),
+    });
+    assert.equal(auditorCreateAgent.status, 403);
+
+    const auditorChat = await fetch(`${base}/api/chat`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', cookie: auditorCookie },
+      body: JSON.stringify({ message: 'test' }),
+    });
+    assert.equal(auditorChat.status, 403);
+
+    const auditorTarget = await fetch(`${base}/api/targets`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', cookie: auditorCookie },
+      body: JSON.stringify({ name: 'Webhook', type: 'webhook', url: 'https://example.com' }),
+    });
+    assert.equal(auditorTarget.status, 403);
+
+    // Login as Operator
+    const operatorLoginRes = await fetch(`${base}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        email: 'operator@aegis.local',
+        password: 'operator-pass-123',
+      }),
+    });
+    assert.equal(operatorLoginRes.status, 200);
+    const operatorCookie = operatorLoginRes.headers.get('set-cookie')!;
+
+    // Operator can create conversations and chat (passes auth; will return 400 for bad chat body)
+    const operatorChat = await fetch(`${base}/api/chat`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', cookie: operatorCookie },
+      body: JSON.stringify({}),
+    });
+    assert.equal(operatorChat.status, 400); // 400 bad request, NOT 401 or 403
+
+    // Operator cannot mutate agents or targets (403 Forbidden)
+    const operatorCreateAgent = await fetch(`${base}/api/agents`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', cookie: operatorCookie },
+      body: JSON.stringify({ name: 'Hacked Agent' }),
+    });
+    assert.equal(operatorCreateAgent.status, 403);
+
+    const operatorTarget = await fetch(`${base}/api/targets`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', cookie: operatorCookie },
+      body: JSON.stringify({ name: 'Webhook', type: 'webhook', url: 'https://example.com' }),
+    });
+    assert.equal(operatorTarget.status, 403);
+
+    // Admin can create targets (passes auth/role check; returns 400 for invalid body or 201 for valid)
+    const adminTarget = await fetch(`${base}/api/targets`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', cookie: adminCookie },
+      body: JSON.stringify({ name: 'Valid Target', type: 'webhook', url: 'https://93.184.216.34/hook' }),
+    });
+    assert.equal(adminTarget.status, 201);
+  });
+});

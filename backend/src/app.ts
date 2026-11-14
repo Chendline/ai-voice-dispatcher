@@ -16,6 +16,7 @@ import {
   formatSessionCookie,
   hashPassword,
   requireRole,
+  requireWorkspaceAuth,
   toPublicUser,
   verifyPassword,
 } from './auth.js';
@@ -259,7 +260,7 @@ export function createApp(deps: AppDeps = {}) {
     res.json({ users: store.listUsers() });
   });
 
-  app.get('/api/workspace', asyncHandler(async (_req, res) => {
+  app.get('/api/workspace', requireWorkspaceAuth(store), asyncHandler(async (_req, res) => {
     await hydrate(store);
     res.json({
       config: publicConfig(config),
@@ -278,11 +279,11 @@ export function createApp(deps: AppDeps = {}) {
   // ---------------------------------------------------------------------
   // Agents
   // ---------------------------------------------------------------------
-  app.get('/api/agents', (_req, res) => {
+  app.get('/api/agents', requireWorkspaceAuth(store), (_req, res) => {
     res.json({ agents: store.listAgents() });
   });
 
-  app.post('/api/agents', asyncHandler(async (req, res) => {
+  app.post('/api/agents', requireWorkspaceAuth(store, 'admin'), asyncHandler(async (req, res) => {
     const parsed = parseAgentRequest(req.body);
     if (!parsed.ok) {
       res.status(400).json({ error: parsed.error });
@@ -303,7 +304,7 @@ export function createApp(deps: AppDeps = {}) {
     res.status(201).json({ agent });
   }));
 
-  app.put('/api/agents/:agentId', asyncHandler(async (req, res) => {
+  app.put('/api/agents/:agentId', requireWorkspaceAuth(store, 'admin'), asyncHandler(async (req, res) => {
     const parsed = parseAgentRequest(req.body);
     if (!parsed.ok) {
       res.status(400).json({ error: parsed.error });
@@ -328,7 +329,7 @@ export function createApp(deps: AppDeps = {}) {
     res.json({ agent });
   }));
 
-  app.delete('/api/agents/:agentId', asyncHandler(async (req, res) => {
+  app.delete('/api/agents/:agentId', requireWorkspaceAuth(store, 'admin'), asyncHandler(async (req, res) => {
     const result = store.deleteAgent(req.params.agentId);
     if (result === 'not_found') {
       res.status(404).json({ error: 'Agent not found.' });
@@ -345,11 +346,11 @@ export function createApp(deps: AppDeps = {}) {
   // ---------------------------------------------------------------------
   // Conversations
   // ---------------------------------------------------------------------
-  app.get('/api/conversations', (_req, res) => {
+  app.get('/api/conversations', requireWorkspaceAuth(store), (_req, res) => {
     res.json({ conversations: store.listConversations() });
   });
 
-  app.post('/api/conversations', asyncHandler(async (req, res) => {
+  app.post('/api/conversations', requireWorkspaceAuth(store, 'admin', 'operator'), asyncHandler(async (req, res) => {
     const parsed = parseConversationRequest(req.body);
     if (!parsed.ok) {
       res.status(400).json({ error: parsed.error });
@@ -365,7 +366,7 @@ export function createApp(deps: AppDeps = {}) {
     res.status(201).json({ conversation });
   }));
 
-  app.get('/api/conversations/:conversationId', (req, res) => {
+  app.get('/api/conversations/:conversationId', requireWorkspaceAuth(store), (req, res) => {
     const conversation = store.getConversation(req.params.conversationId);
     if (!conversation) {
       res.status(404).json({ error: 'Conversation not found.' });
@@ -374,7 +375,7 @@ export function createApp(deps: AppDeps = {}) {
     res.json({ conversation });
   });
 
-  app.delete('/api/conversations/:conversationId', asyncHandler(async (req, res) => {
+  app.delete('/api/conversations/:conversationId', requireWorkspaceAuth(store, 'admin', 'operator'), asyncHandler(async (req, res) => {
     if (!store.deleteConversation(req.params.conversationId)) {
       res.status(404).json({ error: 'Conversation not found.' });
       return;
@@ -386,7 +387,7 @@ export function createApp(deps: AppDeps = {}) {
   // ---------------------------------------------------------------------
   // Chat
   // ---------------------------------------------------------------------
-  app.post('/api/chat', asyncHandler(async (req, res) => {
+  app.post('/api/chat', requireWorkspaceAuth(store, 'admin', 'operator'), asyncHandler(async (req, res) => {
     const parsed = parseChatRequest(req.body);
     if (!parsed.ok) {
       res.status(400).json({ error: parsed.error });
@@ -409,7 +410,7 @@ export function createApp(deps: AppDeps = {}) {
   // ---------------------------------------------------------------------
   // Dispatch
   // ---------------------------------------------------------------------
-  app.post('/api/dispatch/plan', asyncHandler(async (req, res) => {
+  app.post('/api/dispatch/plan', requireWorkspaceAuth(store, 'admin', 'operator'), asyncHandler(async (req, res) => {
     const parsed = parsePlanRequest(req.body);
     if (!parsed.ok) {
       res.status(400).json({ error: parsed.error });
@@ -433,7 +434,7 @@ export function createApp(deps: AppDeps = {}) {
     res.json({ plan, targets: store.listPublicTargets() });
   }));
 
-  app.post('/api/dispatch/execute', asyncHandler(async (req, res) => {
+  app.post('/api/dispatch/execute', requireWorkspaceAuth(store, 'admin', 'operator'), asyncHandler(async (req, res) => {
     const parsed = parseExecuteRequest(req.body);
     if (!parsed.ok) {
       res.status(400).json({ error: parsed.error });
@@ -474,18 +475,18 @@ export function createApp(deps: AppDeps = {}) {
     });
   }));
 
-  app.get('/api/dispatch/logs', (_req, res) => {
+  app.get('/api/dispatch/logs', requireWorkspaceAuth(store), (_req, res) => {
     res.json({ logs: store.listDispatchLogs() });
   });
 
   // ---------------------------------------------------------------------
   // Dispatch targets
   // ---------------------------------------------------------------------
-  app.get('/api/targets', (_req, res) => {
+  app.get('/api/targets', requireWorkspaceAuth(store), (_req, res) => {
     res.json({ targets: store.listPublicTargets() });
   });
 
-  app.post('/api/targets', asyncHandler(async (req, res) => {
+  app.post('/api/targets', requireWorkspaceAuth(store, 'admin'), asyncHandler(async (req, res) => {
     const parsed = parseTargetRequest(req.body);
     if (!parsed.ok) {
       res.status(400).json({ error: parsed.error });
@@ -502,7 +503,7 @@ export function createApp(deps: AppDeps = {}) {
     res.status(201).json({ target: publicTarget(target) });
   }));
 
-  app.put('/api/targets/:targetId', asyncHandler(async (req, res) => {
+  app.put('/api/targets/:targetId', requireWorkspaceAuth(store, 'admin'), asyncHandler(async (req, res) => {
     const existing = store.getTarget(req.params.targetId);
     if (!existing) {
       res.status(404).json({ error: 'Dispatch target not found.' });
@@ -534,7 +535,7 @@ export function createApp(deps: AppDeps = {}) {
     res.json({ target: target ? publicTarget(target) : null });
   }));
 
-  app.delete('/api/targets/:targetId', asyncHandler(async (req, res) => {
+  app.delete('/api/targets/:targetId', requireWorkspaceAuth(store, 'admin'), asyncHandler(async (req, res) => {
     if (!store.deleteTarget(req.params.targetId)) {
       res.status(404).json({ error: 'Dispatch target not found.' });
       return;
@@ -543,7 +544,7 @@ export function createApp(deps: AppDeps = {}) {
     res.json({ deleted: true });
   }));
 
-  app.post('/api/targets/:targetId/test', asyncHandler(async (req, res) => {
+  app.post('/api/targets/:targetId/test', requireWorkspaceAuth(store, 'admin'), asyncHandler(async (req, res) => {
     const target = store.getTarget(req.params.targetId);
     if (!target) {
       res.status(404).json({ error: 'Dispatch target not found.' });

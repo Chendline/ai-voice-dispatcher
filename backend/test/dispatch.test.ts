@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import http from 'node:http';
+import { once } from 'node:events';
+import type { AddressInfo } from 'node:net';
 import { readConfig } from '../src/config.js';
-import { checkTargetUrl, executeDispatch, planDispatch } from '../src/dispatch.js';
+import { checkTargetUrl, executeDispatch, planDispatch, pinnedFetch } from '../src/dispatch.js';
 import { ProviderRegistry } from '../src/providers/registry.js';
 import { WorkspaceStore } from '../src/store.js';
 import type { DispatchPlan, DispatchTarget } from '../src/types.js';
@@ -201,4 +204,70 @@ test('dispatch: planning falls back to rules without a provider', async () => {
   assert.equal(result.source, 'rules');
   assert.equal(result.priority, 'urgent');
   assert.ok(result.notice?.includes('rules engine'));
+});
+
+test('dispatch: pinnedFetch rejects private IP when allowInsecure is false', async () => {
+  await assert.rejects(
+    async () => {
+      await pinnedFetch('https://example.com/webhook', {
+        method: 'POST',
+        pinnedIp: '127.0.0.1',
+        pinnedFamily: 4,
+        allowInsecure: false,
+      });
+    },
+    { message: /Target resolved to blocked private address/ }
+  );
+
+  await assert.rejects(
+    async () => {
+      await pinnedFetch('https://example.com/webhook', {
+        method: 'POST',
+        pinnedIp: '169.254.169.254',
+        pinnedFamily: 4,
+        allowInsecure: false,
+      });
+    },
+    { message: /Target resolved to blocked private address/ }
+  );
+});
+
+test('dispatch: pinnedFetch delivers payload with socket lookup pinning', async () => {
+  let receivedBody = '';
+  let receivedHeader = '';
+  const server = http.createServer((req, res) => {
+    receivedHeader = req.headers['x-custom-test'] as string;
+    const chunks: Buffer[] = [];
+    req.on('data', (chunk: Buffer) => chunks.push(chunk));
+    req.on('end', () => {
+      receivedBody = Buffer.concat(chunks).toString('utf8');
+      res.writeHead(200, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ delivered: true }));
+    });
+  });
+
+  server.listen(0);
+  await once(server, 'listening');
+  const { port } = server.address() as AddressInfo;
+
+  try {
+    const res = await pinnedFetch(`http://localhost:${port}/test`, {
+      method: 'POST',
+      pinnedIp: '127.0.0.1',
+      pinnedFamily: 4,
+      allowInsecure: true,
+      headers: {
+        'x-custom-test': 'socket-pinning-verified',
+      },
+      body: JSON.stringify({ hello: 'world' }),
+    });
+
+    assert.equal(res.status, 200);
+    const text = await res.text();
+    assert.deepEqual(JSON.parse(text), { delivered: true });
+    assert.equal(receivedHeader, 'socket-pinning-verified');
+    assert.deepEqual(JSON.parse(receivedBody), { hello: 'world' });
+  } finally {
+    await new Promise<void>(resolve => server.close(() => resolve()));
+  }
 });
