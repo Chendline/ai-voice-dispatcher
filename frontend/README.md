@@ -32,6 +32,7 @@ scripts/
 src/
   components/
     AegisFieldCanvas.tsx
+    CookieNotice.tsx
     Icons.tsx
     ui.tsx
     workspace/
@@ -58,11 +59,13 @@ src/
     TermsPage.tsx
     WorkspacePage.tsx
   styles/
+    cookieNotice.css
     landing.css
     legal.css
     tts.css
     workspace.css
   utils/
+    cookieConsent.ts
     soundEffects.ts
     tts.ts
   App.tsx
@@ -70,7 +73,9 @@ src/
   main.tsx
   types.ts
 test/
+  cookieConsent.test.ts
   gravityField.test.ts
+  router.test.ts
   tts.test.ts
 ```
 
