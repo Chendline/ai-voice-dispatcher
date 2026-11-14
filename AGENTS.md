@@ -31,6 +31,16 @@ Two surfaces:
 
 Do not reintroduce hackathon, judging, submission, tenant, or sponsor-platform framing. Those belonged to an earlier version of this repository.
 
+### Codebase Intelligence & Graph Navigation (Mandatory First Step)
+
+Before modifying code, undertaking multi-file refactors, or tracing cross-module call flows:
+1. **Inspect `graphify-out/GRAPH_REPORT.md` first**: Review architectural community hubs and the God Nodes hierarchy (`SqliteWorkspaceStore`, `createApp()`, `dispatch.ts`, `validation.ts`, etc.) to understand module boundaries.
+2. **Check blast radiuses using the Graphify CLI**:
+   - `graphify affected "<SymbolName>"` — inspect dependent call-sites before altering public interfaces or store methods.
+   - `graphify path "<SourceSymbol>" "<TargetSymbol>"` — trace execution paths across system boundaries.
+3. **Keep the index synchronized**:
+   - Run `graphify extract . --code-only && graphify cluster-only .` (or `graphify update .`) following architectural refactors or file restructuring.
+
 ---
 
 ## 2. Architecture
