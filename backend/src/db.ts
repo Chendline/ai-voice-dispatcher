@@ -1,6 +1,7 @@
 import { DatabaseSync } from 'node:sqlite';
 import { mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
+import { resolveEncryptionKey, encryptTargetUrl, decryptTargetUrl, isEncryptedUrl } from './crypto.js';
 import type {
   Agent,
   Conversation,
@@ -50,6 +51,11 @@ export function publicTarget(target: DispatchTarget): PublicDispatchTarget {
 export class SqliteWorkspaceStore {
   private db: DatabaseSync;
   private updatedAt: string;
+  private encryptionKey: Buffer;
+
+  get rawDatabase(): DatabaseSync {
+    return this.db;
+  }
 
   constructor(config: AppConfig, dbPath?: string) {
     const targetPath = dbPath ?? config.dbPath ?? (process.env.NODE_ENV === 'test' ? ':memory:' : 'data/aegis.sqlite');
@@ -60,6 +66,7 @@ export class SqliteWorkspaceStore {
 
     this.db = new DatabaseSync(targetPath);
     this.updatedAt = now();
+    this.encryptionKey = resolveEncryptionKey(config, targetPath);
 
     this.db.exec('PRAGMA foreign_keys = ON;');
     if (targetPath !== ':memory:') {
@@ -463,6 +470,7 @@ export class SqliteWorkspaceStore {
   createTarget(input: Omit<DispatchTarget, 'id' | 'createdAt' | 'updatedAt'>): DispatchTarget {
     const timestamp = now();
     const newId = id('tgt');
+    const encryptedUrl = encryptTargetUrl(input.url, this.encryptionKey);
     this.db.prepare(`
       INSERT INTO dispatch_targets (id, name, type, url, enabled, last_status, last_tested_at, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -470,7 +478,7 @@ export class SqliteWorkspaceStore {
       newId,
       input.name,
       input.type,
-      input.url,
+      encryptedUrl,
       input.enabled ? 1 : 0,
       input.lastStatus ?? null,
       input.lastTestedAt ?? null,
@@ -487,6 +495,7 @@ export class SqliteWorkspaceStore {
 
     const timestamp = now();
     const merged = { ...current, ...input };
+    const encryptedUrl = encryptTargetUrl(merged.url, this.encryptionKey);
 
     this.db.prepare(`
       UPDATE dispatch_targets SET
@@ -495,7 +504,7 @@ export class SqliteWorkspaceStore {
     `).run(
       merged.name,
       merged.type,
-      merged.url,
+      encryptedUrl,
       merged.enabled ? 1 : 0,
       merged.lastStatus ?? null,
       merged.lastTestedAt ?? null,
@@ -530,19 +539,25 @@ export class SqliteWorkspaceStore {
     this.updatedAt = timestamp;
   }
 
-  private mapTarget(row: Record<string, unknown>): DispatchTarget {
+  private mapTarget = (row: Record<string, unknown>): DispatchTarget => {
+    let decryptedUrl: string;
+    try {
+      decryptedUrl = decryptTargetUrl(String(row.url), this.encryptionKey);
+    } catch {
+      decryptedUrl = String(row.url);
+    }
     return {
       id: String(row.id),
       name: String(row.name),
       type: row.type as DispatchTarget['type'],
-      url: String(row.url),
+      url: decryptedUrl,
       enabled: Boolean(row.enabled),
       lastStatus: (row.last_status as DispatchTarget['lastStatus']) || undefined,
       lastTestedAt: row.last_tested_at ? String(row.last_tested_at) : undefined,
       createdAt: String(row.created_at),
       updatedAt: String(row.updated_at),
     };
-  }
+  };
 
   /* ------------------- DISPATCH LOGS ------------------- */
 
@@ -702,11 +717,12 @@ export class SqliteWorkspaceStore {
     if (Array.isArray(state.targets)) {
       for (const target of state.targets) {
         if (!this.getTarget(target.id)) {
+          const encryptedUrl = isEncryptedUrl(target.url) ? target.url : encryptTargetUrl(target.url, this.encryptionKey);
           this.db.prepare(`
             INSERT INTO dispatch_targets (id, name, type, url, enabled, last_status, last_tested_at, created_at, updated_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
           `).run(
-            target.id, target.name, target.type, target.url, target.enabled ? 1 : 0,
+            target.id, target.name, target.type, encryptedUrl, target.enabled ? 1 : 0,
             target.lastStatus ?? null, target.lastTestedAt ?? null,
             target.createdAt, target.updatedAt
           );

@@ -27,6 +27,7 @@ export interface AppConfig {
   allowInsecureWebhooks: boolean;
   stateId: string;
   dbPath: string;
+  encryptionKey?: string | null;
   warnings: string[];
 }
 
@@ -200,6 +201,7 @@ export function readConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     allowInsecureWebhooks: /^(1|true|yes)$/i.test(env.DISPATCH_ALLOW_INSECURE ?? ''),
     stateId: env.AEGIS_STATE_ID?.trim() || 'default',
     dbPath: env.AEGIS_DB_PATH?.trim() || env.SQLITE_PATH?.trim() || (process.env.NODE_ENV === 'test' ? ':memory:' : 'data/aegis.sqlite'),
+    encryptionKey: readKey(env.AEGIS_ENCRYPTION_KEY || env.ENCRYPTION_KEY),
     warnings,
   };
 }
