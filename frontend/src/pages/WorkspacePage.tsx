@@ -9,6 +9,7 @@ import { DispatchPanel } from '../components/workspace/DispatchPanel';
 import { AgentsPanel } from '../components/workspace/AgentsPanel';
 import { SettingsPanel } from '../components/workspace/SettingsPanel';
 import { AuthCard } from '../components/workspace/AuthCard';
+import { ErrorBoundary } from '../components/ErrorBoundary';
 import {
   AgentsIcon,
   ArrowUpRight,
@@ -300,53 +301,59 @@ export function WorkspacePage() {
         </header>
 
         <main className="ws-content">
-          {section === 'chat' ? (
-            <ChatPanel
-              data={data}
-              agent={agent}
-              conversation={conversation}
-              conversationLoading={conversationLoading}
-              sending={sending}
-              error={sendError}
-              onSelectConversation={id => void openConversation(id)}
-              onNewConversation={newConversation}
-              onSend={sendMessage}
-              onRefresh={() => void reload()}
-            />
-          ) : null}
+          <ErrorBoundary
+            compact
+            title={`${section.charAt(0).toUpperCase() + section.slice(1)} panel encountered an error`}
+            onReset={() => void reload()}
+          >
+            {section === 'chat' ? (
+              <ChatPanel
+                data={data}
+                agent={agent}
+                conversation={conversation}
+                conversationLoading={conversationLoading}
+                sending={sending}
+                error={sendError}
+                onSelectConversation={id => void openConversation(id)}
+                onNewConversation={newConversation}
+                onSend={sendMessage}
+                onRefresh={() => void reload()}
+              />
+            ) : null}
 
-          {section === 'voice' ? (
-            <VoicePanel
-              agent={agent}
-              provider={provider}
-              conversation={conversation}
-              sending={sending}
-              error={sendError}
-              onSend={sendMessage}
-              onNewConversation={newConversation}
-            />
-          ) : null}
+            {section === 'voice' ? (
+              <VoicePanel
+                agent={agent}
+                provider={provider}
+                conversation={conversation}
+                sending={sending}
+                error={sendError}
+                onSend={sendMessage}
+                onNewConversation={newConversation}
+              />
+            ) : null}
 
-          {section === 'dispatch' ? (
-            <DispatchPanel
-              data={data}
-              agent={agent}
-              onChanged={() => void reload()}
-            />
-          ) : null}
+            {section === 'dispatch' ? (
+              <DispatchPanel
+                data={data}
+                agent={agent}
+                onChanged={() => void reload()}
+              />
+            ) : null}
 
-          {section === 'agents' ? (
-            <AgentsPanel
-              data={data}
-              selectedAgentId={agent?.id ?? ''}
-              onSelectAgent={changeAgent}
-              onChanged={() => void reload()}
-            />
-          ) : null}
+            {section === 'agents' ? (
+              <AgentsPanel
+                data={data}
+                selectedAgentId={agent?.id ?? ''}
+                onSelectAgent={changeAgent}
+                onChanged={() => void reload()}
+              />
+            ) : null}
 
-          {section === 'settings' ? (
-            <SettingsPanel data={data} onChanged={() => void reload()} />
-          ) : null}
+            {section === 'settings' ? (
+              <SettingsPanel data={data} onChanged={() => void reload()} />
+            ) : null}
+          </ErrorBoundary>
         </main>
       </div>
     </div>

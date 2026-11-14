@@ -272,7 +272,7 @@ Targets support exactly two types today: `webhook` and `slack`. Do not add a con
 - `WorkspaceStore` / `SqliteWorkspaceStore` runs a free, local on-server SQLite database via `node:sqlite`.
 - Stores relational records for `users`, `sessions`, `agents`, `conversations`, `messages`, `dispatch_targets`, and `dispatch_logs`.
 - Database file path defaults to `data/aegis.sqlite`, configurable via `AEGIS_DB_PATH` or `SQLITE_PATH` (`:memory:` for automated tests).
-- WAL mode (`PRAGMA journal_mode = WAL;`) and cascading foreign keys (`PRAGMA foreign_keys = ON;`) are enabled.
+- WAL mode (`PRAGMA journal_mode = WAL;`), busy timeout (`PRAGMA busy_timeout = 5000;`), and cascading foreign keys (`PRAGMA foreign_keys = ON;`) are enabled. Multi-statement operations execute within atomic transactions.
 - Target secrets (`dispatch_targets.url`) are encrypted at rest with AES-256-GCM (`enc:v1:<iv>:<tag>:<ciphertext>`) using `crypto.ts`. Key resolves from `AEGIS_ENCRYPTION_KEY` or `data/.aegis_key` (`0o600`).
 - `publicTarget()` strips the URL and adds `host`. Plaintext or encrypted URLs never leak in API responses.
 - `store.snapshot()` maintains encrypted ciphertext for targets and serializes operator accounts (password hashes and salts) to guarantee identity persistence across cold starts without leaking plaintext secrets to cloud storage.
@@ -351,6 +351,7 @@ Targets support exactly two types today: `webhook` and `slack`. Do not add a con
 - Hover/active/focus states are required on every interactive control.
 - Never hide a destructive action without confirmation.
 - Loading states must be honest: spinner + label, never a fake skeleton that resembles real data.
+- Root ErrorBoundary and localized sub-panel error boundaries protect against rendering failures without unmounting the whole application.
 - On mobile the sidebar becomes a bottom navigation; do not let it cover the composer.
 
 ### Accessibility
