@@ -56,17 +56,52 @@ function privateIpv4(address: string): boolean {
 
 function privateAddress(address: string): boolean {
   if (isIP(address) === 4) return privateIpv4(address);
-  const normalized = address.toLowerCase();
-  return (
-    normalized === '::1' ||
-    normalized === '::' ||
-    normalized.startsWith('fe80:') ||
-    normalized.startsWith('fc') ||
-    normalized.startsWith('fd') ||
-    normalized.startsWith('::ffff:127.') ||
-    normalized.startsWith('::ffff:10.') ||
-    normalized.startsWith('::ffff:192.168.')
-  );
+  const normalized = address.toLowerCase().trim();
+
+  // IPv6 loopback and unspecified
+  if (normalized === '::1' || normalized === '::') return true;
+
+  // IPv4-mapped IPv6 (e.g. ::ffff:169.254.169.254 or ::ffff:a9fe:a9fe)
+  if (normalized.startsWith('::ffff:')) {
+    const rest = normalized.slice(7);
+    if (isIP(rest) === 4) {
+      return privateIpv4(rest);
+    }
+    const hexParts = rest.split(':');
+    if (hexParts.length === 2 && hexParts.every(p => /^[0-9a-f]{1,4}$/.test(p))) {
+      const num1 = parseInt(hexParts[0], 16);
+      const num2 = parseInt(hexParts[1], 16);
+      const ipv4Str = `${(num1 >> 8) & 0xff}.${num1 & 0xff}.${(num2 >> 8) & 0xff}.${num2 & 0xff}`;
+      return privateIpv4(ipv4Str);
+    }
+  }
+
+  // IPv4-compatible IPv6 (deprecated, e.g. ::192.168.1.1)
+  if (normalized.startsWith('::') && isIP(normalized.slice(2)) === 4) {
+    return privateIpv4(normalized.slice(2));
+  }
+
+  // IPv6 link-local (fe80::/10)
+  if (
+    normalized.startsWith('fe8') ||
+    normalized.startsWith('fe9') ||
+    normalized.startsWith('fea') ||
+    normalized.startsWith('feb')
+  ) {
+    return true;
+  }
+
+  // IPv6 unique local (fc00::/7 -> fc.. and fd..)
+  if (normalized.startsWith('fc') || normalized.startsWith('fd')) {
+    return true;
+  }
+
+  // IPv6 multicast (ff00::/8)
+  if (normalized.startsWith('ff')) {
+    return true;
+  }
+
+  return false;
 }
 
 export interface UrlSafety {

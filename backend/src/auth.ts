@@ -1,21 +1,24 @@
-import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
+import { randomBytes, scrypt, timingSafeEqual } from 'node:crypto';
+import { promisify } from 'node:util';
 import type { Request, Response, NextFunction } from 'express';
 import type { PublicUser, User, UserRole } from './types.js';
 import type { SqliteWorkspaceStore } from './db.js';
 
+const scryptAsync = promisify(scrypt);
+
 const SESSION_COOKIE_NAME = 'aegis_session';
 const SESSION_DURATION_SECONDS = 7 * 24 * 60 * 60; // 7 days
 
-export function hashPassword(password: string, saltOverride?: string): { hash: string; salt: string } {
+export async function hashPassword(password: string, saltOverride?: string): Promise<{ hash: string; salt: string }> {
   const salt = saltOverride || randomBytes(16).toString('hex');
-  const hash = scryptSync(password, salt, 64).toString('hex');
-  return { hash, salt };
+  const derivedKey = (await scryptAsync(password, salt, 64)) as Buffer;
+  return { hash: derivedKey.toString('hex'), salt };
 }
 
-export function verifyPassword(password: string, storedHash: string, salt: string): boolean {
+export async function verifyPassword(password: string, storedHash: string, salt: string): Promise<boolean> {
   try {
-    const computedHash = scryptSync(password, salt, 64).toString('hex');
-    return timingSafeEqual(Buffer.from(computedHash, 'hex'), Buffer.from(storedHash, 'hex'));
+    const derivedKey = (await scryptAsync(password, salt, 64)) as Buffer;
+    return timingSafeEqual(derivedKey, Buffer.from(storedHash, 'hex'));
   } catch {
     return false;
   }

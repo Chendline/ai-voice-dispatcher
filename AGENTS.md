@@ -240,7 +240,7 @@ Provider errors must propagate to the route and become a real HTTP error or SSE 
 1. **Target safety** — `checkTargetUrl()` and `pinnedFetch`:
    - HTTPS required unless `DISPATCH_ALLOW_INSECURE=true`.
    - Reject credentials in the URL.
-   - Resolve DNS and reject loopback, private, link-local, multicast, and reserved addresses.
+   - Resolve DNS and reject loopback, private, link-local, multicast, and reserved addresses across IPv4 and IPv6 (including IPv4-mapped `::ffff:` addresses).
    - Reject `localhost`, `.local`, and `.internal` names.
    - Direct socket binding (`pinnedFetch` with custom socket `lookup`) pins execution to the pre-validated IP address, eliminating TOCTOU DNS rebinding.
 2. **Planning** — `planDispatch()`:
@@ -251,7 +251,7 @@ Provider errors must propagate to the route and become a real HTTP error or SSE 
 3. **Execution** — `executeDispatch()`:
    - Only enabled, explicitly selected targets.
    - `POST` with `redirect: 'manual'` or `redirect: 'error'`.
-   - Hard timeout.
+   - Concurrent execution across targets via `Promise.allSettled()` with hard timeouts.
    - Record per-target status, HTTP status, duration, and sanitized detail.
    - Aggregate `dispatched` / `partial` / `failed` / `skipped`.
    - Always append a `DispatchLog` with operator attribution (`operatorId`, `operatorName`, `operatorEmail`), including failures and skipped runs.
@@ -269,11 +269,13 @@ Targets support exactly two types today: `webhook` and `slack`. Do not add a con
 ### Store and persistence
 
 - `WorkspaceStore` / `SqliteWorkspaceStore` runs a free, local on-server SQLite database via `node:sqlite`.
-- Stores relational records for `agents`, `conversations`, `messages`, `dispatch_targets`, and `dispatch_logs`.
+- Stores relational records for `users`, `sessions`, `agents`, `conversations`, `messages`, `dispatch_targets`, and `dispatch_logs`.
 - Database file path defaults to `data/aegis.sqlite`, configurable via `AEGIS_DB_PATH` or `SQLITE_PATH` (`:memory:` for automated tests).
 - WAL mode (`PRAGMA journal_mode = WAL;`) and cascading foreign keys (`PRAGMA foreign_keys = ON;`) are enabled.
 - Target secrets (`dispatch_targets.url`) are encrypted at rest with AES-256-GCM (`enc:v1:<iv>:<tag>:<ciphertext>`) using `crypto.ts`. Key resolves from `AEGIS_ENCRYPTION_KEY` or `data/.aegis_key` (`0o600`).
 - `publicTarget()` strips the URL and adds `host`. Plaintext or encrypted URLs never leak in API responses.
+- `store.snapshot()` maintains encrypted ciphertext for targets and serializes operator accounts (password hashes and salts) to guarantee identity persistence across cold starts without leaking plaintext secrets to cloud storage.
+- Expired sessions are pruned automatically during session operations.
 - Never persist environment secrets.
 
 ### API responses
@@ -301,6 +303,7 @@ Targets support exactly two types today: `webhook` and `slack`. Do not add a con
 - All API calls live in `lib/api.ts`.
 - There is **no sandbox fallback**. A network failure shows an offline gate. Never recreate the old demo store.
 - Structured API errors must propagate to the UI. Do not swallow a 4xx/5xx and render fake data.
+- Unauthenticated requests (`401 Unauthorized`) render a dedicated operator Authentication gate (`AuthCard`), never an offline error.
 - The client timeout is 8 s for normal requests and 65 s for AI/dispatch requests.
 - The workspace bootstrap is owned by `WorkspacePage`; panels receive data and call `onChanged()` after mutations.
 
@@ -380,12 +383,12 @@ When in doubt, show the failure.
 ## 7. Security
 
 - Keys and raw target URLs stay server-side.
-- Authentication: on-server user accounts with `scrypt` password hashing (random salt, constant-time verification) and HttpOnly session cookies.
+- Authentication: on-server user accounts with asynchronous `scrypt` password hashing (random salt, constant-time verification) and HttpOnly session cookies.
 - CORS is restricted to `FRONTEND_URL` origins. Do not use `*` with credentials.
 - Helmet is enabled (CSP is disabled only because the app has no server-rendered inline policy needs; revisit before production hardening).
-- Rate limits: 120 req/min/IP for `/api`, 40 req/min/IP for AI and dispatch.
+- Rate limits: 120 req/min/IP for `/api`, 40 req/min/IP for AI and dispatch, 10 req/min/IP for authentication login endpoints.
 - JSON bodies are capped at 128 kb.
-- Dispatch is SSRF-guarded: HTTPS, no credentials, DNS resolution, private-range rejection, redirects disabled, timeout.
+- Dispatch is SSRF-guarded: HTTPS, no credentials, DNS resolution, private and IPv4-mapped IPv6 range rejection, redirects disabled, timeout.
 - Do not log secrets, full URLs with paths, prompts, or message content.
 
 ---

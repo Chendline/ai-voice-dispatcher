@@ -8,6 +8,7 @@ import { VoicePanel } from '../components/workspace/VoicePanel';
 import { DispatchPanel } from '../components/workspace/DispatchPanel';
 import { AgentsPanel } from '../components/workspace/AgentsPanel';
 import { SettingsPanel } from '../components/workspace/SettingsPanel';
+import { AuthCard } from '../components/workspace/AuthCard';
 import {
   AgentsIcon,
   ArrowUpRight,
@@ -51,7 +52,7 @@ function readAgentId(): string {
 export function WorkspacePage() {
   const path = usePathname();
   const section = sectionFromPath(path);
-  const { data, status, error, refreshing, reload } = useWorkspaceData();
+  const { data, status, error, authRequired, refreshing, reload } = useWorkspaceData();
   const [agentId, setAgentId] = useState(readAgentId);
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const [conversationLoading, setConversationLoading] = useState(false);
@@ -150,6 +151,26 @@ export function WorkspacePage() {
       <div className="app-gate">
         <div className="gate-brand"><LogoMark size={24} /><span>AEGIS</span></div>
         <Spinner label="Opening workspace" />
+      </div>
+    );
+  }
+
+  if (authRequired) {
+    return (
+      <div className="app-gate">
+        <div className="gate-card">
+          <div className="gate-brand"><LogoMark size={24} /><span>AEGIS</span></div>
+          <h1 style={{ marginTop: '16px', marginBottom: '8px' }}>Operator Authentication</h1>
+          <p style={{ marginBottom: '16px', color: 'var(--text-muted)' }}>
+            Sign in with your operator credentials to access the workspace.
+          </p>
+          <AuthCard onAuthenticated={() => void reload()} />
+          <div className="gate-actions" style={{ marginTop: '16px' }}>
+            <button type="button" className="button button-quiet" onClick={() => navigate('/')}>
+              Back to website
+            </button>
+          </div>
+        </div>
       </div>
     );
   }

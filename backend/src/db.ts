@@ -478,6 +478,21 @@ export class SqliteWorkspaceStore {
     return rows.map(this.mapTarget);
   }
 
+  listTargetsEncrypted(): DispatchTarget[] {
+    const rows = this.db.prepare('SELECT * FROM dispatch_targets ORDER BY created_at ASC').all() as Record<string, unknown>[];
+    return rows.map(row => ({
+      id: String(row.id),
+      name: String(row.name),
+      type: row.type as DispatchTarget['type'],
+      url: String(row.url),
+      enabled: Boolean(row.enabled),
+      lastStatus: (row.last_status as DispatchTarget['lastStatus']) || undefined,
+      lastTestedAt: row.last_tested_at ? String(row.last_tested_at) : undefined,
+      createdAt: String(row.created_at),
+      updatedAt: String(row.updated_at),
+    }));
+  }
+
   listPublicTargets(): PublicDispatchTarget[] {
     return this.listTargets().map(publicTarget);
   }
@@ -636,6 +651,11 @@ export class SqliteWorkspaceStore {
     }));
   }
 
+  listRawUsers(): User[] {
+    const rows = this.db.prepare('SELECT * FROM users ORDER BY created_at ASC').all() as Record<string, unknown>[];
+    return rows.map(this.mapUser);
+  }
+
   getUserById(id: string): User | undefined {
     const row = this.db.prepare('SELECT * FROM users WHERE id = ?').get(id) as Record<string, unknown> | undefined;
     return row ? this.mapUser(row) : undefined;
@@ -719,14 +739,25 @@ export class SqliteWorkspaceStore {
       version: STATE_VERSION,
       agents: this.listAgents(),
       conversations,
-      targets: this.listTargets(),
+      targets: this.listTargetsEncrypted(),
       dispatchLogs: this.listDispatchLogs(),
+      users: this.listRawUsers(),
       updatedAt: this.updatedAt,
     };
   }
 
   mergePersisted(state: WorkspaceState): void {
     if (!state || state.version !== STATE_VERSION) return;
+    if (Array.isArray(state.users) && state.users.length > 0) {
+      for (const user of state.users) {
+        if (!this.getUserById(user.id)) {
+          this.db.prepare(`
+            INSERT INTO users (id, email, name, password_hash, salt, role, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+          `).run(user.id, user.email, user.name, user.passwordHash, user.salt, user.role, user.createdAt, user.createdAt);
+        }
+      }
+    }
     if (Array.isArray(state.agents) && state.agents.length > 0) {
       for (const agent of state.agents) {
         if (!this.getAgent(agent.id)) {

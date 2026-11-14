@@ -133,4 +133,27 @@ test('crypto & store: targets are stored encrypted at rest in SQLite and decrypt
   assert.ok(updatedRawRow.url.startsWith('enc:v1:'));
   assert.notEqual(updatedRawRow.url, rawRow.url);
   assert.ok(!updatedRawRow.url.includes('SECOND_SECRET_TOKEN'));
+
+  // Snapshot hygiene: snapshots must NEVER leak decrypted plaintext URLs into external backups
+  store.createUser({
+    email: 'admin@aegis.local',
+    name: 'Admin User',
+    passwordHash: 'hash123',
+    salt: 'salt123',
+    role: 'admin',
+  });
+
+  const snap = store.snapshot();
+  assert.ok(snap.targets[0].url.startsWith('enc:v1:'));
+  assert.ok(!snap.targets[0].url.includes('SECOND_SECRET_TOKEN'));
+  assert.equal(snap.users?.length, 1);
+  assert.equal(snap.users?.[0].email, 'admin@aegis.local');
+
+  // Cold start rehydration: re-hydrating restores users and encrypted targets accurately
+  const freshStore = new WorkspaceStore(config);
+  assert.equal(freshStore.countUsers(), 0);
+  freshStore.mergePersisted(snap);
+  assert.equal(freshStore.countUsers(), 1);
+  assert.equal(freshStore.getUserByEmail('admin@aegis.local')?.name, 'Admin User');
+  assert.equal(freshStore.getTarget(target.id)?.url, 'https://api.example.com/webhook?key=SECOND_SECRET_TOKEN');
 });
