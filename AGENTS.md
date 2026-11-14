@@ -237,12 +237,12 @@ Provider errors must propagate to the route and become a real HTTP error or SSE 
 
 `dispatch.ts` has three responsibilities:
 
-1. **Target safety** — `checkTargetUrl()`:
+1. **Target safety** — `checkTargetUrl()` and `pinnedFetch`:
    - HTTPS required unless `DISPATCH_ALLOW_INSECURE=true`.
    - Reject credentials in the URL.
    - Resolve DNS and reject loopback, private, link-local, multicast, and reserved addresses.
    - Reject `localhost`, `.local`, and `.internal` names.
-   - Re-check the resolved address at execution time.
+   - Direct socket binding (`pinnedFetch` with custom socket `lookup`) pins execution to the pre-validated IP address, eliminating TOCTOU DNS rebinding.
 2. **Planning** — `planDispatch()`:
    - Prefer the selected agent's provider.
    - Return `source: 'ai'` with provider/model metadata when a model produced the plan.
@@ -254,7 +254,8 @@ Provider errors must propagate to the route and become a real HTTP error or SSE 
    - Hard timeout.
    - Record per-target status, HTTP status, duration, and sanitized detail.
    - Aggregate `dispatched` / `partial` / `failed` / `skipped`.
-   - Always append a `DispatchLog`, including failures and skipped runs.
+   - Always append a `DispatchLog` with operator attribution (`operatorId`, `operatorName`, `operatorEmail`), including failures and skipped runs.
+   - Export audit logs via `GET /api/dispatch/logs/export` (`format=json` or `format=csv` following RFC 4180).
 
 Targets support exactly two types today: `webhook` and `slack`. Do not add a connector name to the UI until the backend actually executes it.
 

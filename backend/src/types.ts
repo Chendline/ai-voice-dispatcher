@@ -137,6 +137,9 @@ export interface DispatchLog {
   id: string;
   timestamp: string;
   agentId?: string;
+  operatorId?: string;
+  operatorName?: string;
+  operatorEmail?: string;
   plan: DispatchPlan;
   results: DispatchResult[];
   status: DispatchStatus;

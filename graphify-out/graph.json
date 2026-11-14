@@ -222,7 +222,7 @@
       "file_type": "code",
       "norm_label": "workspacestate",
       "source_file": "backend/src/types.ts",
-      "source_location": "L146"
+      "source_location": "L149"
     },
     {
       "id": "frontend_src_components_workspace_speechsettings_speechcontroller",
@@ -560,7 +560,7 @@
       "file_type": "code",
       "norm_label": "healthresponse",
       "source_file": "frontend/src/types.ts",
-      "source_location": "L169"
+      "source_location": "L172"
     },
     {
       "id": "frontend_src_types_priority",
@@ -664,7 +664,7 @@
       "file_type": "code",
       "norm_label": "workspacebootstrap",
       "source_file": "frontend/src/types.ts",
-      "source_location": "L160"
+      "source_location": "L163"
     },
     {
       "id": "frontend_src_hooks_usespeechrecognition_recognitionconstructor",
@@ -1132,7 +1132,7 @@
       "file_type": "code",
       "norm_label": "plandispatchinput",
       "source_file": "backend/src/dispatch.ts",
-      "source_location": "L546"
+      "source_location": "L558"
     },
     {
       "id": "backend_src_dispatch_urlsafety",
@@ -1421,7 +1421,7 @@
       "file_type": "code",
       "norm_label": ".adddispatchlog()",
       "source_file": "backend/src/db.ts",
-      "source_location": "L564"
+      "source_location": "L584"
     },
     {
       "id": "backend_src_db_sqliteworkspacestore_appendmessage",
@@ -1433,7 +1433,7 @@
       "file_type": "code",
       "norm_label": ".appendmessage()",
       "source_file": "backend/src/db.ts",
-      "source_location": "L391"
+      "source_location": "L411"
     },
     {
       "id": "backend_src_db_sqliteworkspacestore_close",
@@ -1445,7 +1445,7 @@
       "file_type": "code",
       "norm_label": ".close()",
       "source_file": "backend/src/db.ts",
-      "source_location": "L767"
+      "source_location": "L794"
     },
     {
       "id": "backend_src_db_sqliteworkspacestore_constructor",
@@ -1469,7 +1469,7 @@
       "file_type": "code",
       "norm_label": ".countusers()",
       "source_file": "backend/src/db.ts",
-      "source_location": "L595"
+      "source_location": "L622"
     },
     {
       "id": "backend_src_db_sqliteworkspacestore_createagent",
@@ -1481,7 +1481,7 @@
       "file_type": "code",
       "norm_label": ".createagent()",
       "source_file": "backend/src/db.ts",
-      "source_location": "L218"
+      "source_location": "L238"
     },
     {
       "id": "backend_src_db_sqliteworkspacestore_createconversation",
@@ -1493,7 +1493,7 @@
       "file_type": "code",
       "norm_label": ".createconversation()",
       "source_file": "backend/src/db.ts",
-      "source_location": "L358"
+      "source_location": "L378"
     },
     {
       "id": "backend_src_db_sqliteworkspacestore_createsession",
@@ -1505,7 +1505,7 @@
       "file_type": "code",
       "norm_label": ".createsession()",
       "source_file": "backend/src/db.ts",
-      "source_location": "L642"
+      "source_location": "L669"
     },
     {
       "id": "backend_src_db_sqliteworkspacestore_createtarget",
@@ -1517,7 +1517,7 @@
       "file_type": "code",
       "norm_label": ".createtarget()",
       "source_file": "backend/src/db.ts",
-      "source_location": "L470"
+      "source_location": "L490"
     },
     {
       "id": "backend_src_db_sqliteworkspacestore_createuser",
@@ -1529,7 +1529,7 @@
       "file_type": "code",
       "norm_label": ".createuser()",
       "source_file": "backend/src/db.ts",
-      "source_location": "L622"
+      "source_location": "L649"
     },
     {
       "id": "backend_src_db_sqliteworkspacestore_deleteagent",
@@ -1541,7 +1541,7 @@
       "file_type": "code",
       "norm_label": ".deleteagent()",
       "source_file": "backend/src/db.ts",
-      "source_location": "L277"
+      "source_location": "L297"
     },
     {
       "id": "backend_src_db_sqliteworkspacestore_deleteconversation",
@@ -1553,7 +1553,7 @@
       "file_type": "code",
       "norm_label": ".deleteconversation()",
       "source_file": "backend/src/db.ts",
-      "source_location": "L425"
+      "source_location": "L445"
     },
     {
       "id": "backend_src_db_sqliteworkspacestore_deletesession",
@@ -1565,7 +1565,7 @@
       "file_type": "code",
       "norm_label": ".deletesession()",
       "source_file": "backend/src/db.ts",
-      "source_location": "L665"
+      "source_location": "L692"
     },
     {
       "id": "backend_src_db_sqliteworkspacestore_deletetarget",
@@ -1577,7 +1577,7 @@
       "file_type": "code",
       "norm_label": ".deletetarget()",
       "source_file": "backend/src/db.ts",
-      "source_location": "L518"
+      "source_location": "L538"
     },
     {
       "id": "backend_src_db_sqliteworkspacestore_deleteusersessions",
@@ -1589,7 +1589,7 @@
       "file_type": "code",
       "norm_label": ".deleteusersessions()",
       "source_file": "backend/src/db.ts",
-      "source_location": "L670"
+      "source_location": "L697"
     },
     {
       "id": "backend_src_db_sqliteworkspacestore_ensuredefaultagent",
@@ -1601,7 +1601,7 @@
       "file_type": "code",
       "norm_label": ".ensuredefaultagent()",
       "source_file": "backend/src/db.ts",
-      "source_location": "L175"
+      "source_location": "L195"
     },
     {
       "id": "backend_src_db_sqliteworkspacestore_getagent",
@@ -1613,7 +1613,7 @@
       "file_type": "code",
       "norm_label": ".getagent()",
       "source_file": "backend/src/db.ts",
-      "source_location": "L213"
+      "source_location": "L233"
     },
     {
       "id": "backend_src_db_sqliteworkspacestore_getconversation",
@@ -1625,7 +1625,7 @@
       "file_type": "code",
       "norm_label": ".getconversation()",
       "source_file": "backend/src/db.ts",
-      "source_location": "L338"
+      "source_location": "L358"
     },
     {
       "id": "backend_src_db_sqliteworkspacestore_gettarget",
@@ -1637,7 +1637,7 @@
       "file_type": "code",
       "norm_label": ".gettarget()",
       "source_file": "backend/src/db.ts",
-      "source_location": "L465"
+      "source_location": "L485"
     },
     {
       "id": "backend_src_db_sqliteworkspacestore_getuserbyemail",
@@ -1649,7 +1649,7 @@
       "file_type": "code",
       "norm_label": ".getuserbyemail()",
       "source_file": "backend/src/db.ts",
-      "source_location": "L617"
+      "source_location": "L644"
     },
     {
       "id": "backend_src_db_sqliteworkspacestore_getuserbyid",
@@ -1661,7 +1661,7 @@
       "file_type": "code",
       "norm_label": ".getuserbyid()",
       "source_file": "backend/src/db.ts",
-      "source_location": "L612"
+      "source_location": "L639"
     },
     {
       "id": "backend_src_db_sqliteworkspacestore_getuserbysessiontoken",
@@ -1673,7 +1673,7 @@
       "file_type": "code",
       "norm_label": ".getuserbysessiontoken()",
       "source_file": "backend/src/db.ts",
-      "source_location": "L655"
+      "source_location": "L682"
     },
     {
       "id": "backend_src_db_sqliteworkspacestore_initschema",
@@ -1697,7 +1697,7 @@
       "file_type": "code",
       "norm_label": ".listagents()",
       "source_file": "backend/src/db.ts",
-      "source_location": "L208"
+      "source_location": "L228"
     },
     {
       "id": "backend_src_db_sqliteworkspacestore_listconversations",
@@ -1709,7 +1709,7 @@
       "file_type": "code",
       "norm_label": ".listconversations()",
       "source_file": "backend/src/db.ts",
-      "source_location": "L314"
+      "source_location": "L334"
     },
     {
       "id": "backend_src_db_sqliteworkspacestore_listdispatchlogs",
@@ -1721,7 +1721,7 @@
       "file_type": "code",
       "norm_label": ".listdispatchlogs()",
       "source_file": "backend/src/db.ts",
-      "source_location": "L580"
+      "source_location": "L604"
     },
     {
       "id": "backend_src_db_sqliteworkspacestore_listpublictargets",
@@ -1733,7 +1733,7 @@
       "file_type": "code",
       "norm_label": ".listpublictargets()",
       "source_file": "backend/src/db.ts",
-      "source_location": "L461"
+      "source_location": "L481"
     },
     {
       "id": "backend_src_db_sqliteworkspacestore_listtargets",
@@ -1745,7 +1745,7 @@
       "file_type": "code",
       "norm_label": ".listtargets()",
       "source_file": "backend/src/db.ts",
-      "source_location": "L456"
+      "source_location": "L476"
     },
     {
       "id": "backend_src_db_sqliteworkspacestore_listusers",
@@ -1757,7 +1757,7 @@
       "file_type": "code",
       "norm_label": ".listusers()",
       "source_file": "backend/src/db.ts",
-      "source_location": "L600"
+      "source_location": "L627"
     },
     {
       "id": "backend_src_db_sqliteworkspacestore_mapagent",
@@ -1769,7 +1769,7 @@
       "file_type": "code",
       "norm_label": ".mapagent()",
       "source_file": "backend/src/db.ts",
-      "source_location": "L288"
+      "source_location": "L308"
     },
     {
       "id": "backend_src_db_sqliteworkspacestore_mapmessage",
@@ -1781,7 +1781,7 @@
       "file_type": "code",
       "norm_label": ".mapmessage()",
       "source_file": "backend/src/db.ts",
-      "source_location": "L434"
+      "source_location": "L454"
     },
     {
       "id": "backend_src_db_sqliteworkspacestore_maptarget",
@@ -1793,7 +1793,7 @@
       "file_type": "code",
       "norm_label": ".maptarget()",
       "source_file": "backend/src/db.ts",
-      "source_location": "L542"
+      "source_location": "L562"
     },
     {
       "id": "backend_src_db_sqliteworkspacestore_mapuser",
@@ -1805,7 +1805,7 @@
       "file_type": "code",
       "norm_label": ".mapuser()",
       "source_file": "backend/src/db.ts",
-      "source_location": "L674"
+      "source_location": "L701"
     },
     {
       "id": "backend_src_db_sqliteworkspacestore_marktargettested",
@@ -1817,7 +1817,7 @@
       "file_type": "code",
       "norm_label": ".marktargettested()",
       "source_file": "backend/src/db.ts",
-      "source_location": "L534"
+      "source_location": "L554"
     },
     {
       "id": "backend_src_db_sqliteworkspacestore_mergepersisted",
@@ -1829,7 +1829,7 @@
       "file_type": "code",
       "norm_label": ".mergepersisted()",
       "source_file": "backend/src/db.ts",
-      "source_location": "L701"
+      "source_location": "L728"
     },
     {
       "id": "backend_src_db_sqliteworkspacestore_rawdatabase",
@@ -1853,7 +1853,7 @@
       "file_type": "code",
       "norm_label": ".snapshot()",
       "source_file": "backend/src/db.ts",
-      "source_location": "L689"
+      "source_location": "L716"
     },
     {
       "id": "backend_src_db_sqliteworkspacestore_updateagent",
@@ -1865,7 +1865,7 @@
       "file_type": "code",
       "norm_label": ".updateagent()",
       "source_file": "backend/src/db.ts",
-      "source_location": "L246"
+      "source_location": "L266"
     },
     {
       "id": "backend_src_db_sqliteworkspacestore_updatetarget",
@@ -1877,7 +1877,7 @@
       "file_type": "code",
       "norm_label": ".updatetarget()",
       "source_file": "backend/src/db.ts",
-      "source_location": "L492"
+      "source_location": "L512"
     },
     {
       "id": "frontend_src_components_workspace_speechsettings_groupvoices",
@@ -4049,7 +4049,7 @@
       "file_type": "code",
       "norm_label": "executedispatch()",
       "source_file": "backend/src/dispatch.ts",
-      "source_location": "L412"
+      "source_location": "L415"
     },
     {
       "id": "backend_src_dispatch_hostof",
@@ -4097,7 +4097,7 @@
       "file_type": "code",
       "norm_label": "parseplannerjson()",
       "source_file": "backend/src/dispatch.ts",
-      "source_location": "L528"
+      "source_location": "L540"
     },
     {
       "id": "backend_src_dispatch_pinnedfetch",
@@ -4121,7 +4121,7 @@
       "file_type": "code",
       "norm_label": "plandispatch()",
       "source_file": "backend/src/dispatch.ts",
-      "source_location": "L554"
+      "source_location": "L566"
     },
     {
       "id": "backend_src_dispatch_posttarget",
@@ -4169,7 +4169,7 @@
       "file_type": "code",
       "norm_label": "rulesplan()",
       "source_file": "backend/src/dispatch.ts",
-      "source_location": "L504"
+      "source_location": "L516"
     },
     {
       "id": "backend_src_dispatch_rulespriority",
@@ -4181,7 +4181,7 @@
       "file_type": "code",
       "norm_label": "rulespriority()",
       "source_file": "backend/src/dispatch.ts",
-      "source_location": "L496"
+      "source_location": "L508"
     },
     {
       "id": "backend_src_dispatch_sanitizedetail",
@@ -4205,7 +4205,7 @@
       "file_type": "code",
       "norm_label": "testtarget()",
       "source_file": "backend/src/dispatch.ts",
-      "source_location": "L467"
+      "source_location": "L479"
     },
     {
       "id": "backend_src_validation_isrecord",
@@ -6414,7 +6414,7 @@
       "node_kind": "heading",
       "norm_label": "10. git and deployment",
       "source_file": "AGENTS.md",
-      "source_location": "L445"
+      "source_location": "L446"
     },
     {
       "id": "agents_11_common_pitfalls",
@@ -6426,7 +6426,7 @@
       "node_kind": "heading",
       "norm_label": "11. common pitfalls",
       "source_file": "AGENTS.md",
-      "source_location": "L456"
+      "source_location": "L457"
     },
     {
       "id": "agents_12_definition_of_done",
@@ -6438,7 +6438,7 @@
       "node_kind": "heading",
       "norm_label": "12. definition of done",
       "source_file": "AGENTS.md",
-      "source_location": "L475"
+      "source_location": "L476"
     },
     {
       "id": "agents_1_product_direction",
@@ -6486,7 +6486,7 @@
       "node_kind": "heading",
       "norm_label": "5. frontend rules",
       "source_file": "AGENTS.md",
-      "source_location": "L288"
+      "source_location": "L289"
     },
     {
       "id": "agents_6_honesty_rules_non_negotiable",
@@ -6498,7 +6498,7 @@
       "node_kind": "heading",
       "norm_label": "6. honesty rules (non-negotiable)",
       "source_file": "AGENTS.md",
-      "source_location": "L362"
+      "source_location": "L363"
     },
     {
       "id": "agents_7_security",
@@ -6510,7 +6510,7 @@
       "node_kind": "heading",
       "norm_label": "7. security",
       "source_file": "AGENTS.md",
-      "source_location": "L379"
+      "source_location": "L380"
     },
     {
       "id": "agents_8_testing",
@@ -6522,7 +6522,7 @@
       "node_kind": "heading",
       "norm_label": "8. testing",
       "source_file": "AGENTS.md",
-      "source_location": "L392"
+      "source_location": "L393"
     },
     {
       "id": "agents_9_dependency_policy",
@@ -6534,7 +6534,7 @@
       "node_kind": "heading",
       "norm_label": "9. dependency policy",
       "source_file": "AGENTS.md",
-      "source_location": "L435"
+      "source_location": "L436"
     },
     {
       "id": "agents_accessibility",
@@ -6546,7 +6546,7 @@
       "node_kind": "heading",
       "norm_label": "accessibility",
       "source_file": "AGENTS.md",
-      "source_location": "L351"
+      "source_location": "L352"
     },
     {
       "id": "agents_agents_md",
@@ -6582,7 +6582,7 @@
       "node_kind": "heading",
       "norm_label": "data layer",
       "source_file": "AGENTS.md",
-      "source_location": "L298"
+      "source_location": "L299"
     },
     {
       "id": "agents_landing_field",
@@ -6594,7 +6594,7 @@
       "node_kind": "heading",
       "norm_label": "landing field",
       "source_file": "AGENTS.md",
-      "source_location": "L332"
+      "source_location": "L333"
     },
     {
       "id": "agents_non_goals",
@@ -6726,7 +6726,7 @@
       "node_kind": "heading",
       "norm_label": "sound",
       "source_file": "AGENTS.md",
-      "source_location": "L325"
+      "source_location": "L326"
     },
     {
       "id": "agents_source_layout",
@@ -6750,7 +6750,7 @@
       "node_kind": "heading",
       "norm_label": "state and components",
       "source_file": "AGENTS.md",
-      "source_location": "L306"
+      "source_location": "L307"
     },
     {
       "id": "agents_styling_and_ux",
@@ -6762,7 +6762,7 @@
       "node_kind": "heading",
       "norm_label": "styling and ux",
       "source_file": "AGENTS.md",
-      "source_location": "L340"
+      "source_location": "L341"
     },
     {
       "id": "agents_voice",
@@ -6774,7 +6774,7 @@
       "node_kind": "heading",
       "norm_label": "voice",
       "source_file": "AGENTS.md",
-      "source_location": "L315"
+      "source_location": "L316"
     },
     {
       "id": "frontend_src_pages_workspacepage",
@@ -8786,7 +8786,7 @@
       "node_kind": "heading",
       "norm_label": "6. api specification & security perimeter",
       "source_file": "SPECSHEET.md",
-      "source_location": "L212"
+      "source_location": "L214"
     },
     {
       "id": "specsheet_7_security_trust_architecture",
@@ -8798,7 +8798,7 @@
       "node_kind": "heading",
       "norm_label": "7. security & trust architecture",
       "source_file": "SPECSHEET.md",
-      "source_location": "L248"
+      "source_location": "L250"
     },
     {
       "id": "specsheet_aegis_product_technical_specification_srs",
@@ -10020,7 +10020,7 @@
       "node_kind": "heading",
       "norm_label": "routing",
       "source_file": "AGENTS.md",
-      "source_location": "L290"
+      "source_location": "L291"
     },
     {
       "id": "agents_skills_shadcn_skill",
@@ -11620,7 +11620,7 @@
       "node_kind": "heading",
       "norm_label": "api responses",
       "source_file": "AGENTS.md",
-      "source_location": "L278"
+      "source_location": "L279"
     },
     {
       "id": "agents_chat",
@@ -11668,7 +11668,7 @@
       "node_kind": "heading",
       "norm_label": "store and persistence",
       "source_file": "AGENTS.md",
-      "source_location": "L268"
+      "source_location": "L269"
     },
     {
       "id": "agents_validation",
@@ -11680,7 +11680,7 @@
       "node_kind": "heading",
       "norm_label": "validation",
       "source_file": "AGENTS.md",
-      "source_location": "L261"
+      "source_location": "L262"
     },
     {
       "id": "backend_src_dispatch",
@@ -12320,7 +12320,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/app.ts",
-      "source_location": "L531",
+      "source_location": "L594",
       "weight": 1.0
     },
     {
@@ -12332,7 +12332,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/app.ts",
-      "source_location": "L536",
+      "source_location": "L599",
       "weight": 1.0
     },
     {
@@ -12344,7 +12344,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/app.ts",
-      "source_location": "L544",
+      "source_location": "L607",
       "weight": 1.0
     },
     {
@@ -12356,7 +12356,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/app.ts",
-      "source_location": "L595",
+      "source_location": "L658",
       "weight": 1.0
     },
     {
@@ -12656,7 +12656,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/db.ts",
-      "source_location": "L219",
+      "source_location": "L239",
       "weight": 1.0
     },
     {
@@ -12668,7 +12668,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/db.ts",
-      "source_location": "L243",
+      "source_location": "L263",
       "weight": 1.0
     },
     {
@@ -12680,7 +12680,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/db.ts",
-      "source_location": "L359",
+      "source_location": "L379",
       "weight": 1.0
     },
     {
@@ -12692,7 +12692,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/db.ts",
-      "source_location": "L645",
+      "source_location": "L672",
       "weight": 1.0
     },
     {
@@ -12704,7 +12704,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/db.ts",
-      "source_location": "L471",
+      "source_location": "L491",
       "weight": 1.0
     },
     {
@@ -12716,7 +12716,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/db.ts",
-      "source_location": "L473",
+      "source_location": "L493",
       "weight": 1.0
     },
     {
@@ -12728,7 +12728,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/db.ts",
-      "source_location": "L489",
+      "source_location": "L509",
       "weight": 1.0
     },
     {
@@ -12740,7 +12740,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/db.ts",
-      "source_location": "L623",
+      "source_location": "L650",
       "weight": 1.0
     },
     {
@@ -12752,7 +12752,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/db.ts",
-      "source_location": "L639",
+      "source_location": "L666",
       "weight": 1.0
     },
     {
@@ -12764,7 +12764,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/db.ts",
-      "source_location": "L284",
+      "source_location": "L304",
       "weight": 1.0
     },
     {
@@ -12776,7 +12776,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/db.ts",
-      "source_location": "L428",
+      "source_location": "L448",
       "weight": 1.0
     },
     {
@@ -12788,7 +12788,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/db.ts",
-      "source_location": "L523",
+      "source_location": "L543",
       "weight": 1.0
     },
     {
@@ -12800,7 +12800,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/db.ts",
-      "source_location": "L526",
+      "source_location": "L546",
       "weight": 1.0
     },
     {
@@ -12812,7 +12812,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/db.ts",
-      "source_location": "L530",
+      "source_location": "L550",
       "weight": 1.0
     },
     {
@@ -12824,7 +12824,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/db.ts",
-      "source_location": "L178",
+      "source_location": "L198",
       "weight": 1.0
     },
     {
@@ -12836,7 +12836,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/db.ts",
-      "source_location": "L215",
+      "source_location": "L235",
       "weight": 1.0
     },
     {
@@ -12848,7 +12848,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/db.ts",
-      "source_location": "L467",
+      "source_location": "L487",
       "weight": 1.0
     },
     {
@@ -12860,7 +12860,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/db.ts",
-      "source_location": "L619",
+      "source_location": "L646",
       "weight": 1.0
     },
     {
@@ -12872,7 +12872,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/db.ts",
-      "source_location": "L614",
+      "source_location": "L641",
       "weight": 1.0
     },
     {
@@ -12884,7 +12884,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/db.ts",
-      "source_location": "L660",
+      "source_location": "L687",
       "weight": 1.0
     },
     {
@@ -12896,7 +12896,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/db.ts",
-      "source_location": "L662",
+      "source_location": "L689",
       "weight": 1.0
     },
     {
@@ -12908,7 +12908,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/db.ts",
-      "source_location": "L462",
+      "source_location": "L482",
       "weight": 1.0
     },
     {
@@ -12920,7 +12920,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/db.ts",
-      "source_location": "L545",
+      "source_location": "L565",
       "weight": 1.0
     },
     {
@@ -12932,7 +12932,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/db.ts",
-      "source_location": "L535",
+      "source_location": "L555",
       "weight": 1.0
     },
     {
@@ -12944,7 +12944,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/db.ts",
-      "source_location": "L705",
+      "source_location": "L732",
       "weight": 1.0
     },
     {
@@ -12956,7 +12956,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/db.ts",
-      "source_location": "L719",
+      "source_location": "L746",
       "weight": 1.0
     },
     {
@@ -12968,7 +12968,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/db.ts",
-      "source_location": "L720",
+      "source_location": "L747",
       "weight": 1.0
     },
     {
@@ -12980,7 +12980,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/db.ts",
-      "source_location": "L720",
+      "source_location": "L747",
       "weight": 1.0
     },
     {
@@ -12992,7 +12992,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/db.ts",
-      "source_location": "L734",
+      "source_location": "L761",
       "weight": 1.0
     },
     {
@@ -13004,7 +13004,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/db.ts",
-      "source_location": "L758",
+      "source_location": "L785",
       "weight": 1.0
     },
     {
@@ -13016,7 +13016,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/db.ts",
-      "source_location": "L764",
+      "source_location": "L791",
       "weight": 1.0
     },
     {
@@ -13028,7 +13028,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/db.ts",
-      "source_location": "L690",
+      "source_location": "L717",
       "weight": 1.0
     },
     {
@@ -13040,7 +13040,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/db.ts",
-      "source_location": "L690",
+      "source_location": "L717",
       "weight": 1.0
     },
     {
@@ -13052,7 +13052,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/db.ts",
-      "source_location": "L693",
+      "source_location": "L720",
       "weight": 1.0
     },
     {
@@ -13064,7 +13064,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/db.ts",
-      "source_location": "L695",
+      "source_location": "L722",
       "weight": 1.0
     },
     {
@@ -13076,7 +13076,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/db.ts",
-      "source_location": "L696",
+      "source_location": "L723",
       "weight": 1.0
     },
     {
@@ -13088,7 +13088,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/db.ts",
-      "source_location": "L247",
+      "source_location": "L267",
       "weight": 1.0
     },
     {
@@ -13100,7 +13100,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/db.ts",
-      "source_location": "L250",
+      "source_location": "L270",
       "weight": 1.0
     },
     {
@@ -13112,7 +13112,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/db.ts",
-      "source_location": "L493",
+      "source_location": "L513",
       "weight": 1.0
     },
     {
@@ -13124,7 +13124,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/db.ts",
-      "source_location": "L496",
+      "source_location": "L516",
       "weight": 1.0
     },
     {
@@ -13136,7 +13136,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/db.ts",
-      "source_location": "L498",
+      "source_location": "L518",
       "weight": 1.0
     },
     {
@@ -13160,7 +13160,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/dispatch.ts",
-      "source_location": "L425",
+      "source_location": "L431",
       "weight": 1.0
     },
     {
@@ -13172,7 +13172,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/dispatch.ts",
-      "source_location": "L439",
+      "source_location": "L448",
       "weight": 1.0
     },
     {
@@ -13196,7 +13196,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/dispatch.ts",
-      "source_location": "L565",
+      "source_location": "L577",
       "weight": 1.0
     },
     {
@@ -13208,7 +13208,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/dispatch.ts",
-      "source_location": "L575",
+      "source_location": "L587",
       "weight": 1.0
     },
     {
@@ -13220,7 +13220,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/dispatch.ts",
-      "source_location": "L599",
+      "source_location": "L611",
       "weight": 1.0
     },
     {
@@ -13232,7 +13232,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/dispatch.ts",
-      "source_location": "L617",
+      "source_location": "L629",
       "weight": 1.0
     },
     {
@@ -13244,7 +13244,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/dispatch.ts",
-      "source_location": "L625",
+      "source_location": "L637",
       "weight": 1.0
     },
     {
@@ -13316,7 +13316,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/dispatch.ts",
-      "source_location": "L519",
+      "source_location": "L531",
       "weight": 1.0
     },
     {
@@ -13328,7 +13328,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/dispatch.ts",
-      "source_location": "L523",
+      "source_location": "L535",
       "weight": 1.0
     },
     {
@@ -13340,7 +13340,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/dispatch.ts",
-      "source_location": "L479",
+      "source_location": "L491",
       "weight": 1.0
     },
     {
@@ -13352,7 +13352,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/dispatch.ts",
-      "source_location": "L481",
+      "source_location": "L493",
       "weight": 1.0
     },
     {
@@ -14432,7 +14432,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "frontend/src/components/workspace/DispatchPanel.tsx",
-      "source_location": "L251",
+      "source_location": "L254",
       "weight": 1.0
     },
     {
@@ -15932,7 +15932,7 @@
       "confidence_score": 1.0,
       "context": "field",
       "source_file": "backend/src/dispatch.ts",
-      "source_location": "L548",
+      "source_location": "L560",
       "weight": 1.0
     },
     {
@@ -15944,7 +15944,7 @@
       "confidence_score": 1.0,
       "context": "field",
       "source_file": "backend/src/dispatch.ts",
-      "source_location": "L549",
+      "source_location": "L561",
       "weight": 1.0
     },
     {
@@ -15956,7 +15956,7 @@
       "confidence_score": 1.0,
       "context": "field",
       "source_file": "backend/src/dispatch.ts",
-      "source_location": "L550",
+      "source_location": "L562",
       "weight": 1.0
     },
     {
@@ -15968,7 +15968,7 @@
       "confidence_score": 1.0,
       "context": "field",
       "source_file": "backend/src/dispatch.ts",
-      "source_location": "L551",
+      "source_location": "L563",
       "weight": 1.0
     },
     {
@@ -24084,7 +24084,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "backend/src/db.ts",
-      "source_location": "L564",
+      "source_location": "L584",
       "weight": 1.0
     },
     {
@@ -24096,7 +24096,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "backend/src/db.ts",
-      "source_location": "L391",
+      "source_location": "L411",
       "weight": 1.0
     },
     {
@@ -24108,7 +24108,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "backend/src/db.ts",
-      "source_location": "L391",
+      "source_location": "L411",
       "weight": 1.0
     },
     {
@@ -24132,7 +24132,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "backend/src/db.ts",
-      "source_location": "L358",
+      "source_location": "L378",
       "weight": 1.0
     },
     {
@@ -24144,7 +24144,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "backend/src/db.ts",
-      "source_location": "L622",
+      "source_location": "L649",
       "weight": 1.0
     },
     {
@@ -24156,7 +24156,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "backend/src/db.ts",
-      "source_location": "L175",
+      "source_location": "L195",
       "weight": 1.0
     },
     {
@@ -24168,7 +24168,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "backend/src/db.ts",
-      "source_location": "L701",
+      "source_location": "L728",
       "weight": 1.0
     },
     {
@@ -24216,7 +24216,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "backend/src/db.ts",
-      "source_location": "L218",
+      "source_location": "L238",
       "weight": 1.0
     },
     {
@@ -24228,7 +24228,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "backend/src/db.ts",
-      "source_location": "L358",
+      "source_location": "L378",
       "weight": 1.0
     },
     {
@@ -24240,7 +24240,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "backend/src/db.ts",
-      "source_location": "L470",
+      "source_location": "L490",
       "weight": 1.0
     },
     {
@@ -24252,7 +24252,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "backend/src/db.ts",
-      "source_location": "L622",
+      "source_location": "L649",
       "weight": 1.0
     },
     {
@@ -24264,7 +24264,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "backend/src/db.ts",
-      "source_location": "L213",
+      "source_location": "L233",
       "weight": 1.0
     },
     {
@@ -24276,7 +24276,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "backend/src/db.ts",
-      "source_location": "L338",
+      "source_location": "L358",
       "weight": 1.0
     },
     {
@@ -24288,7 +24288,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "backend/src/db.ts",
-      "source_location": "L465",
+      "source_location": "L485",
       "weight": 1.0
     },
     {
@@ -24300,7 +24300,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "backend/src/db.ts",
-      "source_location": "L617",
+      "source_location": "L644",
       "weight": 1.0
     },
     {
@@ -24312,7 +24312,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "backend/src/db.ts",
-      "source_location": "L612",
+      "source_location": "L639",
       "weight": 1.0
     },
     {
@@ -24324,7 +24324,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "backend/src/db.ts",
-      "source_location": "L655",
+      "source_location": "L682",
       "weight": 1.0
     },
     {
@@ -24336,7 +24336,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "backend/src/db.ts",
-      "source_location": "L208",
+      "source_location": "L228",
       "weight": 1.0
     },
     {
@@ -24348,7 +24348,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "backend/src/db.ts",
-      "source_location": "L314",
+      "source_location": "L334",
       "weight": 1.0
     },
     {
@@ -24360,7 +24360,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "backend/src/db.ts",
-      "source_location": "L580",
+      "source_location": "L604",
       "weight": 1.0
     },
     {
@@ -24372,7 +24372,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "backend/src/db.ts",
-      "source_location": "L461",
+      "source_location": "L481",
       "weight": 1.0
     },
     {
@@ -24384,7 +24384,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "backend/src/db.ts",
-      "source_location": "L456",
+      "source_location": "L476",
       "weight": 1.0
     },
     {
@@ -24396,7 +24396,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "backend/src/db.ts",
-      "source_location": "L600",
+      "source_location": "L627",
       "weight": 1.0
     },
     {
@@ -24408,7 +24408,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "backend/src/db.ts",
-      "source_location": "L288",
+      "source_location": "L308",
       "weight": 1.0
     },
     {
@@ -24420,7 +24420,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "backend/src/db.ts",
-      "source_location": "L434",
+      "source_location": "L454",
       "weight": 1.0
     },
     {
@@ -24432,7 +24432,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "backend/src/db.ts",
-      "source_location": "L674",
+      "source_location": "L701",
       "weight": 1.0
     },
     {
@@ -24444,7 +24444,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "backend/src/db.ts",
-      "source_location": "L689",
+      "source_location": "L716",
       "weight": 1.0
     },
     {
@@ -24456,7 +24456,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "backend/src/db.ts",
-      "source_location": "L246",
+      "source_location": "L266",
       "weight": 1.0
     },
     {
@@ -24468,7 +24468,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "backend/src/db.ts",
-      "source_location": "L492",
+      "source_location": "L512",
       "weight": 1.0
     },
     {
@@ -24602,7 +24602,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
-      "source_location": "L261",
+      "source_location": "L262",
       "weight": 1.0
     },
     {
@@ -24613,7 +24613,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
-      "source_location": "L268",
+      "source_location": "L269",
       "weight": 1.0
     },
     {
@@ -24624,7 +24624,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
-      "source_location": "L278",
+      "source_location": "L279",
       "weight": 1.0
     },
     {
@@ -24635,7 +24635,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
-      "source_location": "L290",
+      "source_location": "L291",
       "weight": 1.0
     },
     {
@@ -24646,7 +24646,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
-      "source_location": "L298",
+      "source_location": "L299",
       "weight": 1.0
     },
     {
@@ -24657,7 +24657,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
-      "source_location": "L306",
+      "source_location": "L307",
       "weight": 1.0
     },
     {
@@ -24668,7 +24668,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
-      "source_location": "L315",
+      "source_location": "L316",
       "weight": 1.0
     },
     {
@@ -24679,7 +24679,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
-      "source_location": "L325",
+      "source_location": "L326",
       "weight": 1.0
     },
     {
@@ -24690,7 +24690,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
-      "source_location": "L332",
+      "source_location": "L333",
       "weight": 1.0
     },
     {
@@ -24701,7 +24701,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
-      "source_location": "L340",
+      "source_location": "L341",
       "weight": 1.0
     },
     {
@@ -24712,7 +24712,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
-      "source_location": "L351",
+      "source_location": "L352",
       "weight": 1.0
     },
     {
@@ -24745,7 +24745,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
-      "source_location": "L288",
+      "source_location": "L289",
       "weight": 1.0
     },
     {
@@ -24756,7 +24756,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
-      "source_location": "L362",
+      "source_location": "L363",
       "weight": 1.0
     },
     {
@@ -24767,7 +24767,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
-      "source_location": "L379",
+      "source_location": "L380",
       "weight": 1.0
     },
     {
@@ -24778,7 +24778,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
-      "source_location": "L392",
+      "source_location": "L393",
       "weight": 1.0
     },
     {
@@ -24789,7 +24789,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
-      "source_location": "L435",
+      "source_location": "L436",
       "weight": 1.0
     },
     {
@@ -24800,7 +24800,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
-      "source_location": "L445",
+      "source_location": "L446",
       "weight": 1.0
     },
     {
@@ -24811,7 +24811,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
-      "source_location": "L456",
+      "source_location": "L457",
       "weight": 1.0
     },
     {
@@ -24833,7 +24833,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
-      "source_location": "L475",
+      "source_location": "L476",
       "weight": 1.0
     },
     {
@@ -28661,7 +28661,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/dispatch.ts",
-      "source_location": "L412",
+      "source_location": "L415",
       "weight": 1.0
     },
     {
@@ -28672,7 +28672,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/dispatch.ts",
-      "source_location": "L467",
+      "source_location": "L479",
       "weight": 1.0
     },
     {
@@ -28683,7 +28683,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/dispatch.ts",
-      "source_location": "L496",
+      "source_location": "L508",
       "weight": 1.0
     },
     {
@@ -28694,7 +28694,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/dispatch.ts",
-      "source_location": "L504",
+      "source_location": "L516",
       "weight": 1.0
     },
     {
@@ -28705,7 +28705,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/dispatch.ts",
-      "source_location": "L528",
+      "source_location": "L540",
       "weight": 1.0
     },
     {
@@ -28716,7 +28716,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/dispatch.ts",
-      "source_location": "L546",
+      "source_location": "L558",
       "weight": 1.0
     },
     {
@@ -28727,7 +28727,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/dispatch.ts",
-      "source_location": "L554",
+      "source_location": "L566",
       "weight": 1.0
     },
     {
@@ -29134,7 +29134,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/types.ts",
-      "source_location": "L146",
+      "source_location": "L149",
       "weight": 1.0
     },
     {
@@ -31576,7 +31576,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "frontend/src/types.ts",
-      "source_location": "L160",
+      "source_location": "L163",
       "weight": 1.0
     },
     {
@@ -31587,7 +31587,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "frontend/src/types.ts",
-      "source_location": "L169",
+      "source_location": "L172",
       "weight": 1.0
     },
     {
@@ -33116,7 +33116,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "SPECSHEET.md",
-      "source_location": "L212",
+      "source_location": "L214",
       "weight": 1.0
     },
     {
@@ -33138,7 +33138,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "SPECSHEET.md",
-      "source_location": "L248",
+      "source_location": "L250",
       "weight": 1.0
     },
     {
@@ -33325,7 +33325,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/db.ts",
-      "source_location": "L175",
+      "source_location": "L195",
       "weight": 1.0
     },
     {
@@ -33336,7 +33336,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/db.ts",
-      "source_location": "L208",
+      "source_location": "L228",
       "weight": 1.0
     },
     {
@@ -33347,7 +33347,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/db.ts",
-      "source_location": "L213",
+      "source_location": "L233",
       "weight": 1.0
     },
     {
@@ -33358,7 +33358,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/db.ts",
-      "source_location": "L218",
+      "source_location": "L238",
       "weight": 1.0
     },
     {
@@ -33369,7 +33369,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/db.ts",
-      "source_location": "L246",
+      "source_location": "L266",
       "weight": 1.0
     },
     {
@@ -33380,7 +33380,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/db.ts",
-      "source_location": "L277",
+      "source_location": "L297",
       "weight": 1.0
     },
     {
@@ -33391,7 +33391,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/db.ts",
-      "source_location": "L288",
+      "source_location": "L308",
       "weight": 1.0
     },
     {
@@ -33402,7 +33402,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/db.ts",
-      "source_location": "L314",
+      "source_location": "L334",
       "weight": 1.0
     },
     {
@@ -33413,7 +33413,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/db.ts",
-      "source_location": "L338",
+      "source_location": "L358",
       "weight": 1.0
     },
     {
@@ -33424,7 +33424,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/db.ts",
-      "source_location": "L358",
+      "source_location": "L378",
       "weight": 1.0
     },
     {
@@ -33435,7 +33435,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/db.ts",
-      "source_location": "L391",
+      "source_location": "L411",
       "weight": 1.0
     },
     {
@@ -33446,7 +33446,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/db.ts",
-      "source_location": "L425",
+      "source_location": "L445",
       "weight": 1.0
     },
     {
@@ -33457,7 +33457,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/db.ts",
-      "source_location": "L434",
+      "source_location": "L454",
       "weight": 1.0
     },
     {
@@ -33468,7 +33468,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/db.ts",
-      "source_location": "L456",
+      "source_location": "L476",
       "weight": 1.0
     },
     {
@@ -33479,7 +33479,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/db.ts",
-      "source_location": "L461",
+      "source_location": "L481",
       "weight": 1.0
     },
     {
@@ -33490,7 +33490,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/db.ts",
-      "source_location": "L465",
+      "source_location": "L485",
       "weight": 1.0
     },
     {
@@ -33501,7 +33501,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/db.ts",
-      "source_location": "L470",
+      "source_location": "L490",
       "weight": 1.0
     },
     {
@@ -33512,7 +33512,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/db.ts",
-      "source_location": "L492",
+      "source_location": "L512",
       "weight": 1.0
     },
     {
@@ -33523,7 +33523,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/db.ts",
-      "source_location": "L518",
+      "source_location": "L538",
       "weight": 1.0
     },
     {
@@ -33534,18 +33534,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/db.ts",
-      "source_location": "L534",
-      "weight": 1.0
-    },
-    {
-      "source": "backend_src_db_sqliteworkspacestore",
-      "target": "backend_src_db_sqliteworkspacestore_maptarget",
-      "relation": "method",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "backend/src/db.ts",
-      "source_location": "L542",
+      "source_location": "L554",
       "weight": 1.0
     },
     {
@@ -33561,35 +33550,24 @@
     },
     {
       "source": "backend_src_db_sqliteworkspacestore",
+      "target": "backend_src_db_sqliteworkspacestore_maptarget",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/src/db.ts",
+      "source_location": "L562",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_src_db_sqliteworkspacestore",
       "target": "backend_src_db_sqliteworkspacestore_adddispatchlog",
       "relation": "method",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/db.ts",
-      "source_location": "L564",
-      "weight": 1.0
-    },
-    {
-      "source": "backend_src_db_sqliteworkspacestore",
-      "target": "backend_src_db_sqliteworkspacestore_listdispatchlogs",
-      "relation": "method",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "backend/src/db.ts",
-      "source_location": "L580",
-      "weight": 1.0
-    },
-    {
-      "source": "backend_src_db_sqliteworkspacestore",
-      "target": "backend_src_db_sqliteworkspacestore_countusers",
-      "relation": "method",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "backend/src/db.ts",
-      "source_location": "L595",
+      "source_location": "L584",
       "weight": 1.0
     },
     {
@@ -33605,40 +33583,18 @@
     },
     {
       "source": "backend_src_db_sqliteworkspacestore",
-      "target": "backend_src_db_sqliteworkspacestore_listusers",
+      "target": "backend_src_db_sqliteworkspacestore_listdispatchlogs",
       "relation": "method",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/db.ts",
-      "source_location": "L600",
+      "source_location": "L604",
       "weight": 1.0
     },
     {
       "source": "backend_src_db_sqliteworkspacestore",
-      "target": "backend_src_db_sqliteworkspacestore_getuserbyid",
-      "relation": "method",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "backend/src/db.ts",
-      "source_location": "L612",
-      "weight": 1.0
-    },
-    {
-      "source": "backend_src_db_sqliteworkspacestore",
-      "target": "backend_src_db_sqliteworkspacestore_getuserbyemail",
-      "relation": "method",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "backend/src/db.ts",
-      "source_location": "L617",
-      "weight": 1.0
-    },
-    {
-      "source": "backend_src_db_sqliteworkspacestore",
-      "target": "backend_src_db_sqliteworkspacestore_createuser",
+      "target": "backend_src_db_sqliteworkspacestore_countusers",
       "relation": "method",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -33649,13 +33605,57 @@
     },
     {
       "source": "backend_src_db_sqliteworkspacestore",
+      "target": "backend_src_db_sqliteworkspacestore_listusers",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/src/db.ts",
+      "source_location": "L627",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_src_db_sqliteworkspacestore",
+      "target": "backend_src_db_sqliteworkspacestore_getuserbyid",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/src/db.ts",
+      "source_location": "L639",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_src_db_sqliteworkspacestore",
+      "target": "backend_src_db_sqliteworkspacestore_getuserbyemail",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/src/db.ts",
+      "source_location": "L644",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_src_db_sqliteworkspacestore",
+      "target": "backend_src_db_sqliteworkspacestore_createuser",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/src/db.ts",
+      "source_location": "L649",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_src_db_sqliteworkspacestore",
       "target": "backend_src_db_sqliteworkspacestore_createsession",
       "relation": "method",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/db.ts",
-      "source_location": "L642",
+      "source_location": "L669",
       "weight": 1.0
     },
     {
@@ -33666,7 +33666,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/db.ts",
-      "source_location": "L655",
+      "source_location": "L682",
       "weight": 1.0
     },
     {
@@ -33677,7 +33677,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/db.ts",
-      "source_location": "L665",
+      "source_location": "L692",
       "weight": 1.0
     },
     {
@@ -33688,7 +33688,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/db.ts",
-      "source_location": "L670",
+      "source_location": "L697",
       "weight": 1.0
     },
     {
@@ -33699,7 +33699,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/db.ts",
-      "source_location": "L674",
+      "source_location": "L701",
       "weight": 1.0
     },
     {
@@ -33710,7 +33710,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/db.ts",
-      "source_location": "L689",
+      "source_location": "L716",
       "weight": 1.0
     },
     {
@@ -33721,7 +33721,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/db.ts",
-      "source_location": "L701",
+      "source_location": "L728",
       "weight": 1.0
     },
     {
@@ -33732,7 +33732,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/db.ts",
-      "source_location": "L767",
+      "source_location": "L794",
       "weight": 1.0
     },
     {
@@ -34422,7 +34422,7 @@
       "confidence_score": 0.85,
       "context": "argument",
       "source_file": "backend/src/db.ts",
-      "source_location": "L462",
+      "source_location": "L482",
       "weight": 1.0
     },
     {
@@ -34506,7 +34506,7 @@
       "confidence_score": 0.95,
       "context": "LandingPage",
       "source_file": "AGENTS.md",
-      "source_location": "L293",
+      "source_location": "L294",
       "weight": 1.0
     },
     {
@@ -34578,7 +34578,7 @@
       "confidence_score": 0.95,
       "context": "SqliteWorkspaceStore",
       "source_file": "AGENTS.md",
-      "source_location": "L270",
+      "source_location": "L271",
       "weight": 1.0
     },
     {
@@ -34614,7 +34614,7 @@
       "confidence_score": 0.95,
       "context": "WorkspacePage",
       "source_file": "AGENTS.md",
-      "source_location": "L304",
+      "source_location": "L305",
       "weight": 1.0
     },
     {
@@ -34626,7 +34626,7 @@
       "confidence_score": 0.95,
       "context": "WorkspacePage",
       "source_file": "AGENTS.md",
-      "source_location": "L293",
+      "source_location": "L294",
       "weight": 1.0
     },
     {
@@ -34638,7 +34638,7 @@
       "confidence_score": 0.95,
       "context": "WorkspacePage",
       "source_file": "AGENTS.md",
-      "source_location": "L308",
+      "source_location": "L309",
       "weight": 1.0
     },
     {
@@ -34806,7 +34806,7 @@
       "confidence_score": 0.95,
       "context": "main",
       "source_file": "AGENTS.md",
-      "source_location": "L448",
+      "source_location": "L449",
       "weight": 1.0
     },
     {
@@ -34818,7 +34818,7 @@
       "confidence_score": 0.95,
       "context": "main",
       "source_file": "AGENTS.md",
-      "source_location": "L353",
+      "source_location": "L354",
       "weight": 1.0
     },
     {
@@ -34842,7 +34842,19 @@
       "confidence_score": 0.95,
       "context": "navigate()",
       "source_file": "AGENTS.md",
-      "source_location": "L296",
+      "source_location": "L297",
+      "weight": 1.0
+    },
+    {
+      "source": "agents_dispatch",
+      "target": "backend_src_dispatch_pinnedfetch",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "context": "pinnedFetch",
+      "source_file": "AGENTS.md",
+      "source_location": "L240",
       "weight": 1.0
     },
     {
@@ -34890,7 +34902,7 @@
       "confidence_score": 0.95,
       "context": "publicConfig()",
       "source_file": "AGENTS.md",
-      "source_location": "L461",
+      "source_location": "L462",
       "weight": 1.0
     },
     {
@@ -34914,7 +34926,7 @@
       "confidence_score": 0.95,
       "context": "publicTarget()",
       "source_file": "AGENTS.md",
-      "source_location": "L275",
+      "source_location": "L276",
       "weight": 1.0
     },
     {
@@ -34962,7 +34974,7 @@
       "confidence_score": 0.95,
       "context": "usePathname()",
       "source_file": "AGENTS.md",
-      "source_location": "L293",
+      "source_location": "L294",
       "weight": 1.0
     },
     {
@@ -34974,7 +34986,7 @@
       "confidence_score": 0.95,
       "context": "useSpeechPlayback",
       "source_file": "AGENTS.md",
-      "source_location": "L318",
+      "source_location": "L319",
       "weight": 1.0
     },
     {
@@ -34986,10 +34998,10 @@
       "confidence_score": 0.95,
       "context": "useSpeechRecognition",
       "source_file": "AGENTS.md",
-      "source_location": "L317",
+      "source_location": "L318",
       "weight": 1.0
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "0c9a4ee7f9095569ffb7014c7acb620ebc479e90"
+  "built_at_commit": "a6135af77dad325997d3fad8e500ddf2930137fb"
 }

@@ -94,6 +94,35 @@ test('dispatch: a successful target produces a dispatched log', async () => {
   }
 });
 
+test('dispatch: operator attribution is attached to the dispatch log', async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async () => new Response('ok', { status: 200 })) as typeof fetch;
+
+  try {
+    const store = new WorkspaceStore(config);
+    const log = await executeDispatch({
+      plan: plan(),
+      targets: [target()],
+      store,
+      config,
+      operatorId: 'usr_ops123',
+      operatorName: 'Ops Lead',
+      operatorEmail: 'ops@aegis.local',
+    });
+
+    assert.equal(log.operatorId, 'usr_ops123');
+    assert.equal(log.operatorName, 'Ops Lead');
+    assert.equal(log.operatorEmail, 'ops@aegis.local');
+
+    const storedLogs = store.listDispatchLogs();
+    assert.equal(storedLogs[0].operatorId, 'usr_ops123');
+    assert.equal(storedLogs[0].operatorName, 'Ops Lead');
+    assert.equal(storedLogs[0].operatorEmail, 'ops@aegis.local');
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test('dispatch: webhook and Slack payloads match the documented shapes', async () => {
   const originalFetch = globalThis.fetch;
   const bodies: unknown[] = [];

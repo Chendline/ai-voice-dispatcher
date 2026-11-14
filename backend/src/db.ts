@@ -138,6 +138,9 @@ export class SqliteWorkspaceStore {
         id TEXT PRIMARY KEY,
         timestamp TEXT NOT NULL,
         agent_id TEXT,
+        operator_id TEXT,
+        operator_name TEXT,
+        operator_email TEXT,
         plan TEXT NOT NULL,
         results TEXT NOT NULL,
         status TEXT NOT NULL,
@@ -170,6 +173,23 @@ export class SqliteWorkspaceStore {
       CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
       CREATE INDEX IF NOT EXISTS idx_sessions_expires ON sessions(expires_at);
     `);
+
+    // Schema migrations for existing databases
+    try {
+      this.db.exec('ALTER TABLE dispatch_logs ADD COLUMN operator_id TEXT;');
+    } catch {
+      // Column already exists
+    }
+    try {
+      this.db.exec('ALTER TABLE dispatch_logs ADD COLUMN operator_name TEXT;');
+    } catch {
+      // Column already exists
+    }
+    try {
+      this.db.exec('ALTER TABLE dispatch_logs ADD COLUMN operator_email TEXT;');
+    } catch {
+      // Column already exists
+    }
   }
 
   private ensureDefaultAgent(config: AppConfig): void {
@@ -563,12 +583,16 @@ export class SqliteWorkspaceStore {
 
   addDispatchLog(log: DispatchLog): void {
     this.db.prepare(`
-      INSERT INTO dispatch_logs (id, timestamp, agent_id, plan, results, status, message)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO dispatch_logs (
+        id, timestamp, agent_id, operator_id, operator_name, operator_email, plan, results, status, message
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       log.id,
       log.timestamp,
       log.agentId ?? null,
+      log.operatorId ?? null,
+      log.operatorName ?? null,
+      log.operatorEmail ?? null,
       JSON.stringify(log.plan),
       JSON.stringify(log.results || []),
       log.status,
@@ -583,6 +607,9 @@ export class SqliteWorkspaceStore {
       id: String(row.id),
       timestamp: String(row.timestamp),
       agentId: row.agent_id ? String(row.agent_id) : undefined,
+      operatorId: row.operator_id ? String(row.operator_id) : undefined,
+      operatorName: row.operator_name ? String(row.operator_name) : undefined,
+      operatorEmail: row.operator_email ? String(row.operator_email) : undefined,
       plan: JSON.parse(String(row.plan)),
       results: JSON.parse(String(row.results || '[]')),
       status: row.status as DispatchLog['status'],
