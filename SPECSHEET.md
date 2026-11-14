@@ -30,7 +30,7 @@ Operational teams communicate incident context, customer escalations, and system
 - **Governed Dispatch Engine:** Multi-target dispatch planning with labeled fallback heuristics, SSRF destination validation, and real-time execution logging.
 - **Legal & Governance Surfaces:** Complete Terms of Service (`/terms`), Privacy Policy (`/privacy`), Cookie & Storage Policy (`/cookies`), and first-launch Apple-grade cookie consent notice banner.
 
-### 2.2 Active Remediation Plan (Sprints 1–4)
+### 2.2 Implemented Milestones (Sprints 1–4)
 - **Sprint 1 (Immediate Security) [COMPLETED]:**
   - Production SSRF Socket Pinning in `dispatch.ts` (`pinnedFetch`) to eliminate Time-of-Check to Time-of-Use (TOCTOU) DNS rebinding risks.
   - Perimeter Route Protection enforcing `requireWorkspaceAuth` and role-based permissions (`admin`, `operator`, `auditor`) across all workspace endpoints.
@@ -43,7 +43,20 @@ Operational teams communicate incident context, customer escalations, and system
   - Operator attribution (`operator_id`, `operator_name`, `operator_email`) attached to all dispatch executions and logs.
   - Audit Trail Export (JSON and RFC 4180 CSV formats) via `GET /api/dispatch/logs/export` with 1-click downloads in the Dispatch UI.
 
-### 2.3 Explicit Non-Goals
+### 2.3 Active Production Hardening Plan (Sprints 5 & 6)
+- **Sprint 5 (Auth Perimeter, Confidentiality & SSRF Hardening) [PLANNED]:**
+  - Workspace Auth Gate: Top-level dedicated authentication screen (`AuthCard`) when unauthenticated (`401 Unauthorized`) instead of offline error.
+  - Encrypted Snapshot & Backup Hygiene: Retain AES-256-GCM ciphertext (`enc:v1:...`) in Vercel Blob snapshots and include operator accounts to prevent cold-start identity loss.
+  - Complete IPv6 SSRF Shield: Explicitly parse and normalize IPv4-mapped IPv6 addresses (`::ffff:169.254.169.254`, `::ffff:172.16.0.0/12`) against metadata and private IP ranges.
+  - Asynchronous Password Hashing & Login Rate Limiting: Move from `scryptSync` to async `crypto.scrypt` (libuv thread pool) and apply dedicated 10 req/min auth rate limiter.
+- **Sprint 6 (AI Stability, Concurrency & Operational Resilience) [PLANNED]:**
+  - Anthropic History Normalization: Enforce leading user message role on sliced bounded histories to avoid upstream 400 errors on long conversations.
+  - Header-Based Gemini Auth: Transmit Google API keys via `x-goog-api-key` header rather than URL query parameters.
+  - Concurrent Multi-Target Dispatch Fanout: Parallelize target deliveries using `Promise.allSettled()`.
+  - Session Auto-Pruning & Cookie Hardening: Automatically purge expired SQLite session tokens and ensure `Secure` flag on clearing cookies over HTTPS.
+  - Graceful Shutdown & React Error Boundary: Handle `SIGTERM` / `SIGINT` signals with clean `server.close()` and `db.close()`, and mount root React `ErrorBoundary`.
+
+### 2.4 Explicit Non-Goals
 - Consumer multi-tenant SaaS with billing or paid seat tiers.
 - Inbound telephony, SIP trunking, or phone number provisioning.
 - Fake integration marketplaces or synthetic mock replies.
@@ -252,15 +265,18 @@ Base URL: `/api`
 1. **SSRF Guardrails with Socket Pinning:**
    - Target URLs must be HTTPS unless explicitly configured in local dev (`DISPATCH_ALLOW_INSECURE=true`).
    - Domain resolution pre-flight checks and socket connection handlers reject loopback, RFC 1918 private ranges, link-local, multicast, and cloud metadata IPs (`169.254.169.254`).
+   - Strict normalization of IPv4-mapped IPv6 addresses (`::ffff:`) ensuring mapped cloud metadata and private ranges are blocked.
    - Direct socket binding to pre-validated IP addresses eliminates TOCTOU DNS rebinding.
    - HTTP redirects are disabled (`redirect: 'manual'`).
 2. **Credential Hygiene:**
    - Provider API keys reside exclusively in server process environment variables.
    - Stored webhook URLs are write-only from the client perspective; API responses echo only the destination hostname.
-   - Passwords are salted and hashed using `scryptSync` (N=16384, r=8, p=1).
+   - Passwords are salted and hashed asynchronously using Node.js `scrypt` (N=16384, r=8, p=1) running on the libuv thread pool.
 3. **Session Security:**
    - Session tokens are 256-bit cryptographically secure random values transmitted via `HttpOnly`, `SameSite=Lax`, `Secure` cookies.
+   - Unauthenticated workspace requests (`401 Unauthorized`) surface a dedicated operator auth gate rather than an offline error.
 4. **Rate Limiting & DoS Protection:**
    - General API: 120 req/min per IP.
    - AI & Dispatch: 40 req/min per IP.
+   - Operator Authentication: 10 req/min per IP on login endpoints.
    - Body size cap: Strict 128 KB JSON parsing limit.
