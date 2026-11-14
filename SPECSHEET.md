@@ -25,7 +25,7 @@ Operational teams communicate incident context, customer escalations, and system
 ### 2.1 Implemented Capabilities
 - **Multi-Provider AI Registry:** Unified adapter contract driving Anthropic Messages API, OpenAI Chat Completions, Google Gemini (`generateContent`), OpenRouter, Groq, and custom OpenAI-compatible endpoints.
 - **On-Server Relational Database:** High-performance, zero-external-cost relational persistence using Node.js built-in `node:sqlite` (`DatabaseSync`), Write-Ahead Logging (WAL mode), cascading foreign keys, and indexes.
-- **On-Server Operator Authentication & RBAC:** Native `node:crypto` `scryptSync` password hashing with cryptographically secure random salts, constant-time `timingSafeEqual` verification, 256-bit opaque session tokens, `HttpOnly` `SameSite=Lax` cookies, and Role-Based Access Control (`admin`, `operator`, `viewer`).
+- **On-Server Operator Authentication & RBAC:** Native `node:crypto` asynchronous `scrypt` password hashing (libuv thread pool) with cryptographically secure random salts, constant-time `timingSafeEqual` verification, 256-bit opaque session tokens, `HttpOnly` `SameSite=Lax` cookies, and Role-Based Access Control (`admin`, `operator`, `viewer`).
 - **Voice-First Audio Pipeline:** Browser-native speech recognition (`webkitSpeechRecognition` / `SpeechRecognition`) with sentence-aware chunking, generation tokens to eliminate stale callbacks, watchdog recovery, and local speech synthesis.
 - **Governed Dispatch Engine:** Multi-target dispatch planning with labeled fallback heuristics, SSRF destination validation, and real-time execution logging.
 - **Legal & Governance Surfaces:** Complete Terms of Service (`/terms`), Privacy Policy (`/privacy`), Cookie & Storage Policy (`/cookies`), and first-launch Apple-grade cookie consent notice banner.
@@ -105,7 +105,7 @@ Operational teams communicate incident context, customer escalations, and system
 │                    Express Backend API                      │
 │                                                             │
 │  ├── validation.ts        Zod-like typed request validation │
-│  ├── auth.ts              scryptSync auth, sessions, RBAC   │
+│  ├── auth.ts              async scrypt auth, sessions, RBAC │
 │  ├── db.ts                node:sqlite (WAL mode, FK on)     │
 │  ├── config.ts            Provider metadata & env parsing   │
 │  ├── providers/           Adapter registry & normalization  │

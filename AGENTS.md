@@ -110,6 +110,7 @@ frontend/
       ui.tsx
       AegisFieldCanvas.tsx
       CookieNotice.tsx
+      ErrorBoundary.tsx
       workspace/
         AgentsPanel.tsx
         AuthCard.tsx
