@@ -185,6 +185,57 @@ test('api: chat calls the provider and persists the conversation', async () => {
   }
 });
 
+test('api: chat/stream returns SSE stream and persists conversation', async () => {
+  const originalFetch = globalThis.fetch;
+  const sseChunks = [
+    'event: content_block_delta\ndata: {"type":"content_block_delta","delta":{"type":"text_delta","text":"Incident "}}\n\n',
+    'event: content_block_delta\ndata: {"type":"content_block_delta","delta":{"type":"text_delta","text":"summarized."}}\n\n',
+  ];
+
+  globalThis.fetch = (async (input: string | URL | Request, init?: RequestInit) => {
+    const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
+    if (url.includes('/api/')) return originalFetch(input, init);
+    const stream = new ReadableStream({
+      start(controller) {
+        for (const chunk of sseChunks) {
+          controller.enqueue(new TextEncoder().encode(chunk));
+        }
+        controller.close();
+      },
+    });
+    return new Response(stream, {
+      status: 200,
+      headers: { 'content-type': 'text/event-stream' },
+    });
+  }) as typeof fetch;
+
+  try {
+    await withServer(async (base, appDeps) => {
+      const store = appDeps.store as WorkspaceStore;
+      const agent = store.listAgents()[0];
+      const response = await post(base, '/api/chat/stream', {
+        agentId: agent.id,
+        message: 'Please stream the summary.',
+      });
+      assert.equal(response.status, 200);
+      assert.match(response.headers.get('content-type') ?? '', /text\/event-stream/);
+
+      const body = await response.text();
+      assert.ok(body.includes('event: delta'));
+      assert.ok(body.includes('"delta":"Incident "'));
+      assert.ok(body.includes('"delta":"summarized."'));
+      assert.ok(body.includes('event: done'));
+      assert.ok(body.includes('"content":"Incident summarized."'));
+
+      assert.equal(store.listConversations().length, 1);
+      const conv = store.getConversation(store.listConversations()[0].id)!;
+      assert.equal(conv.messages.at(-1)?.content, 'Incident summarized.');
+    });
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test('api: target URLs are stored server-side and never echoed', async () => {
   await withServer(async base => {
     const created = await post(base, '/api/targets', {

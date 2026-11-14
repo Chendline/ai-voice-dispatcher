@@ -96,3 +96,81 @@ export async function runChat(
 
   return { conversation, reply };
 }
+
+export async function runChatStream(
+  input: ChatInput,
+  store: WorkspaceStore,
+  registry: ProviderRegistry,
+  onToken: (delta: string) => void,
+  signal?: AbortSignal,
+): Promise<ChatOutput> {
+  const agent = store.getAgent(input.agentId);
+  if (!agent) {
+    throw new ProviderError('not_configured', 'The selected agent no longer exists.');
+  }
+
+  let conversation: Conversation | undefined;
+  if (input.conversationId) {
+    conversation = store.getConversation(input.conversationId);
+    if (!conversation) {
+      throw new ProviderError('not_configured', 'The selected conversation no longer exists.');
+    }
+    if (conversation.agentId !== agent.id) {
+      throw new ProviderError('not_configured', 'This conversation belongs to a different agent.');
+    }
+  } else {
+    conversation = store.createConversation(agent);
+  }
+
+  const userMessage: ConversationMessage = {
+    id: id('msg'),
+    role: 'user',
+    content: input.message,
+    createdAt: now(),
+  };
+  store.appendMessage(conversation, userMessage);
+
+  const history: ChatMessage[] = conversation.messages
+    .filter(message => message.role === 'user' || message.role === 'assistant')
+    .slice(-MAX_HISTORY_MESSAGES)
+    .map(message => ({ role: message.role, content: message.content.slice(0, 8000) }));
+
+  const adapter = registry.get(agent.providerId);
+  const request = {
+    model: agent.modelId,
+    system: buildSystemPrompt(agent),
+    messages: history,
+    temperature: agent.temperature,
+    maxTokens: agent.maxTokens,
+    signal,
+  };
+
+  let result: {
+    text: string;
+    providerId: string;
+    model: string;
+    usage?: { inputTokens?: number; outputTokens?: number };
+  };
+
+  if (typeof adapter.streamChat === 'function') {
+    result = await adapter.streamChat(request, onToken);
+  } else {
+    result = await adapter.chat(request);
+    onToken(result.text);
+  }
+
+  const reply: ConversationMessage = {
+    id: id('msg'),
+    role: 'assistant',
+    content: result.text,
+    createdAt: now(),
+    providerId: result.providerId,
+    modelId: result.model,
+    usage: result.usage,
+  };
+  store.appendMessage(conversation, reply);
+  conversation.providerId = agent.providerId;
+  conversation.modelId = agent.modelId;
+
+  return { conversation, reply };
+}

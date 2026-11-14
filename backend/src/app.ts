@@ -5,7 +5,7 @@ import rateLimit from 'express-rate-limit';
 import { publicConfig, readConfig, type AppConfig } from './config.js';
 import { ProviderRegistry } from './providers/registry.js';
 import { ProviderError } from './providers/types.js';
-import { runChat } from './chat.js';
+import { runChat, runChatStream } from './chat.js';
 import { checkTargetUrl, executeDispatch, planDispatch, testTarget } from './dispatch.js';
 import { hydrateWorkspace as defaultHydrate, persistWorkspace as defaultPersist, persistenceEnabled } from './persistence.js';
 import { WorkspaceStore, publicTarget } from './store.js';
@@ -404,6 +404,47 @@ export function createApp(deps: AppDeps = {}) {
         return;
       }
       throw error;
+    }
+  }));
+
+  app.post('/api/chat/stream', requireWorkspaceAuth(store, 'admin', 'operator'), asyncHandler(async (req, res) => {
+    const parsed = parseChatRequest(req.body);
+    if (!parsed.ok) {
+      res.status(400).json({ error: parsed.error });
+      return;
+    }
+
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache, no-transform',
+      'Connection': 'keep-alive',
+      'X-Accel-Buffering': 'no',
+    });
+
+    const sendEvent = (event: string, data: unknown) => {
+      res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+    };
+
+    try {
+      const output = await runChatStream(
+        parsed.value,
+        store,
+        registry,
+        (delta: string) => {
+          sendEvent('delta', { delta });
+        },
+        req.signal,
+      );
+      await persist(store);
+      sendEvent('done', output);
+      res.end();
+    } catch (error) {
+      if (error instanceof ProviderError) {
+        sendEvent('error', { error: error.message, code: error.code });
+      } else {
+        sendEvent('error', { error: 'The AI provider could not complete the stream.', code: 'upstream_error' });
+      }
+      res.end();
     }
   }));
 

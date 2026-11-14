@@ -30,6 +30,7 @@ export interface ProviderAdapter {
   id: string;
   label: string;
   chat(request: ChatRequest): Promise<ChatResult>;
+  streamChat?(request: ChatRequest, onChunk: (chunk: string) => void): Promise<ChatResult>;
 }
 
 export type ProviderErrorCode =
@@ -113,6 +114,66 @@ export async function fetchJson(
       );
     }
     return (await response.json()) as unknown;
+  } catch (error) {
+    if (error instanceof ProviderError) throw error;
+    if (controller.signal.aborted) {
+      throw new ProviderError('timeout', 'The AI provider did not respond before the timeout.');
+    }
+    throw new ProviderError('network', 'The AI provider could not be reached.');
+  } finally {
+    clearTimeout(timer);
+    signal?.removeEventListener('abort', forwardAbort);
+  }
+}
+
+export async function streamSse(
+  url: string,
+  init: RequestInit,
+  timeoutMs: number,
+  signal: AbortSignal | undefined,
+  onLine: (line: string) => void,
+): Promise<void> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(new Error('timeout')), timeoutMs);
+  const forwardAbort = () => controller.abort(signal?.reason);
+
+  if (signal) {
+    if (signal.aborted) forwardAbort();
+    else signal.addEventListener('abort', forwardAbort, { once: true });
+  }
+
+  try {
+    const response = await fetch(url, { ...init, signal: controller.signal });
+    if (!response.ok) {
+      const detail = await readErrorDetail(response);
+      const code = classifyStatus(response.status);
+      throw new ProviderError(
+        code,
+        detail || `The AI provider responded with HTTP ${response.status}.`,
+        response.status,
+      );
+    }
+    if (!response.body) {
+      throw new ProviderError('invalid_response', 'The AI provider returned an empty response stream.');
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() ?? '';
+      for (const line of lines) {
+        onLine(line.trim());
+      }
+    }
+    if (buffer.trim()) {
+      onLine(buffer.trim());
+    }
   } catch (error) {
     if (error instanceof ProviderError) throw error;
     if (controller.signal.aborted) {
