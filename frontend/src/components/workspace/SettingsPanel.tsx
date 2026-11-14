@@ -349,7 +349,7 @@ export function SettingsPanel({
       </div>
 
       <aside className="settings-side">
-        <AuthCard />
+        <AuthCard onAuthenticated={onChanged} />
 
         <section className="settings-card compact">
           <h3>Runtime</h3>

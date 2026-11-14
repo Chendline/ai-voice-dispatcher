@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { api } from '../lib/api';
+import { api, ApiError } from '../lib/api';
 import type { WorkspaceBootstrap } from '../types';
 
 type LoadStatus = 'loading' | 'ready' | 'error';
@@ -8,6 +8,7 @@ export function useWorkspaceData() {
   const [data, setData] = useState<WorkspaceBootstrap | null>(null);
   const [status, setStatus] = useState<LoadStatus>('loading');
   const [error, setError] = useState<string | null>(null);
+  const [authRequired, setAuthRequired] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const epoch = useRef(0);
 
@@ -19,11 +20,18 @@ export function useWorkspaceData() {
       const next = await api.workspace();
       if (epoch.current !== current) return;
       setData(next);
+      setAuthRequired(false);
       setStatus('ready');
     } catch (loadError) {
       if (epoch.current !== current) return;
-      setError(loadError instanceof Error ? loadError.message : 'AEGIS could not reach its API.');
-      setStatus(previous => (previous === 'ready' ? 'ready' : 'error'));
+      if (loadError instanceof ApiError && loadError.status === 401) {
+        setAuthRequired(true);
+        setStatus('ready');
+      } else {
+        setAuthRequired(false);
+        setError(loadError instanceof Error ? loadError.message : 'AEGIS could not reach its API.');
+        setStatus(previous => (previous === 'ready' ? 'ready' : 'error'));
+      }
     } finally {
       if (epoch.current === current) setRefreshing(false);
     }
@@ -33,5 +41,5 @@ export function useWorkspaceData() {
     void reload();
   }, [reload]);
 
-  return { data, status, error, refreshing, reload, setData };
+  return { data, status, error, authRequired, refreshing, reload, setData };
 }

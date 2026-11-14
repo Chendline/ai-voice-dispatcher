@@ -152,5 +152,6 @@ export interface WorkspaceState {
   conversations: Conversation[];
   targets: DispatchTarget[];
   dispatchLogs: DispatchLog[];
+  users?: User[];
   updatedAt: string;
 }

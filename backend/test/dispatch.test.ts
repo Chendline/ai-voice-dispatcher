@@ -51,6 +51,12 @@ test('dispatch: private and insecure URLs are blocked by default', async () => {
     'https://192.168.1.2/hook',
     'https://169.254.169.254/latest/meta-data',
     'https://metadata.google.internal/hook',
+    'https://[::1]/hook',
+    'https://[fe80::1]/hook',
+    'https://[::ffff:169.254.169.254]/meta',
+    'https://[::ffff:a9fe:a9fe]/meta',
+    'https://[::ffff:127.0.0.1]/hook',
+    'https://[::ffff:172.16.0.1]/hook',
   ]) {
     const result = await checkTargetUrl(url, false);
     assert.equal(result.ok, false, url);
@@ -254,6 +260,30 @@ test('dispatch: pinnedFetch rejects private IP when allowInsecure is false', asy
         method: 'POST',
         pinnedIp: '169.254.169.254',
         pinnedFamily: 4,
+        allowInsecure: false,
+      });
+    },
+    { message: /Target resolved to blocked private address/ }
+  );
+
+  await assert.rejects(
+    async () => {
+      await pinnedFetch('https://example.com/webhook', {
+        method: 'POST',
+        pinnedIp: '::ffff:169.254.169.254',
+        pinnedFamily: 6,
+        allowInsecure: false,
+      });
+    },
+    { message: /Target resolved to blocked private address/ }
+  );
+
+  await assert.rejects(
+    async () => {
+      await pinnedFetch('https://example.com/webhook', {
+        method: 'POST',
+        pinnedIp: '::ffff:a9fe:a9fe',
+        pinnedFamily: 6,
         allowInsecure: false,
       });
     },

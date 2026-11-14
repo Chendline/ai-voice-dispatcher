@@ -37,6 +37,7 @@ export interface AppDeps {
   persist?: (store: WorkspaceStore) => Promise<void>;
   rateLimit?: { windowMs: number; limit: number } | false;
   aiRateLimit?: { windowMs: number; limit: number } | false;
+  authRateLimit?: { windowMs: number; limit: number } | false;
 }
 
 type AsyncHandler = (req: Request, res: Response, next: NextFunction) => Promise<unknown>;
@@ -79,6 +80,7 @@ export function createApp(deps: AppDeps = {}) {
   const persist = deps.persist ?? defaultPersist;
   const rateLimitConfig = deps.rateLimit === undefined ? { windowMs: 60_000, limit: 120 } : deps.rateLimit;
   const aiRateLimitConfig = deps.aiRateLimit === undefined ? { windowMs: 60_000, limit: 40 } : deps.aiRateLimit;
+  const authRateLimitConfig = deps.authRateLimit === undefined ? { windowMs: 60_000, limit: 10 } : deps.authRateLimit;
 
   const app = express();
   app.disable('x-powered-by');
@@ -118,6 +120,16 @@ export function createApp(deps: AppDeps = {}) {
       standardHeaders: 'draft-7',
       legacyHeaders: false,
       message: { error: 'Too many AI or dispatch requests. Please wait a moment.' },
+    }));
+  }
+
+  if (authRateLimitConfig) {
+    app.use('/api/auth/login', rateLimit({
+      windowMs: authRateLimitConfig.windowMs,
+      limit: authRateLimitConfig.limit,
+      standardHeaders: 'draft-7',
+      legacyHeaders: false,
+      message: { error: 'Too many login attempts. Please wait a moment.' },
     }));
   }
 
@@ -174,7 +186,7 @@ export function createApp(deps: AppDeps = {}) {
       return res.status(400).json({ error: 'Name is required.' });
     }
 
-    const { hash, salt } = hashPassword(password);
+    const { hash, salt } = await hashPassword(password);
     const user = store.createUser({
       email,
       passwordHash: hash,
@@ -196,7 +208,8 @@ export function createApp(deps: AppDeps = {}) {
     }
 
     const user = store.getUserByEmail(email);
-    if (!user || !verifyPassword(password, user.passwordHash, user.salt)) {
+    const valid = user ? await verifyPassword(password, user.passwordHash, user.salt) : false;
+    if (!valid || !user) {
       return res.status(401).json({ error: 'Invalid email or password.' });
     }
 
@@ -229,7 +242,7 @@ export function createApp(deps: AppDeps = {}) {
     }
 
     const userRole = hasUsers ? (role === 'admin' || role === 'auditor' ? role : 'operator') : 'admin';
-    const { hash, salt } = hashPassword(password);
+    const { hash, salt } = await hashPassword(password);
     const user = store.createUser({
       email,
       passwordHash: hash,

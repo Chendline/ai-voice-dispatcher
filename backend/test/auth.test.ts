@@ -8,12 +8,12 @@ import { readConfig } from '../src/config.js';
 import { WorkspaceStore } from '../src/store.js';
 import { hashPassword, verifyPassword } from '../src/auth.js';
 
-test('auth: password hashing and verification with scrypt', () => {
-  const { hash, salt } = hashPassword('correct-horse-battery-staple');
+test('auth: password hashing and verification with scrypt', async () => {
+  const { hash, salt } = await hashPassword('correct-horse-battery-staple');
   assert.ok(hash);
   assert.ok(salt);
-  assert.ok(verifyPassword('correct-horse-battery-staple', hash, salt));
-  assert.equal(verifyPassword('wrong-password', hash, salt), false);
+  assert.ok(await verifyPassword('correct-horse-battery-staple', hash, salt));
+  assert.equal(await verifyPassword('wrong-password', hash, salt), false);
 });
 
 async function withAuthServer(run: (base: string) => Promise<void>) {
@@ -26,6 +26,7 @@ async function withAuthServer(run: (base: string) => Promise<void>) {
     persist: async () => {},
     rateLimit: false,
     aiRateLimit: false,
+    authRateLimit: false,
   });
 
   const server: Server = app.listen(0);
@@ -265,4 +266,47 @@ test('auth & rbac: perimeter route protection and role permissions', async () =>
     });
     assert.equal(adminTarget.status, 201);
   });
+});
+
+test('auth: dedicated rate limiter throttles brute-force login attempts', async () => {
+  const config = readConfig();
+  const store = new WorkspaceStore(config, ':memory:');
+  const app = createApp({
+    config,
+    store,
+    hydrate: async () => {},
+    persist: async () => {},
+    rateLimit: false,
+    aiRateLimit: false,
+    authRateLimit: { windowMs: 60_000, limit: 3 }, // strict limit of 3 for test
+  });
+
+  const server: Server = app.listen(0);
+  await once(server, 'listening');
+  const { port } = server.address() as AddressInfo;
+  const base = `http://127.0.0.1:${port}`;
+
+  try {
+    // Send 3 requests within limit
+    for (let i = 0; i < 3; i++) {
+      const res = await fetch(`${base}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ email: 'test@example.com', password: 'wrong' }),
+      });
+      assert.equal(res.status, 401);
+    }
+
+    // 4th request must be rate limited (429)
+    const blockedRes = await fetch(`${base}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ email: 'test@example.com', password: 'wrong' }),
+    });
+    assert.equal(blockedRes.status, 429);
+    const body = await blockedRes.json() as { error: string };
+    assert.match(body.error, /Too many login attempts/);
+  } finally {
+    await new Promise<void>(resolve => server.close(() => resolve()));
+  }
 });

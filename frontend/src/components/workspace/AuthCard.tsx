@@ -4,7 +4,7 @@ import { api, ApiError } from '../../lib/api';
 import { Pill, Spinner } from '../ui';
 import { CheckIcon, ShieldIcon } from '../Icons';
 
-export function AuthCard() {
+export function AuthCard({ onAuthenticated }: { onAuthenticated?: () => void } = {}) {
   const [status, setStatus] = useState<AuthStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -41,6 +41,7 @@ export function AuthCard() {
       setEmail('');
       setPassword('');
       setName('');
+      onAuthenticated?.();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Setup failed');
     } finally {
@@ -57,6 +58,7 @@ export function AuthCard() {
       setStatus({ initialized: true, user: res.user });
       setEmail('');
       setPassword('');
+      onAuthenticated?.();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Invalid credentials');
     } finally {
@@ -69,6 +71,7 @@ export function AuthCard() {
     try {
       await api.logout();
       setStatus(curr => curr ? { ...curr, user: null } : null);
+      onAuthenticated?.();
     } catch (err) {
       console.warn('Logout failed:', err);
     } finally {
