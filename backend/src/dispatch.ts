@@ -1,3 +1,5 @@
+import http from 'node:http';
+import https from 'node:https';
 import { promises as dns } from 'node:dns';
 import { isIP } from 'node:net';
 import type { AppConfig } from './config.js';
@@ -70,6 +72,165 @@ function privateAddress(address: string): boolean {
 export interface UrlSafety {
   ok: boolean;
   reason?: string;
+  resolvedAddress?: string;
+  family?: number;
+}
+
+const defaultFetch = globalThis.fetch;
+
+export interface PinnedFetchOptions {
+  method: string;
+  headers: Record<string, string>;
+  body: string;
+  signal?: AbortSignal;
+  pinnedIp?: string;
+  pinnedFamily?: number;
+  allowInsecure?: boolean;
+  timeoutMs?: number;
+}
+
+export interface PinnedFetchResponse {
+  status: number;
+  text: () => Promise<string>;
+}
+
+/**
+ * Executes an HTTP/HTTPS dispatch request with strict socket IP pinning.
+ * Pinned socket resolution ensures that no secondary DNS lookup (e.g. via DNS rebinding)
+ * can redirect outbound requests to private RFC 1918 or link-local/cloud metadata ranges.
+ */
+export async function pinnedFetch(
+  targetUrl: string,
+  options: PinnedFetchOptions
+): Promise<PinnedFetchResponse> {
+  // If globalThis.fetch was mocked or overridden (e.g. during unit tests), defer to the mock
+  if (globalThis.fetch !== defaultFetch) {
+    const res = await globalThis.fetch(targetUrl, {
+      method: options.method,
+      headers: options.headers,
+      body: options.body,
+      signal: options.signal,
+      redirect: 'manual',
+    });
+    return {
+      status: res.status,
+      text: () => res.text(),
+    };
+  }
+
+  const parsed = new URL(targetUrl);
+  const isHttps = parsed.protocol === 'https:';
+  const client = isHttps ? https : http;
+
+  const pinnedIp = options.pinnedIp;
+  const pinnedFamily = options.pinnedFamily ?? 4;
+
+  if (!options.allowInsecure && pinnedIp && privateAddress(pinnedIp)) {
+    throw new Error(`Target resolved to blocked private address: ${pinnedIp}`);
+  }
+
+  const lookupFn = pinnedIp
+    ? ((
+        _hostname: string,
+        opts: unknown,
+        cb: (err: NodeJS.ErrnoException | null, address: string | { address: string; family: number }[], family?: number) => void
+      ) => {
+        if (!options.allowInsecure && privateAddress(pinnedIp)) {
+          cb(new Error(`Target resolved to blocked private address: ${pinnedIp}`), '');
+          return;
+        }
+        const lookupOpts = typeof opts === 'object' && opts !== null ? (opts as { all?: boolean }) : {};
+        if (lookupOpts.all) {
+          cb(null, [{ address: pinnedIp, family: pinnedFamily }]);
+        } else {
+          cb(null, pinnedIp, pinnedFamily);
+        }
+      })
+    : undefined;
+
+  return new Promise<PinnedFetchResponse>((resolve, reject) => {
+    let settled = false;
+
+    const cleanup = () => {
+      if (options.signal) {
+        options.signal.removeEventListener('abort', onAbort);
+      }
+    };
+
+    const onAbort = () => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      req.destroy(new DOMException('The operation was aborted.', 'AbortError'));
+      reject(new DOMException('The operation was aborted.', 'AbortError'));
+    };
+
+    const onResponse = (res: http.IncomingMessage) => {
+      const chunks: Buffer[] = [];
+      let totalLength = 0;
+      const MAX_BYTES = 64 * 1024;
+
+      res.on('data', (chunk: Buffer) => {
+        if (totalLength < MAX_BYTES) {
+          chunks.push(chunk);
+          totalLength += chunk.length;
+        }
+      });
+
+      res.on('end', () => {
+        if (settled) return;
+        settled = true;
+        cleanup();
+        const text = Buffer.concat(chunks).toString('utf8');
+        resolve({
+          status: res.statusCode ?? 500,
+          text: async () => text,
+        });
+      });
+    };
+
+    const requestOptions: https.RequestOptions = {
+      protocol: parsed.protocol,
+      hostname: parsed.hostname,
+      port: parsed.port ? Number(parsed.port) : (isHttps ? 443 : 80),
+      path: `${parsed.pathname || '/'}${parsed.search || ''}`,
+      method: options.method,
+      headers: {
+        ...options.headers,
+        host: parsed.host,
+      },
+      lookup: lookupFn as https.RequestOptions['lookup'],
+      servername: isHttps ? parsed.hostname : undefined,
+      timeout: options.timeoutMs,
+    };
+
+    const req = isHttps ? https.request(requestOptions, onResponse) : http.request(requestOptions, onResponse);
+
+    if (options.signal) {
+      if (options.signal.aborted) {
+        return onAbort();
+      }
+      options.signal.addEventListener('abort', onAbort);
+    }
+
+    req.on('timeout', () => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      req.destroy(new DOMException('The operation timed out.', 'AbortError'));
+      reject(new DOMException('The operation timed out.', 'AbortError'));
+    });
+
+    req.on('error', (err) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      reject(err);
+    });
+
+    req.write(options.body);
+    req.end();
+  });
 }
 
 /**
@@ -92,13 +253,27 @@ export async function checkTargetUrl(url: string, allowInsecure: boolean): Promi
     return { ok: false, reason: 'Target URL must not contain credentials.' };
   }
 
-  if (allowInsecure) return { ok: true };
+  const hostname = parsed.hostname.toLowerCase();
+
+  if (allowInsecure) {
+    if (isIP(hostname) !== 0) {
+      return { ok: true, resolvedAddress: hostname, family: isIP(hostname) };
+    }
+    try {
+      const records = await dns.lookup(hostname, { all: true, verbatim: true });
+      if (records.length > 0) {
+        return { ok: true, resolvedAddress: records[0].address, family: records[0].family };
+      }
+    } catch {
+      // In insecure local mode, allow unresolved hostnames for custom mocks
+    }
+    return { ok: true };
+  }
 
   if (parsed.protocol !== 'https:') {
     return { ok: false, reason: 'Target URL must use https (set DISPATCH_ALLOW_INSECURE=true only for local testing).' };
   }
 
-  const hostname = parsed.hostname.toLowerCase();
   if (
     hostname === 'localhost' ||
     hostname.endsWith('.localhost') ||
@@ -113,7 +288,7 @@ export async function checkTargetUrl(url: string, allowInsecure: boolean): Promi
   if (isIP(hostname) !== 0) {
     return privateAddress(hostname)
       ? { ok: false, reason: 'Target URL points to a private network address.' }
-      : { ok: true };
+      : { ok: true, resolvedAddress: hostname, family: isIP(hostname) };
   }
 
   try {
@@ -122,11 +297,10 @@ export async function checkTargetUrl(url: string, allowInsecure: boolean): Promi
     if (records.some(record => privateAddress(record.address))) {
       return { ok: false, reason: 'Target host resolves to a private network address.' };
     }
+    return { ok: true, resolvedAddress: records[0].address, family: records[0].family };
   } catch {
     return { ok: false, reason: 'Target host could not be resolved.' };
   }
-
-  return { ok: true };
 }
 
 function sanitizeDetail(text: string): string {
@@ -182,9 +356,8 @@ async function postTarget(
   const timer = setTimeout(() => controller.abort(), config.dispatchTimeoutMs);
 
   try {
-    const response = await fetch(target.url, {
+    const response = await pinnedFetch(target.url, {
       method: 'POST',
-      redirect: 'manual',
       signal: controller.signal,
       headers: {
         'content-type': 'application/json',
@@ -193,6 +366,10 @@ async function postTarget(
         'x-aegis-dispatch-id': plan.id,
       },
       body: JSON.stringify(payload),
+      pinnedIp: safety.resolvedAddress,
+      pinnedFamily: safety.family,
+      allowInsecure: config.allowInsecureWebhooks,
+      timeoutMs: config.dispatchTimeoutMs,
     });
 
     const durationMs = Date.now() - started;

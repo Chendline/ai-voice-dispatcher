@@ -114,3 +114,19 @@ export function requireRole(...allowedRoles: UserRole[]) {
     next();
   };
 }
+
+export function requireWorkspaceAuth(store: SqliteWorkspaceStore, ...allowedRoles: UserRole[]) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    // If the system has 0 registered users, allow unauthenticated setup/bootstrap
+    if (store.countUsers() === 0) {
+      return next();
+    }
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required. Please log in.', code: 'unauthorized' });
+    }
+    if (allowedRoles.length > 0 && !allowedRoles.includes(req.user.role)) {
+      return res.status(403).json({ error: 'Forbidden: Insufficient permissions.', code: 'forbidden' });
+    }
+    next();
+  };
+}
