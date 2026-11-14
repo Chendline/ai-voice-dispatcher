@@ -65,3 +65,7 @@ secrets/
 *.cert
 .vercel
 .env*
+
+# Graphify temporary caches
+graphify-out/cache/
+graphify-out/converted/
