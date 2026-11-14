@@ -1,4 +1,5 @@
 import { CookieNotice } from './components/CookieNotice';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { isCookiesPath, isPrivacyPath, isTermsPath, isWorkspacePath, usePathname } from './lib/router';
 import { CookiesPage } from './pages/CookiesPage';
 import { LandingPage } from './pages/LandingPage';
@@ -17,9 +18,9 @@ export default function App() {
   else pageContent = <LandingPage />;
 
   return (
-    <>
+    <ErrorBoundary>
       {pageContent}
       <CookieNotice />
-    </>
+    </ErrorBoundary>
   );
 }

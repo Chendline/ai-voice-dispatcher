@@ -22,6 +22,10 @@ export function createAnthropicAdapter(options: {
         .filter(message => message.role !== 'system')
         .map(message => ({ role: message.role, content: message.content }));
 
+      while (messages.length > 0 && messages[0].role !== 'user') {
+        messages.shift();
+      }
+
       if (messages.length === 0) {
         throw new ProviderError('invalid_response', 'At least one user message is required.');
       }
@@ -71,6 +75,10 @@ export function createAnthropicAdapter(options: {
       const messages = request.messages
         .filter(message => message.role !== 'system')
         .map(message => ({ role: message.role, content: message.content }));
+
+      while (messages.length > 0 && messages[0].role !== 'user') {
+        messages.shift();
+      }
 
       if (messages.length === 0) {
         throw new ProviderError('invalid_response', 'At least one user message is required.');

@@ -28,6 +28,7 @@ export interface AppConfig {
   stateId: string;
   dbPath: string;
   encryptionKey?: string | null;
+  trustProxy: boolean;
   warnings: string[];
 }
 
@@ -202,6 +203,7 @@ export function readConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     stateId: env.AEGIS_STATE_ID?.trim() || 'default',
     dbPath: env.AEGIS_DB_PATH?.trim() || env.SQLITE_PATH?.trim() || (process.env.NODE_ENV === 'test' ? ':memory:' : 'data/aegis.sqlite'),
     encryptionKey: readKey(env.AEGIS_ENCRYPTION_KEY || env.ENCRYPTION_KEY),
+    trustProxy: /^(1|true|yes)$/i.test(env.TRUST_PROXY ?? '') || Boolean(process.env.VERCEL),
     warnings,
   };
 }

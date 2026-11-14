@@ -33,10 +33,13 @@ export function createGoogleAdapter(options: {
 
       const model = encodeURIComponent(request.model);
       const payload = (await fetchJson(
-        `${options.baseUrl}/models/${model}:generateContent?key=${encodeURIComponent(options.apiKey)}`,
+        `${options.baseUrl}/models/${model}:generateContent`,
         {
           method: 'POST',
-          headers: { 'content-type': 'application/json' },
+          headers: {
+            'content-type': 'application/json',
+            'x-goog-api-key': options.apiKey,
+          },
           body: JSON.stringify({
             ...(request.system ? { systemInstruction: { parts: [{ text: request.system }] } } : {}),
             contents,
@@ -85,10 +88,13 @@ export function createGoogleAdapter(options: {
       let accumulated = '';
 
       await streamSse(
-        `${options.baseUrl}/models/${model}:streamGenerateContent?alt=sse&key=${encodeURIComponent(options.apiKey)}`,
+        `${options.baseUrl}/models/${model}:streamGenerateContent?alt=sse`,
         {
           method: 'POST',
-          headers: { 'content-type': 'application/json' },
+          headers: {
+            'content-type': 'application/json',
+            'x-goog-api-key': options.apiKey,
+          },
           body: JSON.stringify({
             ...(request.system ? { systemInstruction: { parts: [{ text: request.system }] } } : {}),
             contents,

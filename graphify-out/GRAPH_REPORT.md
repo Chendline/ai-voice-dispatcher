@@ -1,17 +1,17 @@
 # Graph Report - ai-voice-dispatcher  (2026-11-15)
 
 ## Corpus Check
-- 91 files · ~84,125 words
+- 92 files · ~84,863 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 12 file(s) not represented in the graph (top: .css 7, (none) 4, .example 1)
 
 ## Summary
-- 1018 nodes · 2003 edges · 55 communities (53 shown, 2 thin omitted)
-- Extraction: 97% EXTRACTED · 3% INFERRED · 0% AMBIGUOUS · INFERRED: 59 edges (avg confidence: 0.92)
+- 1029 nodes · 2031 edges · 61 communities (59 shown, 2 thin omitted)
+- Extraction: 97% EXTRACTED · 3% INFERRED · 0% AMBIGUOUS · INFERRED: 65 edges (avg confidence: 0.93)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `d3ee1a8b`
+- Built from commit: `a6f1ac94`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -20,12 +20,12 @@
 - tts.ts
 - WorkspacePage.tsx
 - Icons.tsx
-- playTap
+- router.ts
 - dispatch.test.ts
 - chat.ts
 - dispatch.ts
-- createApp
-- auth.ts
+- backend/src/types.ts
+- app.ts
 - gravityField.ts
 - compilerOptions
 - compilerOptions
@@ -35,18 +35,20 @@
 - compilerOptions
 - DispatchPanel.tsx
 - AGENTS.md
-- SettingsPanel.tsx
+- VoicePanel.tsx
 - The Design System Page
-- cookieConsent.test.ts
-- app.ts
+- react
+- persistence.ts
 - AEGIS
+- Step 4: Map Tokens to the Theme
 - Registry Authoring and Addresses
-- ChatPanel.tsx
+- SettingsPanel.tsx
 - .oxlintrc.json
 - Apple Design
+- Critical Rules
 - Design Systems from DESIGN.md
 - shadcn/ui
-- AEGIS — Product & Technical Specification (SRS)
+- ErrorBoundary
 - frontend/tsconfig.json
 - Commands
 - Customization & Theming
@@ -70,79 +72,83 @@
 - Icons
 - Core Philosophy
 - Debugging Animations
+- dependencies
+- devDependencies
+- ProviderRegistry
+- Customizing Components
 
 ## God Nodes (most connected - your core abstractions)
-1. `SqliteWorkspaceStore` - 56 edges
+1. `SqliteWorkspaceStore` - 57 edges
 2. `base()` - 34 edges
 3. `createApp()` - 33 edges
 4. `SpeechPlaybackController` - 27 edges
-5. `react` - 24 edges
+5. `react` - 25 edges
 6. `playTap()` - 24 edges
 7. `navigate()` - 23 edges
 8. `Apple Design` - 20 edges
 9. `compilerOptions` - 18 edges
-10. `ProviderError` - 17 edges
+10. `now()` - 17 edges
 
 ## Surprising Connections (you probably didn't know these)
 - ``info` — Project information` --references--> `base()`  [INFERRED]
   .agents/skills/shadcn/cli.md → frontend/src/components/Icons.tsx
 - `Switching Presets` --references--> `base()`  [INFERRED]
   .agents/skills/shadcn/cli.md → frontend/src/components/Icons.tsx
-- `Inputs to Confirm` --references--> `base()`  [INFERRED]
-  .agents/skills/shadcn/design-system.md → frontend/src/components/Icons.tsx
 - `Picking a style` --references--> `base()`  [INFERRED]
   .agents/skills/shadcn/design-system.md → frontend/src/components/Icons.tsx
 - `Key Fields` --references--> `base()`  [INFERRED]
+  .agents/skills/shadcn/SKILL.md → frontend/src/components/Icons.tsx
+- `Workflow` --references--> `base()`  [INFERRED]
   .agents/skills/shadcn/SKILL.md → frontend/src/components/Icons.tsx
 
 ## Import Cycles
 - None detected.
 
-## Communities (55 total, 2 thin omitted)
+## Communities (61 total, 2 thin omitted)
 
 ### Community 0 - "SqliteWorkspaceStore"
-Cohesion: 0.05
-Nodes (45): components, missing, source, [uiArg, ...roots], uiDir, walk(), Store and persistence, AppDeps (+37 more)
+Cohesion: 0.06
+Nodes (31): components, missing, source, [uiArg, ...roots], uiDir, walk(), ChatOutput, decryptTargetUrl() (+23 more)
 
 ### Community 1 - "tts.ts"
 Cohesion: 0.07
-Nodes (33): groupVoices(), SpeechSettingsPanel(), statusTone(), clamp(), persistSettings(), readSettings(), TEST_VOICE_SAMPLE, useSpeechPlayback() (+25 more)
+Nodes (36): groupVoices(), SpeechController, SpeechSettingsPanel(), STATUS_LABEL, statusTone(), clamp(), persistSettings(), readSettings() (+28 more)
 
 ### Community 2 - "WorkspacePage.tsx"
 Cohesion: 0.10
-Nodes (34): AgentsPanel(), toInput(), ChatPanelProps, VoicePanelProps, LoadStatus, useWorkspaceData(), api, ApiError (+26 more)
+Nodes (27): Spinner(), AuthCard(), LoadStatus, useWorkspaceData(), api, ApiError, configuredBase, request() (+19 more)
 
 ### Community 3 - "Icons.tsx"
 Cohesion: 0.12
-Nodes (31): AgentsIcon(), AlertIcon(), ArrowRight(), ArrowUpRight(), base(), BoltIcon(), ChatIcon(), CheckIcon() (+23 more)
+Nodes (30): Props, State, AgentsIcon(), AlertIcon(), ArrowUpRight(), base(), BoltIcon(), ChatIcon() (+22 more)
 
-### Community 4 - "playTap"
-Cohesion: 0.21
-Nodes (22): Routing, App(), CookieNotice(), currentPath(), isCookiesPath(), isPrivacyPath(), isTermsPath(), isWorkspacePath() (+14 more)
+### Community 4 - "router.ts"
+Cohesion: 0.12
+Nodes (29): 5. Frontend rules, Data layer, Landing field, Routing, Sound, State and components, Styling and UX, Voice (+21 more)
 
 ### Community 5 - "dispatch.test.ts"
-Cohesion: 0.11
-Nodes (21): 11. Common pitfalls, Configuration, ProviderId, publicConfig(), readConfig(), readHttpsBase(), readKey(), readModels() (+13 more)
+Cohesion: 0.10
+Nodes (23): 11. Common pitfalls, Configuration, ProviderId, publicConfig(), readConfig(), readHttpsBase(), readKey(), readModels() (+15 more)
 
 ### Community 6 - "chat.ts"
-Cohesion: 0.09
-Nodes (34): 4. Backend rules, API responses, Chat, Provider adapters, Validation, buildSystemPrompt(), ChatInput, now() (+26 more)
+Cohesion: 0.11
+Nodes (32): 4. Backend rules, API responses, Chat, Provider adapters, Store and persistence, Validation, buildBoundedHistory(), buildSystemPrompt() (+24 more)
 
 ### Community 7 - "dispatch.ts"
-Cohesion: 0.17
-Nodes (21): Dispatch, checkTargetUrl(), executeDispatch(), hostOf(), now(), parsePlannerJson(), pinnedFetch(), PinnedFetchOptions (+13 more)
+Cohesion: 0.16
+Nodes (22): Dispatch, checkTargetUrl(), executeDispatch(), ExecuteDispatchOptions, hostOf(), now(), parsePlannerJson(), pinnedFetch() (+14 more)
 
-### Community 8 - "createApp"
-Cohesion: 0.17
-Nodes (23): createApp(), PRIORITIES, Priority, TargetType, AgentInput, ChatInput, ClientPlan, ExecuteInput (+15 more)
+### Community 8 - "backend/src/types.ts"
+Cohesion: 0.11
+Nodes (29): ChatUsage, DispatchResult, DispatchStatus, PRIORITIES, Priority, Session, TARGET_TYPES, TargetType (+21 more)
 
-### Community 9 - "auth.ts"
-Cohesion: 0.14
-Nodes (15): createAuthMiddleware(), Express, extractAuthToken(), formatClearCookie(), formatSessionCookie(), hashPassword(), parseCookie(), requireRole() (+7 more)
+### Community 9 - "app.ts"
+Cohesion: 0.16
+Nodes (21): AsyncHandler, createApp(), providerErrorStatus(), sendProviderError(), createAuthMiddleware(), Express, extractAuthToken(), formatClearCookie() (+13 more)
 
 ### Community 10 - "gravityField.ts"
 Cohesion: 0.19
-Nodes (17): Bounds, createEnvironmentTexture(), createGravityField(), FieldSphere, GravityFieldHandle, GravityFieldOptions, MATERIAL_SPECS, mulberry32() (+9 more)
+Nodes (17): AegisFieldCanvas(), Bounds, createEnvironmentTexture(), createGravityField(), FieldSphere, GravityFieldHandle, GravityFieldOptions, MATERIAL_SPECS (+9 more)
 
 ### Community 11 - "compilerOptions"
 Cohesion: 0.10
@@ -153,56 +159,60 @@ Cohesion: 0.12
 Nodes (16): compilerOptions, allowImportingTsExtensions, erasableSyntaxOnly, lib, module, moduleDetection, noEmit, noFallthroughCasesInSwitch (+8 more)
 
 ### Community 13 - "frontend/package.json"
-Cohesion: 0.05
-Nodes (35): dependencies, lenis, react, react-dom, three, devDependencies, oxlint, @types/node (+27 more)
+Cohesion: 0.06
+Nodes (34): dependencies, lenis, react, react-dom, three, devDependencies, oxlint, @types/node (+26 more)
 
 ### Community 14 - "frontend"
 Cohesion: 0.14
 Nodes (13): root, runtime, buildCommand, framework, outputDirectory, rewrites, root, headers (+5 more)
 
 ### Community 15 - "backend/package.json"
-Cohesion: 0.06
-Nodes (32): dependencies, cors, dotenv, express, express-rate-limit, helmet, @vercel/blob, description (+24 more)
+Cohesion: 0.11
+Nodes (17): description, @types/node, typescript, main, name, scripts, build, dev (+9 more)
 
 ### Community 16 - "compilerOptions"
 Cohesion: 0.15
 Nodes (12): compilerOptions, esModuleInterop, forceConsistentCasingInFileNames, lib, module, moduleResolution, outDir, rootDir (+4 more)
 
 ### Community 17 - "DispatchPanel.tsx"
-Cohesion: 0.38
-Nodes (9): formatTime(), DispatchPanel(), PRIORITIES, statusTone(), Priority, getAudioContext(), playDispatchComplete(), playDispatchLaunch() (+1 more)
+Cohesion: 0.44
+Nodes (8): formatTime(), DispatchPanel(), PRIORITIES, statusTone(), getAudioContext(), playDispatchComplete(), playDispatchLaunch(), playStepTick()
 
 ### Community 18 - "AGENTS.md"
-Cohesion: 0.10
-Nodes (18): 12. Definition of done, 1. Product direction, 2. Architecture, 3. Commands, 5. Frontend rules, 6. Honesty rules (non-negotiable), 7. Security, 8. Testing (+10 more)
+Cohesion: 0.15
+Nodes (11): 12. Definition of done, 1. Product direction, 2. Architecture, 3. Commands, 6. Honesty rules (non-negotiable), 7. Security, 8. Testing, 9. Dependency policy (+3 more)
 
-### Community 19 - "SettingsPanel.tsx"
-Cohesion: 0.32
-Nodes (7): AuthCard(), EMPTY_FORM, ENV_KEYS, SettingsPanel(), targetStatus(), targetTone(), TargetType
+### Community 19 - "VoicePanel.tsx"
+Cohesion: 0.18
+Nodes (16): ChatPanelProps, readSpeakSetting(), VoicePanel(), VoicePanelProps, describeRecognitionError(), RecognitionConstructor, RecognitionErrorEvent, RecognitionEvent (+8 more)
 
 ### Community 20 - "The Design System Page"
 Cohesion: 0.08
 Nodes (30): ColorPair(), contrast(), luminance(), toHex(), toRgb(), defaultStates, previewState(), StateMatrix() (+22 more)
 
-### Community 21 - "cookieConsent.test.ts"
-Cohesion: 0.60
-Nodes (4): COOKIE_CONSENT_KEY, CookieConsentRecord, hasCookieConsent(), recordCookieConsent()
+### Community 21 - "react"
+Cohesion: 0.26
+Nodes (14): ArrowRight(), CheckIcon(), ShieldIcon(), ChatPanel(), navigate(), CookiesPage(), CURRENT_YEAR, CURRENT_YEAR (+6 more)
 
-### Community 22 - "app.ts"
-Cohesion: 0.22
-Nodes (13): 10. Git and deployment, Accessibility, Address Schemes, AsyncHandler, providerErrorStatus(), sendProviderError(), main(), hydrateWorkspace() (+5 more)
+### Community 22 - "persistence.ts"
+Cohesion: 0.20
+Nodes (12): 10. Git and deployment, Accessibility, Address Schemes, main(), hydrateWorkspace(), persistenceEnabled, persistWorkspace(), readState() (+4 more)
 
 ### Community 23 - "AEGIS"
 Cohesion: 0.06
 Nodes (32): Add a dispatch target, Add a provider, AEGIS, Agents, Any Node host, API, Architecture, Backend responsibilities (+24 more)
 
+### Community 24 - "Step 4: Map Tokens to the Theme"
+Cohesion: 0.25
+Nodes (8): Dark mode, Elevation, Focus, Fonts, Radius, Role mapping, Step 4: Map Tokens to the Theme, Type scale
+
 ### Community 25 - "Registry Authoring and Addresses"
 Cohesion: 0.22
 Nodes (9): Build and Verify, GitHub Registries, Include, Item Definitions, Mental Model, Registry Authoring and Addresses, Registry Dependencies, Root `registry.json` (+1 more)
 
-### Community 26 - "ChatPanel.tsx"
-Cohesion: 0.11
-Nodes (29): Component Structure → [composition.md](./rules/composition.md), AegisFieldCanvas(), MicIcon(), PlusIcon(), StopIcon(), EmptyState(), formatRelative(), initials() (+21 more)
+### Community 26 - "SettingsPanel.tsx"
+Cohesion: 0.17
+Nodes (18): MicIcon(), PlusIcon(), EmptyState(), formatRelative(), initials(), Notice(), Pill(), PillTone (+10 more)
 
 ### Community 27 - ".oxlintrc.json"
 Cohesion: 0.33
@@ -212,25 +222,29 @@ Nodes (5): plugins, rules, react/only-export-components, react/rules-of-hooks, $
 Cohesion: 0.10
 Nodes (20): 10. Gesture design details (the "feel" checklist), 11. Frame-level smoothness, 12. Materials & depth — translucency conveys hierarchy, 13. Multimodal feedback — motion + sound + haptics, 14. Reduced motion & accessibility, 15. Typography — optical sizing, tracking, leading, 16. Design foundations — the eight principles, 17. Process (+12 more)
 
+### Community 29 - "Critical Rules"
+Cohesion: 0.29
+Nodes (7): Chat & Messaging → [chat.md](./rules/chat.md), CLI, Critical Rules, Forms & Inputs → [forms.md](./rules/forms.md), Icons → [icons.md](./rules/icons.md), Styling & Tailwind → [styling.md](./rules/styling.md), Use Components, Not Custom Markup → [composition.md](./rules/composition.md)
+
 ### Community 30 - "Design Systems from DESIGN.md"
-Cohesion: 0.10
-Nodes (21): Contents, Coverage check, Dark mode, Design Systems from DESIGN.md, Elevation, Focus, Fonts, Inputs to Confirm (+13 more)
+Cohesion: 0.17
+Nodes (12): Contents, Coverage check, Design Systems from DESIGN.md, Known traps, Picking a style, Report Back, Step 1: Scaffold, Step 2: Install Everything (+4 more)
 
 ### Community 31 - "shadcn/ui"
-Cohesion: 0.11
-Nodes (19): Chat & Messaging → [chat.md](./rules/chat.md), CLI, Component Docs, Examples, and Usage, Component Selection, Critical Rules, Current Project Context, Design Systems from DESIGN.md, Detailed References (+11 more)
+Cohesion: 0.17
+Nodes (12): Component Docs, Examples, and Usage, Component Selection, Current Project Context, Design Systems from DESIGN.md, Detailed References, Key Fields, Key Patterns, Principles (+4 more)
 
-### Community 32 - "AEGIS — Product & Technical Specification (SRS)"
-Cohesion: 0.11
-Nodes (16): 1. Product Summary & Purpose, 2.1 Implemented Capabilities, 2.3 Active Production Hardening Plan (Sprints 5 & 6), 2.4 Explicit Non-Goals, 2. System Scope & Capability Matrix, 3. User Journeys, 4. Technical Architecture, 5.1 Relational SQLite Schema (+8 more)
+### Community 32 - "ErrorBoundary"
+Cohesion: 0.08
+Nodes (18): ErrorBoundary, 1. Product Summary & Purpose, 2.1 Implemented Capabilities, 2.2 Implemented Milestones (Sprints 1–4), 2.3 Active Production Hardening Plan (Sprints 5 & 6), 2.4 Explicit Non-Goals, 2. System Scope & Capability Matrix, 3. User Journeys (+10 more)
 
 ### Community 34 - "Commands"
 Cohesion: 0.12
 Nodes (17): `add` — Add components, `apply` — Apply a preset to an existing project, `build` — Build a custom registry, Commands, Contents, `diff` — Check for updates, `docs` — Get component documentation URLs, Dry-Run Mode (+9 more)
 
 ### Community 35 - "Customization & Theming"
-Cohesion: 0.14
-Nodes (14): 1. Built-in variants, 2. Tailwind classes via `className`, 3. Add a new variant, 4. Wrapper components, Adding Custom Colors, Border Radius, Changing the Theme, Checking for Updates (+6 more)
+Cohesion: 0.22
+Nodes (9): Adding Custom Colors, Border Radius, Changing the Theme, Checking for Updates, Color Variables, Contents, Customization & Theming, Dark Mode (+1 more)
 
 ### Community 36 - "AEGIS-Product-Plan_2b6e72dc.md"
 Cohesion: 0.14
@@ -257,8 +271,8 @@ Cohesion: 0.22
 Nodes (8): Accessibility, Design Engineering, Initial Response, prefers-reduced-motion, Review Checklist, Review Format (Required), Stagger Animations, Touch device hover states
 
 ### Community 43 - "Base vs Radix"
-Cohesion: 0.22
-Nodes (9): Accordion, Base vs Radix, Button / trigger as non-button element (base only), Composition: asChild (radix) vs render (base), Contents, Select, Select — multiple selection and object values (base only), Slider (+1 more)
+Cohesion: 0.18
+Nodes (11): Inputs to Confirm, Accordion, Base vs Radix, Button / trigger as non-button element (base only), Composition: asChild (radix) vs render (base), Contents, Select, Select — multiple selection and object values (base only) (+3 more)
 
 ### Community 44 - "Component Building Principles"
 Cohesion: 0.25
@@ -312,20 +326,36 @@ Nodes (4): Beauty is leverage, Core Philosophy, Taste is trained, not innate, Un
 Cohesion: 0.50
 Nodes (4): Debugging Animations, Frame-by-frame inspection, Slow motion testing, Test on real devices
 
+### Community 57 - "dependencies"
+Cohesion: 0.29
+Nodes (7): dependencies, cors, dotenv, express, express-rate-limit, helmet, @vercel/blob
+
+### Community 58 - "devDependencies"
+Cohesion: 0.33
+Nodes (6): devDependencies, tsx, @types/cors, @types/express, @types/node, typescript
+
+### Community 59 - "ProviderRegistry"
+Cohesion: 0.47
+Nodes (4): AppDeps, AppConfig, PlanDispatchInput, ProviderRegistry
+
+### Community 60 - "Customizing Components"
+Cohesion: 0.40
+Nodes (5): 1. Built-in variants, 2. Tailwind classes via `className`, 3. Add a new variant, 4. Wrapper components, Customizing Components
+
 ## Knowledge Gaps
 - **457 isolated node(s):** `defaultStates`, `[uiArg, ...roots]`, `uiDir`, `components`, `source` (+452 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 498 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 502 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **2 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `react` connect `ChatPanel.tsx` to `tts.ts`, `WorkspacePage.tsx`, `Icons.tsx`, `playTap`, `frontend/package.json`, `DispatchPanel.tsx`, `SettingsPanel.tsx`, `The Design System Page`?**
-  _High betweenness centrality (0.093) - this node is a cross-community bridge._
-- **Why does `Registry Authoring and Addresses` connect `Registry Authoring and Addresses` to `shadcn/SKILL.md`, `app.ts`?**
-  _High betweenness centrality (0.090) - this node is a cross-community bridge._
-- **Why does `base()` connect `Icons.tsx` to `Commands`, `Chat & Messaging`, `Base vs Radix`, `ChatPanel.tsx`, `Design Systems from DESIGN.md`, `shadcn/ui`?**
-  _High betweenness centrality (0.078) - this node is a cross-community bridge._
+- **Why does `react` connect `react` to `tts.ts`, `WorkspacePage.tsx`, `Icons.tsx`, `router.ts`, `gravityField.ts`, `frontend/package.json`, `DispatchPanel.tsx`, `VoicePanel.tsx`, `The Design System Page`, `SettingsPanel.tsx`?**
+  _High betweenness centrality (0.084) - this node is a cross-community bridge._
+- **Why does `SqliteWorkspaceStore` connect `SqliteWorkspaceStore` to `ErrorBoundary`, `dispatch.test.ts`, `chat.ts`, `app.ts`, `AGENTS.md`, `persistence.ts`, `ProviderRegistry`?**
+  _High betweenness centrality (0.067) - this node is a cross-community bridge._
+- **Why does `base()` connect `Icons.tsx` to `Commands`, `Chat & Messaging`, `Base vs Radix`, `react`, `SettingsPanel.tsx`, `Design Systems from DESIGN.md`, `shadcn/ui`?**
+  _High betweenness centrality (0.062) - this node is a cross-community bridge._
 - **Are the 2 inferred relationships involving `SqliteWorkspaceStore` (e.g. with `Codebase Intelligence & Graph Navigation (Mandatory First Step)` and `Store and persistence`) actually correct?**
   _`SqliteWorkspaceStore` has 2 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 9 inferred relationships involving `base()` (e.g. with ``info` — Project information` and `Switching Presets`) actually correct?**
@@ -333,4 +363,4 @@ _Questions this graph is uniquely positioned to answer:_
 - **What connects `defaultStates`, `[uiArg, ...roots]`, `uiDir` to the rest of the system?**
   _457 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `SqliteWorkspaceStore` be split into smaller, more focused modules?**
-  _Cohesion score 0.05025712949976625 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06015037593984962 - nodes in this community are weakly interconnected._

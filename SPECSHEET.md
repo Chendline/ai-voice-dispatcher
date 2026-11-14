@@ -43,13 +43,13 @@ Operational teams communicate incident context, customer escalations, and system
   - Operator attribution (`operator_id`, `operator_name`, `operator_email`) attached to all dispatch executions and logs.
   - Audit Trail Export (JSON and RFC 4180 CSV formats) via `GET /api/dispatch/logs/export` with 1-click downloads in the Dispatch UI.
 
-### 2.3 Active Production Hardening Plan (Sprints 5 & 6)
-- **Sprint 5 (Auth Perimeter, Confidentiality & SSRF Hardening) [PLANNED]:**
+### 2.3 Production Hardening (Sprints 5 & 6)
+- **Sprint 5 (Auth Perimeter, Confidentiality & SSRF Hardening) [COMPLETED]:**
   - Workspace Auth Gate: Top-level dedicated authentication screen (`AuthCard`) when unauthenticated (`401 Unauthorized`) instead of offline error.
   - Encrypted Snapshot & Backup Hygiene: Retain AES-256-GCM ciphertext (`enc:v1:...`) in Vercel Blob snapshots and include operator accounts to prevent cold-start identity loss.
   - Complete IPv6 SSRF Shield: Explicitly parse and normalize IPv4-mapped IPv6 addresses (`::ffff:169.254.169.254`, `::ffff:172.16.0.0/12`) against metadata and private IP ranges.
   - Asynchronous Password Hashing & Login Rate Limiting: Move from `scryptSync` to async `crypto.scrypt` (libuv thread pool) and apply dedicated 10 req/min auth rate limiter.
-- **Sprint 6 (AI Stability, Concurrency & Operational Resilience) [PLANNED]:**
+- **Sprint 6 (AI Stability, Concurrency & Operational Resilience) [COMPLETED]:**
   - Anthropic History Normalization: Enforce leading user message role on sliced bounded histories to avoid upstream 400 errors on long conversations.
   - Header-Based Gemini Auth: Transmit Google API keys via `x-goog-api-key` header rather than URL query parameters.
   - Concurrent Multi-Target Dispatch Fanout: Parallelize target deliveries using `Promise.allSettled()`.

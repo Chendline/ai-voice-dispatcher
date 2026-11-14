@@ -46,8 +46,16 @@ export function formatSessionCookie(token: string, maxAgeSeconds: number = SESSI
   return parts.join('; ');
 }
 
-export function formatClearCookie(): string {
-  return `${SESSION_COOKIE_NAME}=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0`;
+export function formatClearCookie(isSecure: boolean = false): string {
+  const parts = [
+    `${SESSION_COOKIE_NAME}=`,
+    'HttpOnly',
+    'SameSite=Lax',
+    'Path=/',
+    'Max-Age=0',
+  ];
+  if (isSecure) parts.push('Secure');
+  return parts.join('; ');
 }
 
 export function toPublicUser(user: User): PublicUser {

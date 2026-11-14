@@ -153,3 +153,48 @@ test('chat: runChatStream streams tokens and persists the completed message', as
     globalThis.fetch = originalFetch;
   }
 });
+
+test('chat: history with leading assistant message is normalized to start with user', async () => {
+  const originalFetch = globalThis.fetch;
+  let sentMessages: { role: string; content: string }[] = [];
+
+  globalThis.fetch = (async (_url: string | URL | Request, init?: RequestInit) => {
+    const body = JSON.parse(String(init?.body)) as { messages: { role: string; content: string }[] };
+    sentMessages = body.messages;
+    return new Response(
+      JSON.stringify({ content: [{ type: 'text', text: 'Normalized response.' }] }),
+      { status: 200, headers: { 'content-type': 'application/json' } },
+    );
+  }) as typeof fetch;
+
+  try {
+    const conv = store.createConversation(agent);
+    // Artificially append an assistant message first
+    store.appendMessage(conv, {
+      id: 'msg_orphan_asst',
+      role: 'assistant',
+      content: 'I am a leading assistant message.',
+      createdAt: new Date().toISOString(),
+    });
+    store.appendMessage(conv, {
+      id: 'msg_user_1',
+      role: 'user',
+      content: 'Here is the real user message.',
+      createdAt: new Date().toISOString(),
+    });
+
+    await runChat(
+      { agentId: agent.id, conversationId: conv.id, message: 'Next user turn.' },
+      store,
+      registry,
+    );
+
+    // The leading assistant message should have been shifted off
+    assert.ok(sentMessages.length >= 2);
+    assert.equal(sentMessages[0].role, 'user');
+    assert.equal(sentMessages[0].content, 'Here is the real user message.');
+    assert.equal(sentMessages[1].role, 'user'); // In this synthetic sequence, msg 1 is Next user turn
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});

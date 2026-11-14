@@ -5,6 +5,7 @@ import { hydrateWorkspace, persistenceEnabled } from './persistence.js';
 import { WorkspaceStore } from './store.js';
 
 dotenv.config({ path: '../.env' });
+dotenv.config({ path: '.env' });
 
 async function main() {
   const config = readConfig();
@@ -18,14 +19,31 @@ async function main() {
 
   const app = createApp({ config, store });
 
-  app.listen(config.port, () => {
+  const server = app.listen(config.port, () => {
     console.log(
       `[AEGIS] API running on http://localhost:${config.port} ` +
-      `(storage: ${persistenceEnabled ? 'blob' : 'memory'}, ` +
+      `(storage: sqlite${persistenceEnabled ? '+blob' : ''}, ` +
       `AI: ${config.defaultProvider ?? 'not configured'}, ` +
       `dispatch targets: ${store.listTargets().length})`,
     );
   });
+
+  const shutdown = (signal: string) => {
+    console.log(`[AEGIS] Received ${signal}. Draining connections and shutting down gracefully...`);
+    server.close(() => {
+      console.log('[AEGIS] HTTP server closed.');
+      store.close();
+      process.exit(0);
+    });
+
+    setTimeout(() => {
+      console.error('[AEGIS] Forcefully shutting down.');
+      process.exit(1);
+    }, 10_000).unref();
+  };
+
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
 }
 
 main().catch(error => {
