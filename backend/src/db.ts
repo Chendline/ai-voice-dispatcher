@@ -57,6 +57,22 @@ export class SqliteWorkspaceStore {
     return this.db;
   }
 
+  transaction<T>(fn: () => T): T {
+    this.db.exec('BEGIN IMMEDIATE;');
+    try {
+      const result = fn();
+      this.db.exec('COMMIT;');
+      return result;
+    } catch (error) {
+      try {
+        this.db.exec('ROLLBACK;');
+      } catch {
+        // Rollback ignored if already aborted
+      }
+      throw error;
+    }
+  }
+
   constructor(config: AppConfig, dbPath?: string) {
     const targetPath = dbPath ?? config.dbPath ?? (process.env.NODE_ENV === 'test' ? ':memory:' : 'data/aegis.sqlite');
 
@@ -69,6 +85,7 @@ export class SqliteWorkspaceStore {
     this.encryptionKey = resolveEncryptionKey(config, targetPath);
 
     this.db.exec('PRAGMA foreign_keys = ON;');
+    this.db.exec('PRAGMA busy_timeout = 5000;');
     if (targetPath !== ':memory:') {
       this.db.exec('PRAGMA journal_mode = WAL;');
       this.db.exec('PRAGMA synchronous = NORMAL;');
@@ -412,28 +429,30 @@ export class SqliteWorkspaceStore {
     const messageId = message.id || id('msg');
     const usageJson = message.usage ? JSON.stringify(message.usage) : null;
 
-    this.db.prepare(`
-      INSERT INTO messages (id, conversation_id, role, content, provider_id, model_id, usage, created_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(
-      messageId,
-      conversation.id,
-      message.role,
-      message.content,
-      message.providerId ?? null,
-      message.modelId ?? null,
-      usageJson,
-      message.createdAt,
-    );
-
     let nextTitle = conversation.title;
     if (conversation.title === 'New conversation' && message.role === 'user') {
       nextTitle = message.content.replace(/\s+/g, ' ').trim().slice(0, 64) || 'New conversation';
     }
 
-    this.db.prepare(`
-      UPDATE conversations SET title = ?, updated_at = ? WHERE id = ?
-    `).run(nextTitle, message.createdAt, conversation.id);
+    this.transaction(() => {
+      this.db.prepare(`
+        INSERT INTO messages (id, conversation_id, role, content, provider_id, model_id, usage, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(
+        messageId,
+        conversation.id,
+        message.role,
+        message.content,
+        message.providerId ?? null,
+        message.modelId ?? null,
+        usageJson,
+        message.createdAt,
+      );
+
+      this.db.prepare(`
+        UPDATE conversations SET title = ?, updated_at = ? WHERE id = ?
+      `).run(nextTitle, message.createdAt, conversation.id);
+    });
 
     // Update the in-memory object instance for the caller
     conversation.messages.push({ ...message, id: messageId });
@@ -664,6 +683,22 @@ export class SqliteWorkspaceStore {
   getUserByEmail(email: string): User | undefined {
     const row = this.db.prepare('SELECT * FROM users WHERE LOWER(email) = LOWER(?)').get(email) as Record<string, unknown> | undefined;
     return row ? this.mapUser(row) : undefined;
+  }
+
+  setupInitialAdmin(input: { email: string; passwordHash: string; salt: string; name: string }): User | 'already_initialized' {
+    return this.transaction(() => {
+      const countRow = this.db.prepare('SELECT COUNT(*) as count FROM users').get() as { count: number | bigint };
+      if (Number(countRow.count) > 0) {
+        return 'already_initialized';
+      }
+      return this.createUser({
+        email: input.email,
+        passwordHash: input.passwordHash,
+        salt: input.salt,
+        name: input.name,
+        role: 'admin',
+      });
+    });
   }
 
   createUser(input: { email: string; passwordHash: string; salt: string; name: string; role?: UserRole }): User {

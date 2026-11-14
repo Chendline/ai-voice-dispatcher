@@ -310,3 +310,58 @@ test('auth: dedicated rate limiter throttles brute-force login attempts', async 
     await new Promise<void>(resolve => server.close(() => resolve()));
   }
 });
+
+test('auth: atomic setupInitialAdmin initializes once and rejects subsequent attempts', async () => {
+  const config = readConfig();
+  const store = new WorkspaceStore(config, ':memory:');
+  const { hash, salt } = await hashPassword('password123');
+
+  const admin1 = store.setupInitialAdmin({
+    email: 'admin1@example.com',
+    passwordHash: hash,
+    salt,
+    name: 'Admin One',
+  });
+
+  assert.notEqual(admin1, 'already_initialized');
+  if (typeof admin1 !== 'string') {
+    assert.equal(admin1.email, 'admin1@example.com');
+    assert.equal(admin1.role, 'admin');
+  }
+
+  const admin2 = store.setupInitialAdmin({
+    email: 'admin2@example.com',
+    passwordHash: hash,
+    salt,
+    name: 'Admin Two',
+  });
+
+  assert.equal(admin2, 'already_initialized');
+  assert.equal(store.countUsers(), 1);
+});
+
+test('db: transaction executes atomically and rolls back on exception', () => {
+  const config = readConfig();
+  const store = new WorkspaceStore(config, ':memory:');
+  const initialAgents = store.listAgents().length;
+
+  assert.throws(() => {
+    store.transaction(() => {
+      store.createAgent({
+        name: 'Temporary Agent',
+        description: 'Should be rolled back',
+        providerId: 'anthropic',
+        modelId: 'claude-sonnet-4-5',
+        systemPrompt: 'Test',
+        temperature: 0.5,
+        maxTokens: 500,
+        voiceRate: 1,
+        voicePitch: 1,
+        targetIds: [],
+      });
+      throw new Error('Simulated failure inside transaction');
+    });
+  }, /Simulated failure/);
+
+  assert.equal(store.listAgents().length, initialAgents);
+});

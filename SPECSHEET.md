@@ -43,7 +43,7 @@ Operational teams communicate incident context, customer escalations, and system
   - Operator attribution (`operator_id`, `operator_name`, `operator_email`) attached to all dispatch executions and logs.
   - Audit Trail Export (JSON and RFC 4180 CSV formats) via `GET /api/dispatch/logs/export` with 1-click downloads in the Dispatch UI.
 
-### 2.3 Production Hardening (Sprints 5 & 6)
+### 2.3 Production Hardening (Sprints 5, 6 & 7)
 - **Sprint 5 (Auth Perimeter, Confidentiality & SSRF Hardening) [COMPLETED]:**
   - Workspace Auth Gate: Top-level dedicated authentication screen (`AuthCard`) when unauthenticated (`401 Unauthorized`) instead of offline error.
   - Encrypted Snapshot & Backup Hygiene: Retain AES-256-GCM ciphertext (`enc:v1:...`) in Vercel Blob snapshots and include operator accounts to prevent cold-start identity loss.
@@ -55,6 +55,13 @@ Operational teams communicate incident context, customer escalations, and system
   - Concurrent Multi-Target Dispatch Fanout: Parallelize target deliveries using `Promise.allSettled()`.
   - Session Auto-Pruning & Cookie Hardening: Automatically purge expired SQLite session tokens and ensure `Secure` flag on clearing cookies over HTTPS.
   - Graceful Shutdown & React Error Boundary: Handle `SIGTERM` / `SIGINT` signals with clean `server.close()` and `db.close()`, and mount root React `ErrorBoundary`.
+- **Sprint 7 (Production Polish & Resilience Hardening) [COMPLETED]:**
+  - SQLite Busy Handling & Transactions: Added `PRAGMA busy_timeout = 5000;` and atomic `transaction<T>()` wrapping multi-statement writes (`appendMessage`).
+  - Atomic Admin Setup: Created atomic `setupInitialAdmin` eliminating setup race conditions under concurrent first-run initialization.
+  - Cross-Origin Cookie Support: Enforced `credentials: true` in Express CORS for decoupled frontend and API deployments.
+  - Reverse Proxy Keep-Alive: Added 15-second SSE heartbeat comments (`: ping\n\n`) preventing idle proxy timeouts during long AI inferences.
+  - Container Durability: Declared `VOLUME ["/app/data"]` and non-root `USER node` execution in `backend/Dockerfile`.
+  - Sub-Panel Crash Containment: Implemented compact, localized error boundaries for workspace panels (`ChatPanel`, `VoicePanel`, `DispatchPanel`, `AgentsPanel`, `SettingsPanel`).
 
 ### 2.4 Explicit Non-Goals
 - Consumer multi-tenant SaaS with billing or paid seat tiers.

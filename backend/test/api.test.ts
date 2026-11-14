@@ -425,3 +425,17 @@ test('api: dispatch audit logs export returns CSV and JSON formats', async () =>
     assert.equal(logs[0].operatorName, 'Audit Officer');
   });
 });
+
+test('api: cors headers include credentials true for allowed frontend origin', async () => {
+  await withServer(async base => {
+    const res = await fetch(`${base}/api/health`, {
+      method: 'GET',
+      headers: {
+        Origin: 'http://localhost:5173',
+      },
+    });
+    assert.equal(res.status, 200);
+    assert.equal(res.headers.get('access-control-allow-origin'), 'http://localhost:5173');
+    assert.equal(res.headers.get('access-control-allow-credentials'), 'true');
+  });
+});

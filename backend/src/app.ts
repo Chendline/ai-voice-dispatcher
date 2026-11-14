@@ -97,6 +97,7 @@ export function createApp(deps: AppDeps = {}) {
         origin: (origin, callback) => {
           callback(null, !origin || origins.includes(origin));
         },
+        credentials: true,
       }
     : {}));
 
@@ -187,14 +188,18 @@ export function createApp(deps: AppDeps = {}) {
     }
 
     const { hash, salt } = await hashPassword(password);
-    const user = store.createUser({
+    const result = store.setupInitialAdmin({
       email,
       passwordHash: hash,
       salt,
       name,
-      role: 'admin',
     });
 
+    if (result === 'already_initialized') {
+      return res.status(409).json({ error: 'System is already initialized with an admin account.' });
+    }
+
+    const user = result;
     const isSecure = req.secure || req.headers['x-forwarded-proto'] === 'https';
     const { token } = store.createSession(user.id);
     res.setHeader('Set-Cookie', formatSessionCookie(token, 7 * 24 * 60 * 60, isSecure));
@@ -436,8 +441,22 @@ export function createApp(deps: AppDeps = {}) {
     });
 
     const sendEvent = (event: string, data: unknown) => {
-      res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+      if (!res.writableEnded) {
+        res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+      }
     };
+
+    const heartbeat = setInterval(() => {
+      if (!res.writableEnded) {
+        res.write(': ping\n\n');
+      }
+    }, 15_000);
+
+    const cleanupHeartbeat = () => {
+      clearInterval(heartbeat);
+    };
+
+    req.on('close', cleanupHeartbeat);
 
     try {
       const output = await runChatStream(
@@ -459,6 +478,8 @@ export function createApp(deps: AppDeps = {}) {
         sendEvent('error', { error: 'The AI provider could not complete the stream.', code: 'upstream_error' });
       }
       res.end();
+    } finally {
+      cleanupHeartbeat();
     }
   }));
 
