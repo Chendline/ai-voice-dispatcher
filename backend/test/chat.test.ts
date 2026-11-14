@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { runChat } from '../src/chat.js';
+import { runChat, runChatStream } from '../src/chat.js';
 import { readConfig } from '../src/config.js';
 import { ProviderError } from '../src/providers/types.js';
 import { ProviderRegistry } from '../src/providers/registry.js';
@@ -113,4 +113,43 @@ test('chat: unknown conversation ids are rejected', async () => {
     () => runChat({ agentId: agent.id, conversationId: 'conv_missing', message: 'hello' }, store, registry),
     /no longer exists/,
   );
+});
+
+test('chat: runChatStream streams tokens and persists the completed message', async () => {
+  const originalFetch = globalThis.fetch;
+  const sseChunks = [
+    'event: content_block_delta\ndata: {"type":"content_block_delta","delta":{"type":"text_delta","text":"Dispatch "}}\n\n',
+    'event: content_block_delta\ndata: {"type":"content_block_delta","delta":{"type":"text_delta","text":"confirmed."}}\n\n',
+  ];
+
+  globalThis.fetch = (async () => {
+    const stream = new ReadableStream({
+      start(controller) {
+        for (const chunk of sseChunks) {
+          controller.enqueue(new TextEncoder().encode(chunk));
+        }
+        controller.close();
+      },
+    });
+    return new Response(stream, {
+      status: 200,
+      headers: { 'content-type': 'text/event-stream' },
+    });
+  }) as typeof fetch;
+
+  try {
+    const tokens: string[] = [];
+    const output = await runChatStream(
+      { agentId: agent.id, message: 'Stream this message' },
+      store,
+      registry,
+      delta => tokens.push(delta),
+    );
+
+    assert.deepEqual(tokens, ['Dispatch ', 'confirmed.']);
+    assert.equal(output.reply.content, 'Dispatch confirmed.');
+    assert.equal(output.conversation.messages.at(-1)?.content, 'Dispatch confirmed.');
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
 });

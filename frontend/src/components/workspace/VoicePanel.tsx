@@ -14,7 +14,7 @@ interface VoicePanelProps {
   conversation: Conversation | null;
   sending: boolean;
   error: string | null;
-  onSend: (message: string) => Promise<ConversationMessage | null>;
+  onSend: (message: string, onDelta?: (delta: string) => void) => Promise<ConversationMessage | null>;
   onNewConversation: () => void;
 }
 
@@ -42,6 +42,7 @@ export function VoicePanel({
   const [speakReplies, setSpeakReplies] = useState(readSpeakSetting);
   const [handsFree, setHandsFree] = useState(false);
   const [pendingText, setPendingText] = useState<string | null>(null);
+  const [streamingTranscript, setStreamingTranscript] = useState<string>('');
   const [turnError, setTurnError] = useState<string | null>(null);
   const sendingRef = useRef(false);
   const speakRef = useRef(speakReplies);
@@ -76,10 +77,14 @@ export function VoicePanel({
       if (sendingRef.current) return;
       sendingRef.current = true;
       setPendingText(text);
+      setStreamingTranscript('');
       setTurnError(null);
       playDispatchLaunch();
-      const reply = await onSend(text);
+      const reply = await onSend(text, delta => {
+        setStreamingTranscript(prev => prev + delta);
+      });
       setPendingText(null);
+      setStreamingTranscript('');
       sendingRef.current = false;
       if (!reply) {
         setTurnError('The agent did not reply. Check the API and provider configuration.');
@@ -127,7 +132,7 @@ export function VoicePanel({
 
   const phaseCopy: Record<typeof phase, string> = {
     listening: recognition.interim || 'Listening… speak naturally.',
-    thinking: 'The agent is composing a reply.',
+    thinking: streamingTranscript || 'The agent is composing a reply.',
     speaking: 'AEGIS is speaking. Speak again when the turn ends.',
     paused: 'Playback paused.',
     ready: 'Tap the microphone to start a voice turn.',

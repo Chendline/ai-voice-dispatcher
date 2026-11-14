@@ -221,17 +221,17 @@ Current adapters:
 
 ### Chat
 
-`chat.ts` owns one turn:
+`chat.ts` owns conversation turns (both unary `POST /api/chat` and Server-Sent Events `POST /api/chat/stream`):
 
 1. Load the agent.
 2. Create or resume the conversation.
 3. Append the user message.
 4. Build a bounded history (respect provider context limits).
-5. Call the provider.
-6. Append the assistant message with provider/model/usage metadata.
-7. Return the conversation and reply.
+5. Call the provider (`chat` or `streamChat`). In streaming mode, tokens are yielded in real-time via SSE `event: delta`.
+6. Append the assistant message with provider/model/usage metadata upon completion.
+7. Return the conversation and reply (`event: done`).
 
-Provider errors must propagate to the route and become a real HTTP error. Never insert a synthetic assistant reply when the provider fails.
+Provider errors must propagate to the route and become a real HTTP error or SSE `event: error`. Never insert a synthetic assistant reply when the provider fails.
 
 ### Dispatch
 

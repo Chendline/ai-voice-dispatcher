@@ -1,5 +1,5 @@
 import type { ChatRequest, ChatResult, ProviderAdapter } from './types.js';
-import { ProviderError, fetchJson } from './types.js';
+import { ProviderError, fetchJson, streamSse } from './types.js';
 
 interface AnthropicPayload {
   content?: { type: string; text?: string }[];
@@ -65,6 +65,65 @@ export function createAnthropicAdapter(options: {
           inputTokens: payload.usage?.input_tokens,
           outputTokens: payload.usage?.output_tokens,
         },
+      };
+    },
+    async streamChat(request: ChatRequest, onChunk: (text: string) => void): Promise<ChatResult> {
+      const messages = request.messages
+        .filter(message => message.role !== 'system')
+        .map(message => ({ role: message.role, content: message.content }));
+
+      if (messages.length === 0) {
+        throw new ProviderError('invalid_response', 'At least one user message is required.');
+      }
+
+      let accumulated = '';
+      await streamSse(
+        `${options.baseUrl}/v1/messages`,
+        {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            'x-api-key': options.apiKey,
+            'anthropic-version': '2023-06-01',
+          },
+          body: JSON.stringify({
+            model: request.model,
+            max_tokens: request.maxTokens ?? 1024,
+            temperature: request.temperature ?? 0.7,
+            ...(request.system ? { system: request.system } : {}),
+            messages,
+            stream: true,
+          }),
+        },
+        options.timeoutMs,
+        request.signal,
+        (line: string) => {
+          if (!line.startsWith('data:')) return;
+          const payloadStr = line.slice(5).trim();
+          try {
+            const data = JSON.parse(payloadStr) as {
+              type?: string;
+              delta?: { type?: string; text?: string };
+            };
+            if (data.type === 'content_block_delta' && data.delta?.text) {
+              accumulated += data.delta.text;
+              onChunk(data.delta.text);
+            }
+          } catch {
+            // Ignore partial/malformed stream line
+          }
+        },
+      );
+
+      const text = accumulated.trim();
+      if (!text) {
+        throw new ProviderError('invalid_response', 'The AI provider returned an empty response.');
+      }
+
+      return {
+        text,
+        providerId: options.id,
+        model: request.model,
       };
     },
   };

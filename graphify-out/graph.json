@@ -4,6 +4,19 @@
   "graph": {},
   "nodes": [
     {
+      "id": "backend_src_auth_request",
+      "label": "Request",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "SqliteWorkspaceStore",
+      "file_type": "code",
+      "norm_label": "request",
+      "source_file": "backend/src/auth.ts",
+      "source_location": "L58"
+    },
+    {
       "id": "backend_src_chat_chatoutput",
       "label": "ChatOutput",
       "_callable": true,
@@ -41,6 +54,19 @@
       "norm_label": "agent",
       "source_file": "backend/src/types.ts",
       "source_location": "L30"
+    },
+    {
+      "id": "backend_src_types_chatusage",
+      "label": "ChatUsage",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "SqliteWorkspaceStore",
+      "file_type": "code",
+      "norm_label": "chatusage",
+      "source_file": "backend/src/types.ts",
+      "source_location": "L46"
     },
     {
       "id": "backend_src_types_conversation",
@@ -82,17 +108,30 @@
       "source_location": "L73"
     },
     {
-      "id": "backend_src_types_dispatchlog",
-      "label": "DispatchLog",
+      "id": "backend_src_types_dispatchresult",
+      "label": "DispatchResult",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 0,
       "community_name": "SqliteWorkspaceStore",
       "file_type": "code",
-      "norm_label": "dispatchlog",
+      "norm_label": "dispatchresult",
       "source_file": "backend/src/types.ts",
-      "source_location": "L136"
+      "source_location": "L111"
+    },
+    {
+      "id": "backend_src_types_dispatchstatus",
+      "label": "DispatchStatus",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "SqliteWorkspaceStore",
+      "file_type": "code",
+      "norm_label": "dispatchstatus",
+      "source_file": "backend/src/types.ts",
+      "source_location": "L109"
     },
     {
       "id": "backend_src_types_dispatchtarget",
@@ -119,6 +158,32 @@
       "norm_label": "publicdispatchtarget",
       "source_file": "backend/src/types.ts",
       "source_location": "L97"
+    },
+    {
+      "id": "backend_src_types_publicuser",
+      "label": "PublicUser",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "SqliteWorkspaceStore",
+      "file_type": "code",
+      "norm_label": "publicuser",
+      "source_file": "backend/src/types.ts",
+      "source_location": "L21"
+    },
+    {
+      "id": "backend_src_types_session",
+      "label": "Session",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "SqliteWorkspaceStore",
+      "file_type": "code",
+      "norm_label": "session",
+      "source_file": "backend/src/types.ts",
+      "source_location": "L23"
     },
     {
       "id": "backend_src_types_user",
@@ -158,6 +223,19 @@
       "norm_label": "workspacestate",
       "source_file": "backend/src/types.ts",
       "source_location": "L146"
+    },
+    {
+      "id": "frontend_src_components_workspace_speechsettings_speechcontroller",
+      "label": "SpeechController",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "tts.ts",
+      "file_type": "code",
+      "norm_label": "speechcontroller",
+      "source_file": "frontend/src/components/workspace/SpeechSettings.tsx",
+      "source_location": "L41"
     },
     {
       "id": "frontend_src_utils_tts_controllercallbacks",
@@ -329,17 +407,17 @@
       "source_location": "L8"
     },
     {
-      "id": "frontend_src_components_ui_pilltone",
-      "label": "PillTone",
+      "id": "frontend_src_lib_router_workspacesection",
+      "label": "WorkspaceSection",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 19,
       "community_name": "WorkspacePage.tsx",
       "file_type": "code",
-      "norm_label": "pilltone",
-      "source_file": "frontend/src/components/ui.tsx",
-      "source_location": "L4"
+      "norm_label": "workspacesection",
+      "source_file": "frontend/src/lib/router.ts",
+      "source_location": "L50"
     },
     {
       "id": "frontend_src_hooks_useworkspacedata_loadstatus",
@@ -347,8 +425,8 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 19,
-      "community_name": "WorkspacePage.tsx",
+      "community": 2,
+      "community_name": "SettingsPanel.tsx",
       "file_type": "code",
       "norm_label": "loadstatus",
       "source_file": "frontend/src/hooks/useWorkspaceData.ts",
@@ -361,7 +439,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "frontend/src/types.ts",
+      "community_name": "SettingsPanel.tsx",
       "file_type": "code",
       "norm_label": "apierror",
       "source_file": "frontend/src/lib/api.ts",
@@ -374,7 +452,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "frontend/src/types.ts",
+      "community_name": "SettingsPanel.tsx",
       "file_type": "code",
       "norm_label": "agentinput",
       "source_file": "frontend/src/types.ts",
@@ -387,7 +465,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "frontend/src/types.ts",
+      "community_name": "SettingsPanel.tsx",
       "file_type": "code",
       "norm_label": "authstatus",
       "source_file": "frontend/src/types.ts",
@@ -400,7 +478,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "frontend/src/types.ts",
+      "community_name": "SettingsPanel.tsx",
       "file_type": "code",
       "norm_label": "chatusage",
       "source_file": "frontend/src/types.ts",
@@ -413,7 +491,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "frontend/src/types.ts",
+      "community_name": "SettingsPanel.tsx",
       "file_type": "code",
       "norm_label": "conversationsummary",
       "source_file": "frontend/src/types.ts",
@@ -426,7 +504,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "frontend/src/types.ts",
+      "community_name": "SettingsPanel.tsx",
       "file_type": "code",
       "norm_label": "dispatchlog",
       "source_file": "frontend/src/types.ts",
@@ -439,7 +517,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "frontend/src/types.ts",
+      "community_name": "SettingsPanel.tsx",
       "file_type": "code",
       "norm_label": "dispatchplan",
       "source_file": "frontend/src/types.ts",
@@ -452,7 +530,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "frontend/src/types.ts",
+      "community_name": "SettingsPanel.tsx",
       "file_type": "code",
       "norm_label": "dispatchresult",
       "source_file": "frontend/src/types.ts",
@@ -465,7 +543,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "frontend/src/types.ts",
+      "community_name": "SettingsPanel.tsx",
       "file_type": "code",
       "norm_label": "dispatchstatus",
       "source_file": "frontend/src/types.ts",
@@ -478,7 +556,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "frontend/src/types.ts",
+      "community_name": "SettingsPanel.tsx",
       "file_type": "code",
       "norm_label": "healthresponse",
       "source_file": "frontend/src/types.ts",
@@ -491,7 +569,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "frontend/src/types.ts",
+      "community_name": "SettingsPanel.tsx",
       "file_type": "code",
       "norm_label": "priority",
       "source_file": "frontend/src/types.ts",
@@ -504,24 +582,11 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "frontend/src/types.ts",
+      "community_name": "SettingsPanel.tsx",
       "file_type": "code",
       "norm_label": "providerconfigresponse",
       "source_file": "frontend/src/types.ts",
       "source_location": "L30"
-    },
-    {
-      "id": "frontend_src_types_providerinfo",
-      "label": "ProviderInfo",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "frontend/src/types.ts",
-      "file_type": "code",
-      "norm_label": "providerinfo",
-      "source_file": "frontend/src/types.ts",
-      "source_location": "L21"
     },
     {
       "id": "frontend_src_types_publicdispatchtarget",
@@ -530,7 +595,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "frontend/src/types.ts",
+      "community_name": "SettingsPanel.tsx",
       "file_type": "code",
       "norm_label": "publicdispatchtarget",
       "source_file": "frontend/src/types.ts",
@@ -543,7 +608,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "frontend/src/types.ts",
+      "community_name": "SettingsPanel.tsx",
       "file_type": "code",
       "norm_label": "publicuser",
       "source_file": "frontend/src/types.ts",
@@ -556,7 +621,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "frontend/src/types.ts",
+      "community_name": "SettingsPanel.tsx",
       "file_type": "code",
       "norm_label": "targetinput",
       "source_file": "frontend/src/types.ts",
@@ -569,7 +634,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "frontend/src/types.ts",
+      "community_name": "SettingsPanel.tsx",
       "file_type": "code",
       "norm_label": "targettype",
       "source_file": "frontend/src/types.ts",
@@ -582,11 +647,102 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "frontend/src/types.ts",
+      "community_name": "SettingsPanel.tsx",
       "file_type": "code",
       "norm_label": "userrole",
       "source_file": "frontend/src/types.ts",
       "source_location": "L5"
+    },
+    {
+      "id": "frontend_src_types_workspacebootstrap",
+      "label": "WorkspaceBootstrap",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "SettingsPanel.tsx",
+      "file_type": "code",
+      "norm_label": "workspacebootstrap",
+      "source_file": "frontend/src/types.ts",
+      "source_location": "L160"
+    },
+    {
+      "id": "frontend_src_hooks_usespeechrecognition_recognitionconstructor",
+      "label": "RecognitionConstructor",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 21,
+      "community_name": "useSpeechRecognition.ts",
+      "file_type": "code",
+      "norm_label": "recognitionconstructor",
+      "source_file": "frontend/src/hooks/useSpeechRecognition.ts",
+      "source_location": "L39"
+    },
+    {
+      "id": "frontend_src_hooks_usespeechrecognition_recognitionerrorevent",
+      "label": "RecognitionErrorEvent",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 21,
+      "community_name": "useSpeechRecognition.ts",
+      "file_type": "code",
+      "norm_label": "recognitionerrorevent",
+      "source_file": "frontend/src/hooks/useSpeechRecognition.ts",
+      "source_location": "L21"
+    },
+    {
+      "id": "frontend_src_hooks_usespeechrecognition_recognitionevent",
+      "label": "RecognitionEvent",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 21,
+      "community_name": "useSpeechRecognition.ts",
+      "file_type": "code",
+      "norm_label": "recognitionevent",
+      "source_file": "frontend/src/hooks/useSpeechRecognition.ts",
+      "source_location": "L13"
+    },
+    {
+      "id": "frontend_src_hooks_usespeechrecognition_recognitionresult",
+      "label": "RecognitionResult",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 21,
+      "community_name": "useSpeechRecognition.ts",
+      "file_type": "code",
+      "norm_label": "recognitionresult",
+      "source_file": "frontend/src/hooks/useSpeechRecognition.ts",
+      "source_location": "L7"
+    },
+    {
+      "id": "frontend_src_hooks_usespeechrecognition_recognitionresultitem",
+      "label": "RecognitionResultItem",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 21,
+      "community_name": "useSpeechRecognition.ts",
+      "file_type": "code",
+      "norm_label": "recognitionresultitem",
+      "source_file": "frontend/src/hooks/useSpeechRecognition.ts",
+      "source_location": "L3"
+    },
+    {
+      "id": "frontend_src_hooks_usespeechrecognition_speechrecognitionlike",
+      "label": "SpeechRecognitionLike",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 21,
+      "community_name": "useSpeechRecognition.ts",
+      "file_type": "code",
+      "norm_label": "speechrecognitionlike",
+      "source_file": "frontend/src/hooks/useSpeechRecognition.ts",
+      "source_location": "L26"
     },
     {
       "id": "backend_src_app_appdeps",
@@ -602,19 +758,6 @@
       "source_location": "L32"
     },
     {
-      "id": "backend_src_config_appconfig",
-      "label": "AppConfig",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 24,
-      "community_name": "ProviderRegistry",
-      "file_type": "code",
-      "norm_label": "appconfig",
-      "source_file": "backend/src/config.ts",
-      "source_location": "L19"
-    },
-    {
       "id": "backend_src_config_providerconfig",
       "label": "ProviderConfig",
       "_callable": true,
@@ -626,32 +769,6 @@
       "norm_label": "providerconfig",
       "source_file": "backend/src/config.ts",
       "source_location": "L9"
-    },
-    {
-      "id": "backend_src_dispatch_executedispatchoptions",
-      "label": "ExecuteDispatchOptions",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 24,
-      "community_name": "ProviderRegistry",
-      "file_type": "code",
-      "norm_label": "executedispatchoptions",
-      "source_file": "backend/src/dispatch.ts",
-      "source_location": "L404"
-    },
-    {
-      "id": "backend_src_dispatch_plandispatchinput",
-      "label": "PlanDispatchInput",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 24,
-      "community_name": "ProviderRegistry",
-      "file_type": "code",
-      "norm_label": "plandispatchinput",
-      "source_file": "backend/src/dispatch.ts",
-      "source_location": "L546"
     },
     {
       "id": "backend_src_providers_registry_providerregistry",
@@ -667,95 +784,30 @@
       "source_location": "L46"
     },
     {
-      "id": "backend_src_types_dispatchplan",
-      "label": "DispatchPlan",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 24,
-      "community_name": "ProviderRegistry",
-      "file_type": "code",
-      "norm_label": "dispatchplan",
-      "source_file": "backend/src/types.ts",
-      "source_location": "L122"
-    },
-    {
-      "id": "backend_src_auth_request",
-      "label": "Request",
+      "id": "frontend_src_utils_cookieconsent_cookieconsentrecord",
+      "label": "CookieConsentRecord",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 25,
-      "community_name": "backend/src/types.ts",
+      "community_name": "cookieConsent.test.ts",
       "file_type": "code",
-      "norm_label": "request",
-      "source_file": "backend/src/auth.ts",
-      "source_location": "L58"
+      "norm_label": "cookieconsentrecord",
+      "source_file": "frontend/src/utils/cookieConsent.ts",
+      "source_location": "L3"
     },
     {
-      "id": "backend_src_types_chatusage",
-      "label": "ChatUsage",
+      "id": "frontend_src_components_ui_pilltone",
+      "label": "PillTone",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 25,
-      "community_name": "backend/src/types.ts",
+      "community": 26,
+      "community_name": "ChatPanel.tsx",
       "file_type": "code",
-      "norm_label": "chatusage",
-      "source_file": "backend/src/types.ts",
-      "source_location": "L46"
-    },
-    {
-      "id": "backend_src_types_dispatchresult",
-      "label": "DispatchResult",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "backend/src/types.ts",
-      "file_type": "code",
-      "norm_label": "dispatchresult",
-      "source_file": "backend/src/types.ts",
-      "source_location": "L111"
-    },
-    {
-      "id": "backend_src_types_dispatchstatus",
-      "label": "DispatchStatus",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "backend/src/types.ts",
-      "file_type": "code",
-      "norm_label": "dispatchstatus",
-      "source_file": "backend/src/types.ts",
-      "source_location": "L109"
-    },
-    {
-      "id": "backend_src_types_publicuser",
-      "label": "PublicUser",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "backend/src/types.ts",
-      "file_type": "code",
-      "norm_label": "publicuser",
-      "source_file": "backend/src/types.ts",
-      "source_location": "L21"
-    },
-    {
-      "id": "backend_src_types_session",
-      "label": "Session",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "backend/src/types.ts",
-      "file_type": "code",
-      "norm_label": "session",
-      "source_file": "backend/src/types.ts",
-      "source_location": "L23"
+      "norm_label": "pilltone",
+      "source_file": "frontend/src/components/ui.tsx",
+      "source_location": "L4"
     },
     {
       "id": "frontend_src_components_workspace_chatpanel_chatpanelprops",
@@ -782,84 +834,6 @@
       "norm_label": "voicepanelprops",
       "source_file": "frontend/src/components/workspace/VoicePanel.tsx",
       "source_location": "L11"
-    },
-    {
-      "id": "frontend_src_hooks_usespeechrecognition_recognitionconstructor",
-      "label": "RecognitionConstructor",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 26,
-      "community_name": "ChatPanel.tsx",
-      "file_type": "code",
-      "norm_label": "recognitionconstructor",
-      "source_file": "frontend/src/hooks/useSpeechRecognition.ts",
-      "source_location": "L39"
-    },
-    {
-      "id": "frontend_src_hooks_usespeechrecognition_recognitionerrorevent",
-      "label": "RecognitionErrorEvent",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 26,
-      "community_name": "ChatPanel.tsx",
-      "file_type": "code",
-      "norm_label": "recognitionerrorevent",
-      "source_file": "frontend/src/hooks/useSpeechRecognition.ts",
-      "source_location": "L21"
-    },
-    {
-      "id": "frontend_src_hooks_usespeechrecognition_recognitionevent",
-      "label": "RecognitionEvent",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 26,
-      "community_name": "ChatPanel.tsx",
-      "file_type": "code",
-      "norm_label": "recognitionevent",
-      "source_file": "frontend/src/hooks/useSpeechRecognition.ts",
-      "source_location": "L13"
-    },
-    {
-      "id": "frontend_src_hooks_usespeechrecognition_recognitionresult",
-      "label": "RecognitionResult",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 26,
-      "community_name": "ChatPanel.tsx",
-      "file_type": "code",
-      "norm_label": "recognitionresult",
-      "source_file": "frontend/src/hooks/useSpeechRecognition.ts",
-      "source_location": "L7"
-    },
-    {
-      "id": "frontend_src_hooks_usespeechrecognition_recognitionresultitem",
-      "label": "RecognitionResultItem",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 26,
-      "community_name": "ChatPanel.tsx",
-      "file_type": "code",
-      "norm_label": "recognitionresultitem",
-      "source_file": "frontend/src/hooks/useSpeechRecognition.ts",
-      "source_location": "L3"
-    },
-    {
-      "id": "frontend_src_hooks_usespeechrecognition_speechrecognitionlike",
-      "label": "SpeechRecognitionLike",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 26,
-      "community_name": "ChatPanel.tsx",
-      "file_type": "code",
-      "norm_label": "speechrecognitionlike",
-      "source_file": "frontend/src/hooks/useSpeechRecognition.ts",
-      "source_location": "L26"
     },
     {
       "id": "frontend_src_types_agent",
@@ -901,17 +875,17 @@
       "source_location": "L72"
     },
     {
-      "id": "frontend_src_types_workspacebootstrap",
-      "label": "WorkspaceBootstrap",
+      "id": "frontend_src_types_providerinfo",
+      "label": "ProviderInfo",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 26,
       "community_name": "ChatPanel.tsx",
       "file_type": "code",
-      "norm_label": "workspacebootstrap",
+      "norm_label": "providerinfo",
       "source_file": "frontend/src/types.ts",
-      "source_location": "L160"
+      "source_location": "L21"
     },
     {
       "id": "frontend_src_components_icons_iconprops",
@@ -927,32 +901,6 @@
       "source_location": "L3"
     },
     {
-      "id": "frontend_src_lib_router_workspacesection",
-      "label": "WorkspaceSection",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 4,
-      "community_name": "router.ts",
-      "file_type": "code",
-      "norm_label": "workspacesection",
-      "source_file": "frontend/src/lib/router.ts",
-      "source_location": "L50"
-    },
-    {
-      "id": "frontend_src_utils_cookieconsent_cookieconsentrecord",
-      "label": "CookieConsentRecord",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 4,
-      "community_name": "router.ts",
-      "file_type": "code",
-      "norm_label": "cookieconsentrecord",
-      "source_file": "frontend/src/utils/cookieConsent.ts",
-      "source_location": "L3"
-    },
-    {
       "id": "backend_src_config_providerid",
       "label": "ProviderId",
       "_callable": true,
@@ -964,19 +912,6 @@
       "norm_label": "providerid",
       "source_file": "backend/src/config.ts",
       "source_location": "L1"
-    },
-    {
-      "id": "frontend_src_components_workspace_speechsettings_speechcontroller",
-      "label": "SpeechController",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 58,
-      "community_name": "SpeechSettings.tsx",
-      "file_type": "code",
-      "norm_label": "speechcontroller",
-      "source_file": "frontend/src/components/workspace/SpeechSettings.tsx",
-      "source_location": "L41"
     },
     {
       "id": "backend_src_chat_chatinput",
@@ -1119,7 +1054,7 @@
       "file_type": "code",
       "norm_label": "providererror",
       "source_file": "backend/src/providers/types.ts",
-      "source_location": "L46"
+      "source_location": "L47"
     },
     {
       "id": "backend_src_providers_types_providererrorcode",
@@ -1132,7 +1067,33 @@
       "file_type": "code",
       "norm_label": "providererrorcode",
       "source_file": "backend/src/providers/types.ts",
-      "source_location": "L35"
+      "source_location": "L36"
+    },
+    {
+      "id": "backend_src_config_appconfig",
+      "label": "AppConfig",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 7,
+      "community_name": "dispatch.ts",
+      "file_type": "code",
+      "norm_label": "appconfig",
+      "source_file": "backend/src/config.ts",
+      "source_location": "L19"
+    },
+    {
+      "id": "backend_src_dispatch_executedispatchoptions",
+      "label": "ExecuteDispatchOptions",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 7,
+      "community_name": "dispatch.ts",
+      "file_type": "code",
+      "norm_label": "executedispatchoptions",
+      "source_file": "backend/src/dispatch.ts",
+      "source_location": "L404"
     },
     {
       "id": "backend_src_dispatch_pinnedfetchoptions",
@@ -1161,6 +1122,19 @@
       "source_location": "L92"
     },
     {
+      "id": "backend_src_dispatch_plandispatchinput",
+      "label": "PlanDispatchInput",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 7,
+      "community_name": "dispatch.ts",
+      "file_type": "code",
+      "norm_label": "plandispatchinput",
+      "source_file": "backend/src/dispatch.ts",
+      "source_location": "L546"
+    },
+    {
       "id": "backend_src_dispatch_urlsafety",
       "label": "UrlSafety",
       "_callable": true,
@@ -1172,6 +1146,32 @@
       "norm_label": "urlsafety",
       "source_file": "backend/src/dispatch.ts",
       "source_location": "L72"
+    },
+    {
+      "id": "backend_src_types_dispatchlog",
+      "label": "DispatchLog",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 7,
+      "community_name": "dispatch.ts",
+      "file_type": "code",
+      "norm_label": "dispatchlog",
+      "source_file": "backend/src/types.ts",
+      "source_location": "L136"
+    },
+    {
+      "id": "backend_src_types_dispatchplan",
+      "label": "DispatchPlan",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 7,
+      "community_name": "dispatch.ts",
+      "file_type": "code",
+      "norm_label": "dispatchplan",
+      "source_file": "backend/src/types.ts",
+      "source_location": "L122"
     },
     {
       "id": "backend_src_types_priority",
@@ -1410,18 +1410,6 @@
       "norm_label": "now()",
       "source_file": "backend/src/db.ts",
       "source_location": "L30"
-    },
-    {
-      "id": "backend_src_db_publictarget",
-      "label": "publicTarget()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "SqliteWorkspaceStore",
-      "file_type": "code",
-      "norm_label": "publictarget()",
-      "source_file": "backend/src/db.ts",
-      "source_location": "L46"
     },
     {
       "id": "backend_src_db_sqliteworkspacestore_adddispatchlog",
@@ -1760,6 +1748,18 @@
       "source_location": "L456"
     },
     {
+      "id": "backend_src_db_sqliteworkspacestore_listusers",
+      "label": ".listUsers()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "SqliteWorkspaceStore",
+      "file_type": "code",
+      "norm_label": ".listusers()",
+      "source_file": "backend/src/db.ts",
+      "source_location": "L600"
+    },
+    {
       "id": "backend_src_db_sqliteworkspacestore_mapagent",
       "label": ".mapAgent()",
       "_callable": true,
@@ -1880,6 +1880,42 @@
       "source_location": "L492"
     },
     {
+      "id": "frontend_src_components_workspace_speechsettings_groupvoices",
+      "label": "groupVoices()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "tts.ts",
+      "file_type": "code",
+      "norm_label": "groupvoices()",
+      "source_file": "frontend/src/components/workspace/SpeechSettings.tsx",
+      "source_location": "L26"
+    },
+    {
+      "id": "frontend_src_components_workspace_speechsettings_speechsettingspanel",
+      "label": "SpeechSettingsPanel()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "tts.ts",
+      "file_type": "code",
+      "norm_label": "speechsettingspanel()",
+      "source_file": "frontend/src/components/workspace/SpeechSettings.tsx",
+      "source_location": "L43"
+    },
+    {
+      "id": "frontend_src_components_workspace_speechsettings_statustone",
+      "label": "statusTone()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "tts.ts",
+      "file_type": "code",
+      "norm_label": "statustone()",
+      "source_file": "frontend/src/components/workspace/SpeechSettings.tsx",
+      "source_location": "L18"
+    },
+    {
       "id": "frontend_src_hooks_usespeechplayback_clamp",
       "label": "clamp()",
       "_callable": true,
@@ -1926,6 +1962,18 @@
       "norm_label": "usespeechplayback()",
       "source_file": "frontend/src/hooks/useSpeechPlayback.ts",
       "source_location": "L52"
+    },
+    {
+      "id": "frontend_src_utils_tts_browserlanguage",
+      "label": "browserLanguage()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "tts.ts",
+      "file_type": "code",
+      "norm_label": "browserlanguage()",
+      "source_file": "frontend/src/utils/tts.ts",
+      "source_location": "L164"
     },
     {
       "id": "frontend_src_utils_tts_chunktext",
@@ -1998,6 +2046,18 @@
       "norm_label": "getsynth()",
       "source_file": "frontend/src/utils/tts.ts",
       "source_location": "L80"
+    },
+    {
+      "id": "frontend_src_utils_tts_languagelabel",
+      "label": "languageLabel()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "tts.ts",
+      "file_type": "code",
+      "norm_label": "languagelabel()",
+      "source_file": "frontend/src/utils/tts.ts",
+      "source_location": "L108"
     },
     {
       "id": "frontend_src_utils_tts_pickfallbackvoice",
@@ -2564,60 +2624,84 @@
       "source_location": "L103"
     },
     {
-      "id": "frontend_src_components_ui_emptystate",
-      "label": "EmptyState()",
+      "id": "frontend_src_utils_soundeffects_playtap",
+      "label": "playTap()",
       "_callable": true,
       "_origin": "ast",
-      "community": 19,
-      "community_name": "WorkspacePage.tsx",
+      "community": 17,
+      "community_name": "DispatchPanel.tsx",
       "file_type": "code",
-      "norm_label": "emptystate()",
-      "source_file": "frontend/src/components/ui.tsx",
-      "source_location": "L44"
+      "norm_label": "playtap()",
+      "source_file": "frontend/src/utils/soundEffects.ts",
+      "source_location": "L42"
     },
     {
-      "id": "frontend_src_components_ui_notice",
-      "label": "Notice()",
+      "id": "backend_src_main_main",
+      "label": "main()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "AGENTS.md",
+      "file_type": "code",
+      "norm_label": "main()",
+      "source_file": "backend/src/main.ts",
+      "source_location": "L9"
+    },
+    {
+      "id": "backend_test_dispatch_test_target",
+      "label": "target()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "AGENTS.md",
+      "file_type": "code",
+      "norm_label": "target()",
+      "source_file": "backend/test/dispatch.test.ts",
+      "source_location": "L19"
+    },
+    {
+      "id": "frontend_src_pages_workspacepage_readagentid",
+      "label": "readAgentId()",
       "_callable": true,
       "_origin": "ast",
       "community": 19,
       "community_name": "WorkspacePage.tsx",
       "file_type": "code",
-      "norm_label": "notice()",
-      "source_file": "frontend/src/components/ui.tsx",
-      "source_location": "L19"
+      "norm_label": "readagentid()",
+      "source_file": "frontend/src/pages/WorkspacePage.tsx",
+      "source_location": "L43"
+    },
+    {
+      "id": "frontend_src_components_icons_plusicon",
+      "label": "PlusIcon()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "SettingsPanel.tsx",
+      "file_type": "code",
+      "norm_label": "plusicon()",
+      "source_file": "frontend/src/components/Icons.tsx",
+      "source_location": "L107"
     },
     {
       "id": "frontend_src_components_ui_pill",
       "label": "Pill()",
       "_callable": true,
       "_origin": "ast",
-      "community": 19,
-      "community_name": "WorkspacePage.tsx",
+      "community": 2,
+      "community_name": "SettingsPanel.tsx",
       "file_type": "code",
       "norm_label": "pill()",
       "source_file": "frontend/src/components/ui.tsx",
       "source_location": "L6"
     },
     {
-      "id": "frontend_src_components_ui_spinner",
-      "label": "Spinner()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "WorkspacePage.tsx",
-      "file_type": "code",
-      "norm_label": "spinner()",
-      "source_file": "frontend/src/components/ui.tsx",
-      "source_location": "L10"
-    },
-    {
       "id": "frontend_src_components_workspace_agentspanel_agentspanel",
       "label": "AgentsPanel()",
       "_callable": true,
       "_origin": "ast",
-      "community": 19,
-      "community_name": "WorkspacePage.tsx",
+      "community": 2,
+      "community_name": "SettingsPanel.tsx",
       "file_type": "code",
       "norm_label": "agentspanel()",
       "source_file": "frontend/src/components/workspace/AgentsPanel.tsx",
@@ -2628,20 +2712,32 @@
       "label": "toInput()",
       "_callable": true,
       "_origin": "ast",
-      "community": 19,
-      "community_name": "WorkspacePage.tsx",
+      "community": 2,
+      "community_name": "SettingsPanel.tsx",
       "file_type": "code",
       "norm_label": "toinput()",
       "source_file": "frontend/src/components/workspace/AgentsPanel.tsx",
       "source_location": "L8"
     },
     {
+      "id": "frontend_src_components_workspace_authcard_authcard",
+      "label": "AuthCard()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "SettingsPanel.tsx",
+      "file_type": "code",
+      "norm_label": "authcard()",
+      "source_file": "frontend/src/components/workspace/AuthCard.tsx",
+      "source_location": "L7"
+    },
+    {
       "id": "frontend_src_components_workspace_settingspanel_settingspanel",
       "label": "SettingsPanel()",
       "_callable": true,
       "_origin": "ast",
-      "community": 19,
-      "community_name": "WorkspacePage.tsx",
+      "community": 2,
+      "community_name": "SettingsPanel.tsx",
       "file_type": "code",
       "norm_label": "settingspanel()",
       "source_file": "frontend/src/components/workspace/SettingsPanel.tsx",
@@ -2652,8 +2748,8 @@
       "label": "targetStatus()",
       "_callable": true,
       "_origin": "ast",
-      "community": 19,
-      "community_name": "WorkspacePage.tsx",
+      "community": 2,
+      "community_name": "SettingsPanel.tsx",
       "file_type": "code",
       "norm_label": "targetstatus()",
       "source_file": "frontend/src/components/workspace/SettingsPanel.tsx",
@@ -2664,8 +2760,8 @@
       "label": "targetTone()",
       "_callable": true,
       "_origin": "ast",
-      "community": 19,
-      "community_name": "WorkspacePage.tsx",
+      "community": 2,
+      "community_name": "SettingsPanel.tsx",
       "file_type": "code",
       "norm_label": "targettone()",
       "source_file": "frontend/src/components/workspace/SettingsPanel.tsx",
@@ -2676,23 +2772,11 @@
       "label": "useWorkspaceData()",
       "_callable": true,
       "_origin": "ast",
-      "community": 19,
-      "community_name": "WorkspacePage.tsx",
+      "community": 2,
+      "community_name": "SettingsPanel.tsx",
       "file_type": "code",
       "norm_label": "useworkspacedata()",
       "source_file": "frontend/src/hooks/useWorkspaceData.ts",
-      "source_location": "L7"
-    },
-    {
-      "id": "frontend_src_components_workspace_authcard_authcard",
-      "label": "AuthCard()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "frontend/src/types.ts",
-      "file_type": "code",
-      "norm_label": "authcard()",
-      "source_file": "frontend/src/components/workspace/AuthCard.tsx",
       "source_location": "L7"
     },
     {
@@ -2701,7 +2785,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "frontend/src/types.ts",
+      "community_name": "SettingsPanel.tsx",
       "file_type": "code",
       "norm_label": ".constructor()",
       "source_file": "frontend/src/lib/api.ts",
@@ -2713,7 +2797,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "frontend/src/types.ts",
+      "community_name": "SettingsPanel.tsx",
       "file_type": "code",
       "norm_label": "jsonbody()",
       "source_file": "frontend/src/lib/api.ts",
@@ -2725,7 +2809,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "frontend/src/types.ts",
+      "community_name": "SettingsPanel.tsx",
       "file_type": "code",
       "norm_label": "putbody()",
       "source_file": "frontend/src/lib/api.ts",
@@ -2737,7 +2821,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 2,
-      "community_name": "frontend/src/types.ts",
+      "community_name": "SettingsPanel.tsx",
       "file_type": "code",
       "norm_label": "request()",
       "source_file": "frontend/src/lib/api.ts",
@@ -2828,148 +2912,16 @@
       "source_location": "L13"
     },
     {
-      "id": "frontend_src_components_icons_arrowright",
-      "label": "ArrowRight()",
+      "id": "frontend_src_hooks_usespeechrecognition_describerecognitionerror",
+      "label": "describeRecognitionError()",
       "_callable": true,
       "_origin": "ast",
       "community": 21,
-      "community_name": "playTap",
+      "community_name": "useSpeechRecognition.ts",
       "file_type": "code",
-      "norm_label": "arrowright()",
-      "source_file": "frontend/src/components/Icons.tsx",
-      "source_location": "L78"
-    },
-    {
-      "id": "frontend_src_components_icons_checkicon",
-      "label": "CheckIcon()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 21,
-      "community_name": "playTap",
-      "file_type": "code",
-      "norm_label": "checkicon()",
-      "source_file": "frontend/src/components/Icons.tsx",
-      "source_location": "L123"
-    },
-    {
-      "id": "frontend_src_components_icons_logomark",
-      "label": "LogoMark()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 21,
-      "community_name": "playTap",
-      "file_type": "code",
-      "norm_label": "logomark()",
-      "source_file": "frontend/src/components/Icons.tsx",
-      "source_location": "L22"
-    },
-    {
-      "id": "frontend_src_components_icons_shieldicon",
-      "label": "ShieldIcon()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 21,
-      "community_name": "playTap",
-      "file_type": "code",
-      "norm_label": "shieldicon()",
-      "source_file": "frontend/src/components/Icons.tsx",
-      "source_location": "L147"
-    },
-    {
-      "id": "frontend_src_components_workspace_chatpanel_chatpanel",
-      "label": "ChatPanel()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 21,
-      "community_name": "playTap",
-      "file_type": "code",
-      "norm_label": "chatpanel()",
-      "source_file": "frontend/src/components/workspace/ChatPanel.tsx",
-      "source_location": "L36"
-    },
-    {
-      "id": "frontend_src_lib_router_navigate",
-      "label": "navigate()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 21,
-      "community_name": "playTap",
-      "file_type": "code",
-      "norm_label": "navigate()",
-      "source_file": "frontend/src/lib/router.ts",
-      "source_location": "L9"
-    },
-    {
-      "id": "frontend_src_pages_cookiespage_cookiespage",
-      "label": "CookiesPage()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 21,
-      "community_name": "playTap",
-      "file_type": "code",
-      "norm_label": "cookiespage()",
-      "source_file": "frontend/src/pages/CookiesPage.tsx",
-      "source_location": "L9"
-    },
-    {
-      "id": "frontend_src_pages_landingpage_landingpage",
-      "label": "LandingPage()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 21,
-      "community_name": "playTap",
-      "file_type": "code",
-      "norm_label": "landingpage()",
-      "source_file": "frontend/src/pages/LandingPage.tsx",
-      "source_location": "L85"
-    },
-    {
-      "id": "frontend_src_pages_privacypage_privacypage",
-      "label": "PrivacyPage()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 21,
-      "community_name": "playTap",
-      "file_type": "code",
-      "norm_label": "privacypage()",
-      "source_file": "frontend/src/pages/PrivacyPage.tsx",
-      "source_location": "L9"
-    },
-    {
-      "id": "frontend_src_pages_termspage_termspage",
-      "label": "TermsPage()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 21,
-      "community_name": "playTap",
-      "file_type": "code",
-      "norm_label": "termspage()",
-      "source_file": "frontend/src/pages/TermsPage.tsx",
-      "source_location": "L9"
-    },
-    {
-      "id": "frontend_src_utils_soundeffects_playtap",
-      "label": "playTap()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 21,
-      "community_name": "playTap",
-      "file_type": "code",
-      "norm_label": "playtap()",
-      "source_file": "frontend/src/utils/soundEffects.ts",
-      "source_location": "L42"
-    },
-    {
-      "id": "backend_src_main_main",
-      "label": "main()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 22,
-      "community_name": "persistence.ts",
-      "file_type": "code",
-      "norm_label": "main()",
-      "source_file": "backend/src/main.ts",
-      "source_location": "L9"
+      "norm_label": "describerecognitionerror()",
+      "source_file": "frontend/src/hooks/useSpeechRecognition.ts",
+      "source_location": "L50"
     },
     {
       "id": "backend_src_persistence_hydrateworkspace",
@@ -3044,16 +2996,28 @@
       "source_location": "L64"
     },
     {
-      "id": "backend_src_db_sqliteworkspacestore_listusers",
-      "label": ".listUsers()",
+      "id": "frontend_src_utils_cookieconsent_hascookieconsent",
+      "label": "hasCookieConsent()",
       "_callable": true,
       "_origin": "ast",
       "community": 25,
-      "community_name": "backend/src/types.ts",
+      "community_name": "cookieConsent.test.ts",
       "file_type": "code",
-      "norm_label": ".listusers()",
-      "source_file": "backend/src/db.ts",
-      "source_location": "L600"
+      "norm_label": "hascookieconsent()",
+      "source_file": "frontend/src/utils/cookieConsent.ts",
+      "source_location": "L12"
+    },
+    {
+      "id": "frontend_src_utils_cookieconsent_recordcookieconsent",
+      "label": "recordCookieConsent()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "cookieConsent.test.ts",
+      "file_type": "code",
+      "norm_label": "recordcookieconsent()",
+      "source_file": "frontend/src/utils/cookieConsent.ts",
+      "source_location": "L27"
     },
     {
       "id": "frontend_src_components_icons_micicon",
@@ -3066,6 +3030,18 @@
       "norm_label": "micicon()",
       "source_file": "frontend/src/components/Icons.tsx",
       "source_location": "L94"
+    },
+    {
+      "id": "frontend_src_components_ui_emptystate",
+      "label": "EmptyState()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "ChatPanel.tsx",
+      "file_type": "code",
+      "norm_label": "emptystate()",
+      "source_file": "frontend/src/components/ui.tsx",
+      "source_location": "L44"
     },
     {
       "id": "frontend_src_components_ui_formatrelative",
@@ -3092,6 +3068,42 @@
       "source_location": "L87"
     },
     {
+      "id": "frontend_src_components_ui_notice",
+      "label": "Notice()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "ChatPanel.tsx",
+      "file_type": "code",
+      "norm_label": "notice()",
+      "source_file": "frontend/src/components/ui.tsx",
+      "source_location": "L19"
+    },
+    {
+      "id": "frontend_src_components_ui_spinner",
+      "label": "Spinner()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "ChatPanel.tsx",
+      "file_type": "code",
+      "norm_label": "spinner()",
+      "source_file": "frontend/src/components/ui.tsx",
+      "source_location": "L10"
+    },
+    {
+      "id": "frontend_src_components_workspace_chatpanel_chatpanel",
+      "label": "ChatPanel()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "ChatPanel.tsx",
+      "file_type": "code",
+      "norm_label": "chatpanel()",
+      "source_file": "frontend/src/components/workspace/ChatPanel.tsx",
+      "source_location": "L36"
+    },
+    {
       "id": "frontend_src_components_workspace_chatpanel_messagerow",
       "label": "MessageRow()",
       "_callable": true,
@@ -3101,7 +3113,7 @@
       "file_type": "code",
       "norm_label": "messagerow()",
       "source_file": "frontend/src/components/workspace/ChatPanel.tsx",
-      "source_location": "L304"
+      "source_location": "L315"
     },
     {
       "id": "frontend_src_components_workspace_voicepanel_readspeaksetting",
@@ -3128,18 +3140,6 @@
       "source_location": "L31"
     },
     {
-      "id": "frontend_src_hooks_usespeechrecognition_describerecognitionerror",
-      "label": "describeRecognitionError()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 26,
-      "community_name": "ChatPanel.tsx",
-      "file_type": "code",
-      "norm_label": "describerecognitionerror()",
-      "source_file": "frontend/src/hooks/useSpeechRecognition.ts",
-      "source_location": "L50"
-    },
-    {
       "id": "frontend_src_hooks_usespeechrecognition_usespeechrecognition",
       "label": "useSpeechRecognition()",
       "_callable": true,
@@ -3150,18 +3150,6 @@
       "norm_label": "usespeechrecognition()",
       "source_file": "frontend/src/hooks/useSpeechRecognition.ts",
       "source_location": "L70"
-    },
-    {
-      "id": "backend_src_config_publicconfig",
-      "label": "publicConfig()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "4. Backend rules",
-      "file_type": "code",
-      "norm_label": "publicconfig()",
-      "source_file": "backend/src/config.ts",
-      "source_location": "L217"
     },
     {
       "id": "frontend_src_components_icons_agentsicon",
@@ -3186,6 +3174,18 @@
       "norm_label": "alerticon()",
       "source_file": "frontend/src/components/Icons.tsx",
       "source_location": "L202"
+    },
+    {
+      "id": "frontend_src_components_icons_arrowright",
+      "label": "ArrowRight()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "Icons.tsx",
+      "file_type": "code",
+      "norm_label": "arrowright()",
+      "source_file": "frontend/src/components/Icons.tsx",
+      "source_location": "L78"
     },
     {
       "id": "frontend_src_components_icons_arrowupright",
@@ -3236,6 +3236,18 @@
       "source_location": "L34"
     },
     {
+      "id": "frontend_src_components_icons_checkicon",
+      "label": "CheckIcon()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "Icons.tsx",
+      "file_type": "code",
+      "norm_label": "checkicon()",
+      "source_file": "frontend/src/components/Icons.tsx",
+      "source_location": "L123"
+    },
+    {
       "id": "frontend_src_components_icons_chevronicon",
       "label": "ChevronIcon()",
       "_callable": true,
@@ -3284,6 +3296,18 @@
       "source_location": "L211"
     },
     {
+      "id": "frontend_src_components_icons_logomark",
+      "label": "LogoMark()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "Icons.tsx",
+      "file_type": "code",
+      "norm_label": "logomark()",
+      "source_file": "frontend/src/components/Icons.tsx",
+      "source_location": "L22"
+    },
+    {
       "id": "frontend_src_components_icons_playicon",
       "label": "PlayIcon()",
       "_callable": true,
@@ -3294,18 +3318,6 @@
       "norm_label": "playicon()",
       "source_file": "frontend/src/components/Icons.tsx",
       "source_location": "L219"
-    },
-    {
-      "id": "frontend_src_components_icons_plusicon",
-      "label": "PlusIcon()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "Icons.tsx",
-      "file_type": "code",
-      "norm_label": "plusicon()",
-      "source_file": "frontend/src/components/Icons.tsx",
-      "source_location": "L107"
     },
     {
       "id": "frontend_src_components_icons_refreshicon",
@@ -3342,6 +3354,18 @@
       "norm_label": "settingsicon()",
       "source_file": "frontend/src/components/Icons.tsx",
       "source_location": "L69"
+    },
+    {
+      "id": "frontend_src_components_icons_shieldicon",
+      "label": "ShieldIcon()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "Icons.tsx",
+      "file_type": "code",
+      "norm_label": "shieldicon()",
+      "source_file": "frontend/src/components/Icons.tsx",
+      "source_location": "L147"
     },
     {
       "id": "frontend_src_components_icons_slackicon",
@@ -3433,7 +3457,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 4,
-      "community_name": "router.ts",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "app()",
       "source_file": "frontend/src/App.tsx",
@@ -3445,7 +3469,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 4,
-      "community_name": "router.ts",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "cookienotice()",
       "source_file": "frontend/src/components/CookieNotice.tsx",
@@ -3457,7 +3481,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 4,
-      "community_name": "router.ts",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "currentpath()",
       "source_file": "frontend/src/lib/router.ts",
@@ -3469,7 +3493,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 4,
-      "community_name": "router.ts",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "iscookiespath()",
       "source_file": "frontend/src/lib/router.ts",
@@ -3481,7 +3505,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 4,
-      "community_name": "router.ts",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "isprivacypath()",
       "source_file": "frontend/src/lib/router.ts",
@@ -3493,7 +3517,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 4,
-      "community_name": "router.ts",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "istermspath()",
       "source_file": "frontend/src/lib/router.ts",
@@ -3505,11 +3529,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 4,
-      "community_name": "router.ts",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "isworkspacepath()",
       "source_file": "frontend/src/lib/router.ts",
       "source_location": "L34"
+    },
+    {
+      "id": "frontend_src_lib_router_navigate",
+      "label": "navigate()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "navigate()",
+      "source_file": "frontend/src/lib/router.ts",
+      "source_location": "L9"
     },
     {
       "id": "frontend_src_lib_router_pathforsection",
@@ -3517,7 +3553,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 4,
-      "community_name": "router.ts",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "pathforsection()",
       "source_file": "frontend/src/lib/router.ts",
@@ -3529,7 +3565,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 4,
-      "community_name": "router.ts",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "sectionfrompath()",
       "source_file": "frontend/src/lib/router.ts",
@@ -3541,23 +3577,59 @@
       "_callable": true,
       "_origin": "ast",
       "community": 4,
-      "community_name": "router.ts",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "usepathname()",
       "source_file": "frontend/src/lib/router.ts",
       "source_location": "L18"
     },
     {
-      "id": "frontend_src_pages_workspacepage_readagentid",
-      "label": "readAgentId()",
+      "id": "frontend_src_pages_cookiespage_cookiespage",
+      "label": "CookiesPage()",
       "_callable": true,
       "_origin": "ast",
       "community": 4,
-      "community_name": "router.ts",
+      "community_name": "react",
       "file_type": "code",
-      "norm_label": "readagentid()",
-      "source_file": "frontend/src/pages/WorkspacePage.tsx",
-      "source_location": "L43"
+      "norm_label": "cookiespage()",
+      "source_file": "frontend/src/pages/CookiesPage.tsx",
+      "source_location": "L9"
+    },
+    {
+      "id": "frontend_src_pages_landingpage_landingpage",
+      "label": "LandingPage()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "landingpage()",
+      "source_file": "frontend/src/pages/LandingPage.tsx",
+      "source_location": "L85"
+    },
+    {
+      "id": "frontend_src_pages_privacypage_privacypage",
+      "label": "PrivacyPage()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "privacypage()",
+      "source_file": "frontend/src/pages/PrivacyPage.tsx",
+      "source_location": "L9"
+    },
+    {
+      "id": "frontend_src_pages_termspage_termspage",
+      "label": "TermsPage()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "termspage()",
+      "source_file": "frontend/src/pages/TermsPage.tsx",
+      "source_location": "L9"
     },
     {
       "id": "frontend_src_pages_workspacepage_workspacepage",
@@ -3565,35 +3637,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 4,
-      "community_name": "router.ts",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "workspacepage()",
       "source_file": "frontend/src/pages/WorkspacePage.tsx",
       "source_location": "L51"
-    },
-    {
-      "id": "frontend_src_utils_cookieconsent_hascookieconsent",
-      "label": "hasCookieConsent()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 4,
-      "community_name": "router.ts",
-      "file_type": "code",
-      "norm_label": "hascookieconsent()",
-      "source_file": "frontend/src/utils/cookieConsent.ts",
-      "source_location": "L12"
-    },
-    {
-      "id": "frontend_src_utils_cookieconsent_recordcookieconsent",
-      "label": "recordCookieConsent()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 4,
-      "community_name": "router.ts",
-      "file_type": "code",
-      "norm_label": "recordcookieconsent()",
-      "source_file": "frontend/src/utils/cookieConsent.ts",
-      "source_location": "L27"
     },
     {
       "id": "backend_src_config_configuredproviders",
@@ -3716,6 +3764,18 @@
       "source_location": "L50"
     },
     {
+      "id": "backend_test_api_test_start",
+      "label": "start()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "dispatch.test.ts",
+      "file_type": "code",
+      "norm_label": "start()",
+      "source_file": "backend/test/api.test.ts",
+      "source_location": "L199"
+    },
+    {
       "id": "backend_test_api_test_withserver",
       "label": "withServer()",
       "_callable": true,
@@ -3750,78 +3810,6 @@
       "norm_label": "plan()",
       "source_file": "backend/test/dispatch.test.ts",
       "source_location": "L32"
-    },
-    {
-      "id": "backend_test_dispatch_test_target",
-      "label": "target()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 57,
-      "community_name": "Registry Authoring and Addresses",
-      "file_type": "code",
-      "norm_label": "target()",
-      "source_file": "backend/test/dispatch.test.ts",
-      "source_location": "L19"
-    },
-    {
-      "id": "frontend_src_components_workspace_speechsettings_groupvoices",
-      "label": "groupVoices()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 58,
-      "community_name": "SpeechSettings.tsx",
-      "file_type": "code",
-      "norm_label": "groupvoices()",
-      "source_file": "frontend/src/components/workspace/SpeechSettings.tsx",
-      "source_location": "L26"
-    },
-    {
-      "id": "frontend_src_components_workspace_speechsettings_speechsettingspanel",
-      "label": "SpeechSettingsPanel()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 58,
-      "community_name": "SpeechSettings.tsx",
-      "file_type": "code",
-      "norm_label": "speechsettingspanel()",
-      "source_file": "frontend/src/components/workspace/SpeechSettings.tsx",
-      "source_location": "L43"
-    },
-    {
-      "id": "frontend_src_components_workspace_speechsettings_statustone",
-      "label": "statusTone()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 58,
-      "community_name": "SpeechSettings.tsx",
-      "file_type": "code",
-      "norm_label": "statustone()",
-      "source_file": "frontend/src/components/workspace/SpeechSettings.tsx",
-      "source_location": "L18"
-    },
-    {
-      "id": "frontend_src_utils_tts_browserlanguage",
-      "label": "browserLanguage()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 58,
-      "community_name": "SpeechSettings.tsx",
-      "file_type": "code",
-      "norm_label": "browserlanguage()",
-      "source_file": "frontend/src/utils/tts.ts",
-      "source_location": "L164"
-    },
-    {
-      "id": "frontend_src_utils_tts_languagelabel",
-      "label": "languageLabel()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 58,
-      "community_name": "SpeechSettings.tsx",
-      "file_type": "code",
-      "norm_label": "languagelabel()",
-      "source_file": "frontend/src/utils/tts.ts",
-      "source_location": "L108"
     },
     {
       "id": "backend_src_chat_buildsystemprompt",
@@ -3872,6 +3860,18 @@
       "source_location": "L39"
     },
     {
+      "id": "backend_src_chat_runchatstream",
+      "label": "runChatStream()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "chat.ts",
+      "file_type": "code",
+      "norm_label": "runchatstream()",
+      "source_file": "backend/src/chat.ts",
+      "source_location": "L100"
+    },
+    {
       "id": "backend_src_providers_anthropic_createanthropicadapter",
       "label": "createAnthropicAdapter()",
       "_callable": true,
@@ -3905,7 +3905,7 @@
       "file_type": "code",
       "norm_label": "createopenaicompatibleadapter()",
       "source_file": "backend/src/providers/openai.ts",
-      "source_location": "L12"
+      "source_location": "L13"
     },
     {
       "id": "backend_src_providers_registry_createadapter",
@@ -3941,7 +3941,7 @@
       "file_type": "code",
       "norm_label": "classifystatus()",
       "source_file": "backend/src/providers/types.ts",
-      "source_location": "L58"
+      "source_location": "L59"
     },
     {
       "id": "backend_src_providers_types_fetchjson",
@@ -3953,7 +3953,7 @@
       "file_type": "code",
       "norm_label": "fetchjson()",
       "source_file": "backend/src/providers/types.ts",
-      "source_location": "L89"
+      "source_location": "L90"
     },
     {
       "id": "backend_src_providers_types_provideradapter_chat",
@@ -3968,6 +3968,18 @@
       "source_location": "L32"
     },
     {
+      "id": "backend_src_providers_types_provideradapter_streamchat",
+      "label": ".streamChat()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "chat.ts",
+      "file_type": "code",
+      "norm_label": ".streamchat()",
+      "source_file": "backend/src/providers/types.ts",
+      "source_location": "L33"
+    },
+    {
       "id": "backend_src_providers_types_providererror_constructor",
       "label": ".constructor()",
       "_callable": true,
@@ -3977,7 +3989,7 @@
       "file_type": "code",
       "norm_label": ".constructor()",
       "source_file": "backend/src/providers/types.ts",
-      "source_location": "L50"
+      "source_location": "L51"
     },
     {
       "id": "backend_src_providers_types_readerrordetail",
@@ -3989,7 +4001,31 @@
       "file_type": "code",
       "norm_label": "readerrordetail()",
       "source_file": "backend/src/providers/types.ts",
-      "source_location": "L67"
+      "source_location": "L68"
+    },
+    {
+      "id": "backend_src_providers_types_streamsse",
+      "label": "streamSse()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "chat.ts",
+      "file_type": "code",
+      "norm_label": "streamsse()",
+      "source_file": "backend/src/providers/types.ts",
+      "source_location": "L129"
+    },
+    {
+      "id": "backend_test_chat_test_start",
+      "label": "start()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "chat.ts",
+      "file_type": "code",
+      "norm_label": "start()",
+      "source_file": "backend/test/chat.test.ts",
+      "source_location": "L127"
     },
     {
       "id": "backend_src_dispatch_checktargeturl",
@@ -4496,6 +4532,30 @@
       "source_location": "L15"
     },
     {
+      "id": "backend_src_config_publicconfig",
+      "label": "publicConfig()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 9,
+      "community_name": "app.ts",
+      "file_type": "code",
+      "norm_label": "publicconfig()",
+      "source_file": "backend/src/config.ts",
+      "source_location": "L217"
+    },
+    {
+      "id": "backend_src_db_publictarget",
+      "label": "publicTarget()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 9,
+      "community_name": "app.ts",
+      "file_type": "code",
+      "norm_label": "publictarget()",
+      "source_file": "backend/src/db.ts",
+      "source_location": "L46"
+    },
+    {
       "id": "agents_skills_shadcn_scripts_showcase_coverage",
       "label": "showcase-coverage.mjs",
       "_origin": "ast",
@@ -4595,15 +4655,26 @@
       "source_location": "L22"
     },
     {
-      "id": "backend_src_store",
-      "label": "store.ts",
+      "id": "backend_src_types",
+      "label": "backend/src/types.ts",
       "_origin": "ast",
       "community": 0,
       "community_name": "SqliteWorkspaceStore",
       "file_type": "code",
-      "norm_label": "store.ts",
-      "source_file": "backend/src/store.ts",
+      "norm_label": "backend/src/types.ts",
+      "source_file": "backend/src/types.ts",
       "source_location": "L1"
+    },
+    {
+      "id": "backend_src_types_user_roles",
+      "label": "USER_ROLES",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "SqliteWorkspaceStore",
+      "file_type": "code",
+      "norm_label": "user_roles",
+      "source_file": "backend/src/types.ts",
+      "source_location": "L7"
     },
     {
       "id": "backend_test_crypto_test",
@@ -4637,6 +4708,28 @@
       "norm_label": "dist",
       "source_file": "frontend/scripts/postbuild.mjs",
       "source_location": "L6"
+    },
+    {
+      "id": "frontend_src_components_workspace_speechsettings",
+      "label": "SpeechSettings.tsx",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "tts.ts",
+      "file_type": "code",
+      "norm_label": "speechsettings.tsx",
+      "source_file": "frontend/src/components/workspace/SpeechSettings.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "frontend_src_components_workspace_speechsettings_status_label",
+      "label": "STATUS_LABEL",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "tts.ts",
+      "file_type": "code",
+      "norm_label": "status_label",
+      "source_file": "frontend/src/components/workspace/SpeechSettings.tsx",
+      "source_location": "L8"
     },
     {
       "id": "frontend_src_hooks_usespeechplayback",
@@ -4802,6 +4895,17 @@
       "norm_label": "gravityfield.test.ts",
       "source_file": "frontend/test/gravityField.test.ts",
       "source_location": "L1"
+    },
+    {
+      "id": "ref_three",
+      "label": "three",
+      "_origin": "ast",
+      "community": 10,
+      "community_name": "gravityField.ts",
+      "file_type": "concept",
+      "norm_label": "three",
+      "source_file": "frontend/package.json",
+      "source_location": "L17"
     },
     {
       "id": "frontend_tsconfig_app",
@@ -5541,17 +5645,6 @@
       "source_location": "L25"
     },
     {
-      "id": "ref_three",
-      "label": "three",
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "frontend/package.json",
-      "file_type": "concept",
-      "norm_label": "three",
-      "source_file": "frontend/package.json",
-      "source_location": "L17"
-    },
-    {
       "id": "ref_types_react",
       "label": "@types/react",
       "_origin": "ast",
@@ -5772,6 +5865,83 @@
       "source_location": "L1"
     },
     {
+      "id": "backend_package_dependencies",
+      "label": "dependencies",
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "backend/package.json",
+      "file_type": "code",
+      "norm_label": "dependencies",
+      "source_file": "backend/package.json",
+      "source_location": "L12"
+    },
+    {
+      "id": "backend_package_dependencies_cors",
+      "label": "cors",
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "backend/package.json",
+      "file_type": "code",
+      "norm_label": "cors",
+      "source_file": "backend/package.json",
+      "source_location": "L14"
+    },
+    {
+      "id": "backend_package_dependencies_dotenv",
+      "label": "dotenv",
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "backend/package.json",
+      "file_type": "code",
+      "norm_label": "dotenv",
+      "source_file": "backend/package.json",
+      "source_location": "L15"
+    },
+    {
+      "id": "backend_package_dependencies_express",
+      "label": "express",
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "backend/package.json",
+      "file_type": "code",
+      "norm_label": "express",
+      "source_file": "backend/package.json",
+      "source_location": "L16"
+    },
+    {
+      "id": "backend_package_dependencies_express_rate_limit",
+      "label": "express-rate-limit",
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "backend/package.json",
+      "file_type": "code",
+      "norm_label": "express-rate-limit",
+      "source_file": "backend/package.json",
+      "source_location": "L17"
+    },
+    {
+      "id": "backend_package_dependencies_helmet",
+      "label": "helmet",
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "backend/package.json",
+      "file_type": "code",
+      "norm_label": "helmet",
+      "source_file": "backend/package.json",
+      "source_location": "L18"
+    },
+    {
+      "id": "backend_package_dependencies_vercel_blob",
+      "label": "@vercel/blob",
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "backend/package.json",
+      "file_type": "code",
+      "norm_label": "@vercel/blob",
+      "source_file": "backend/package.json",
+      "source_location": "L13"
+    },
+    {
       "id": "backend_package_description",
       "label": "description",
       "_origin": "ast",
@@ -5781,6 +5951,72 @@
       "norm_label": "description",
       "source_file": "backend/package.json",
       "source_location": "L4"
+    },
+    {
+      "id": "backend_package_devdependencies",
+      "label": "devDependencies",
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "backend/package.json",
+      "file_type": "code",
+      "norm_label": "devdependencies",
+      "source_file": "backend/package.json",
+      "source_location": "L20"
+    },
+    {
+      "id": "backend_package_devdependencies_tsx",
+      "label": "tsx",
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "backend/package.json",
+      "file_type": "code",
+      "norm_label": "tsx",
+      "source_file": "backend/package.json",
+      "source_location": "L24"
+    },
+    {
+      "id": "backend_package_devdependencies_types_cors",
+      "label": "@types/cors",
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "backend/package.json",
+      "file_type": "code",
+      "norm_label": "@types/cors",
+      "source_file": "backend/package.json",
+      "source_location": "L21"
+    },
+    {
+      "id": "backend_package_devdependencies_types_express",
+      "label": "@types/express",
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "backend/package.json",
+      "file_type": "code",
+      "norm_label": "@types/express",
+      "source_file": "backend/package.json",
+      "source_location": "L22"
+    },
+    {
+      "id": "backend_package_devdependencies_types_node",
+      "label": "@types/node",
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "backend/package.json",
+      "file_type": "code",
+      "norm_label": "@types/node",
+      "source_file": "backend/package.json",
+      "source_location": "L23"
+    },
+    {
+      "id": "backend_package_devdependencies_typescript",
+      "label": "typescript",
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "backend/package.json",
+      "file_type": "code",
+      "norm_label": "typescript",
+      "source_file": "backend/package.json",
+      "source_location": "L25"
     },
     {
       "id": "backend_package_main",
@@ -5803,6 +6039,61 @@
       "norm_label": "name",
       "source_file": "backend/package.json",
       "source_location": "L2"
+    },
+    {
+      "id": "backend_package_scripts",
+      "label": "scripts",
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "backend/package.json",
+      "file_type": "code",
+      "norm_label": "scripts",
+      "source_file": "backend/package.json",
+      "source_location": "L6"
+    },
+    {
+      "id": "backend_package_scripts_build",
+      "label": "build",
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "backend/package.json",
+      "file_type": "code",
+      "norm_label": "build",
+      "source_file": "backend/package.json",
+      "source_location": "L8"
+    },
+    {
+      "id": "backend_package_scripts_dev",
+      "label": "dev",
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "backend/package.json",
+      "file_type": "code",
+      "norm_label": "dev",
+      "source_file": "backend/package.json",
+      "source_location": "L7"
+    },
+    {
+      "id": "backend_package_scripts_start",
+      "label": "start",
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "backend/package.json",
+      "file_type": "code",
+      "norm_label": "start",
+      "source_file": "backend/package.json",
+      "source_location": "L9"
+    },
+    {
+      "id": "backend_package_scripts_test",
+      "label": "test",
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "backend/package.json",
+      "file_type": "code",
+      "norm_label": "test",
+      "source_file": "backend/package.json",
+      "source_location": "L10"
     },
     {
       "id": "backend_package_version",
@@ -5847,6 +6138,17 @@
       "norm_label": "cors",
       "source_file": "backend/package.json",
       "source_location": "L14"
+    },
+    {
+      "id": "ref_dotenv",
+      "label": "dotenv",
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "backend/package.json",
+      "file_type": "concept",
+      "norm_label": "dotenv",
+      "source_file": "backend/package.json",
+      "source_location": "L15"
     },
     {
       "id": "ref_express_rate_limit",
@@ -5902,6 +6204,17 @@
       "norm_label": "@types/express",
       "source_file": "backend/package.json",
       "source_location": "L22"
+    },
+    {
+      "id": "ref_vercel_blob",
+      "label": "@vercel/blob",
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "backend/package.json",
+      "file_type": "concept",
+      "norm_label": "@vercel/blob",
+      "source_file": "backend/package.json",
+      "source_location": "L13"
     },
     {
       "id": "backend_tsconfig",
@@ -6092,6 +6405,30 @@
       "source_location": "L1"
     },
     {
+      "id": "agents_10_git_and_deployment",
+      "label": "10. Git and deployment",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "AGENTS.md",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "10. git and deployment",
+      "source_file": "AGENTS.md",
+      "source_location": "L445"
+    },
+    {
+      "id": "agents_11_common_pitfalls",
+      "label": "11. Common pitfalls",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "AGENTS.md",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "11. common pitfalls",
+      "source_file": "AGENTS.md",
+      "source_location": "L456"
+    },
+    {
       "id": "agents_12_definition_of_done",
       "label": "12. Definition of done",
       "_origin": "ast",
@@ -6138,6 +6475,18 @@
       "norm_label": "3. commands",
       "source_file": "AGENTS.md",
       "source_location": "L154"
+    },
+    {
+      "id": "agents_5_frontend_rules",
+      "label": "5. Frontend rules",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "AGENTS.md",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "5. frontend rules",
+      "source_file": "AGENTS.md",
+      "source_location": "L288"
     },
     {
       "id": "agents_6_honesty_rules_non_negotiable",
@@ -6188,6 +6537,18 @@
       "source_location": "L435"
     },
     {
+      "id": "agents_accessibility",
+      "label": "Accessibility",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "AGENTS.md",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "accessibility",
+      "source_file": "AGENTS.md",
+      "source_location": "L351"
+    },
+    {
       "id": "agents_agents_md",
       "label": "AGENTS.md",
       "_origin": "ast",
@@ -6212,6 +6573,30 @@
       "source_location": "L34"
     },
     {
+      "id": "agents_data_layer",
+      "label": "Data layer",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "AGENTS.md",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "data layer",
+      "source_file": "AGENTS.md",
+      "source_location": "L298"
+    },
+    {
+      "id": "agents_landing_field",
+      "label": "Landing field",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "AGENTS.md",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "landing field",
+      "source_file": "AGENTS.md",
+      "source_location": "L332"
+    },
+    {
       "id": "agents_non_goals",
       "label": "Non-goals",
       "_origin": "ast",
@@ -6222,6 +6607,126 @@
       "norm_label": "non-goals",
       "source_file": "AGENTS.md",
       "source_location": "L25"
+    },
+    {
+      "id": "agents_skills_shadcn_registry_address_schemes",
+      "label": "Address Schemes",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "AGENTS.md",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "address schemes",
+      "source_file": ".agents/skills/shadcn/registry.md",
+      "source_location": "L179"
+    },
+    {
+      "id": "agents_skills_shadcn_registry_build_and_verify",
+      "label": "Build and Verify",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "AGENTS.md",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "build and verify",
+      "source_file": ".agents/skills/shadcn/registry.md",
+      "source_location": "L239"
+    },
+    {
+      "id": "agents_skills_shadcn_registry_github_registries",
+      "label": "GitHub Registries",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "AGENTS.md",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "github registries",
+      "source_file": ".agents/skills/shadcn/registry.md",
+      "source_location": "L198"
+    },
+    {
+      "id": "agents_skills_shadcn_registry_include",
+      "label": "Include",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "AGENTS.md",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "include",
+      "source_file": ".agents/skills/shadcn/registry.md",
+      "source_location": "L56"
+    },
+    {
+      "id": "agents_skills_shadcn_registry_item_definitions",
+      "label": "Item Definitions",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "AGENTS.md",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "item definitions",
+      "source_file": ".agents/skills/shadcn/registry.md",
+      "source_location": "L100"
+    },
+    {
+      "id": "agents_skills_shadcn_registry_mental_model",
+      "label": "Mental Model",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "AGENTS.md",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "mental model",
+      "source_file": ".agents/skills/shadcn/registry.md",
+      "source_location": "L6"
+    },
+    {
+      "id": "agents_skills_shadcn_registry_registry_authoring_and_addresses",
+      "label": "Registry Authoring and Addresses",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "AGENTS.md",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "registry authoring and addresses",
+      "source_file": ".agents/skills/shadcn/registry.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "agents_skills_shadcn_registry_registry_dependencies",
+      "label": "Registry Dependencies",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "AGENTS.md",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "registry dependencies",
+      "source_file": ".agents/skills/shadcn/registry.md",
+      "source_location": "L150"
+    },
+    {
+      "id": "agents_skills_shadcn_registry_root_registry_json",
+      "label": "Root `registry.json`",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "AGENTS.md",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "root `registry.json`",
+      "source_file": ".agents/skills/shadcn/registry.md",
+      "source_location": "L22"
+    },
+    {
+      "id": "agents_sound",
+      "label": "Sound",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "AGENTS.md",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "sound",
+      "source_file": "AGENTS.md",
+      "source_location": "L325"
     },
     {
       "id": "agents_source_layout",
@@ -6236,81 +6741,40 @@
       "source_location": "L70"
     },
     {
-      "id": "frontend_src_components_ui",
-      "label": "ui.tsx",
+      "id": "agents_state_and_components",
+      "label": "State and components",
       "_origin": "ast",
-      "community": 19,
-      "community_name": "WorkspacePage.tsx",
-      "file_type": "code",
-      "norm_label": "ui.tsx",
-      "source_file": "frontend/src/components/ui.tsx",
-      "source_location": "L1"
+      "community": 18,
+      "community_name": "AGENTS.md",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "state and components",
+      "source_file": "AGENTS.md",
+      "source_location": "L306"
     },
     {
-      "id": "frontend_src_components_workspace_agentspanel",
-      "label": "AgentsPanel.tsx",
+      "id": "agents_styling_and_ux",
+      "label": "Styling and UX",
       "_origin": "ast",
-      "community": 19,
-      "community_name": "WorkspacePage.tsx",
-      "file_type": "code",
-      "norm_label": "agentspanel.tsx",
-      "source_file": "frontend/src/components/workspace/AgentsPanel.tsx",
-      "source_location": "L1"
+      "community": 18,
+      "community_name": "AGENTS.md",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "styling and ux",
+      "source_file": "AGENTS.md",
+      "source_location": "L340"
     },
     {
-      "id": "frontend_src_components_workspace_settingspanel",
-      "label": "SettingsPanel.tsx",
+      "id": "agents_voice",
+      "label": "Voice",
       "_origin": "ast",
-      "community": 19,
-      "community_name": "WorkspacePage.tsx",
-      "file_type": "code",
-      "norm_label": "settingspanel.tsx",
-      "source_file": "frontend/src/components/workspace/SettingsPanel.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "frontend_src_components_workspace_settingspanel_empty_form",
-      "label": "EMPTY_FORM",
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "WorkspacePage.tsx",
-      "file_type": "code",
-      "norm_label": "empty_form",
-      "source_file": "frontend/src/components/workspace/SettingsPanel.tsx",
-      "source_location": "L21"
-    },
-    {
-      "id": "frontend_src_components_workspace_settingspanel_env_keys",
-      "label": "ENV_KEYS",
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "WorkspacePage.tsx",
-      "file_type": "code",
-      "norm_label": "env_keys",
-      "source_file": "frontend/src/components/workspace/SettingsPanel.tsx",
-      "source_location": "L12"
-    },
-    {
-      "id": "frontend_src_hooks_useworkspacedata",
-      "label": "useWorkspaceData.ts",
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "WorkspacePage.tsx",
-      "file_type": "code",
-      "norm_label": "useworkspacedata.ts",
-      "source_file": "frontend/src/hooks/useWorkspaceData.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "frontend_src_lib_api_api",
-      "label": "api",
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "WorkspacePage.tsx",
-      "file_type": "code",
-      "norm_label": "api",
-      "source_file": "frontend/src/lib/api.ts",
-      "source_location": "L91"
+      "community": 18,
+      "community_name": "AGENTS.md",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "voice",
+      "source_file": "AGENTS.md",
+      "source_location": "L315"
     },
     {
       "id": "frontend_src_pages_workspacepage",
@@ -6346,37 +6810,69 @@
       "source_location": "L27"
     },
     {
-      "id": "ref_react",
-      "label": "react",
+      "id": "frontend_src_components_workspace_agentspanel",
+      "label": "AgentsPanel.tsx",
       "_origin": "ast",
-      "community": 19,
-      "community_name": "WorkspacePage.tsx",
-      "file_type": "concept",
-      "norm_label": "react",
-      "source_file": "frontend/package.json",
-      "source_location": "L15"
-    },
-    {
-      "id": "agents_skills_shadcn_skill_component_structure_composition_md_rules_composition_md",
-      "label": "Component Structure \u2192 [composition.md](./rules/composition.md)",
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "WorkspacePage.tsx",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "component structure \u2192 [composition.md](./rules/composition.md)",
-      "source_file": ".agents/skills/shadcn/SKILL.md",
-      "source_location": "L52"
+      "community": 2,
+      "community_name": "SettingsPanel.tsx",
+      "file_type": "code",
+      "norm_label": "agentspanel.tsx",
+      "source_file": "frontend/src/components/workspace/AgentsPanel.tsx",
+      "source_location": "L1"
     },
     {
       "id": "frontend_src_components_workspace_authcard",
       "label": "AuthCard.tsx",
       "_origin": "ast",
       "community": 2,
-      "community_name": "frontend/src/types.ts",
+      "community_name": "SettingsPanel.tsx",
       "file_type": "code",
       "norm_label": "authcard.tsx",
       "source_file": "frontend/src/components/workspace/AuthCard.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "frontend_src_components_workspace_settingspanel",
+      "label": "SettingsPanel.tsx",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "SettingsPanel.tsx",
+      "file_type": "code",
+      "norm_label": "settingspanel.tsx",
+      "source_file": "frontend/src/components/workspace/SettingsPanel.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "frontend_src_components_workspace_settingspanel_empty_form",
+      "label": "EMPTY_FORM",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "SettingsPanel.tsx",
+      "file_type": "code",
+      "norm_label": "empty_form",
+      "source_file": "frontend/src/components/workspace/SettingsPanel.tsx",
+      "source_location": "L21"
+    },
+    {
+      "id": "frontend_src_components_workspace_settingspanel_env_keys",
+      "label": "ENV_KEYS",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "SettingsPanel.tsx",
+      "file_type": "code",
+      "norm_label": "env_keys",
+      "source_file": "frontend/src/components/workspace/SettingsPanel.tsx",
+      "source_location": "L12"
+    },
+    {
+      "id": "frontend_src_hooks_useworkspacedata",
+      "label": "useWorkspaceData.ts",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "SettingsPanel.tsx",
+      "file_type": "code",
+      "norm_label": "useworkspacedata.ts",
+      "source_file": "frontend/src/hooks/useWorkspaceData.ts",
       "source_location": "L1"
     },
     {
@@ -6384,18 +6880,29 @@
       "label": "api.ts",
       "_origin": "ast",
       "community": 2,
-      "community_name": "frontend/src/types.ts",
+      "community_name": "SettingsPanel.tsx",
       "file_type": "code",
       "norm_label": "api.ts",
       "source_file": "frontend/src/lib/api.ts",
       "source_location": "L1"
     },
     {
+      "id": "frontend_src_lib_api_api",
+      "label": "api",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "SettingsPanel.tsx",
+      "file_type": "code",
+      "norm_label": "api",
+      "source_file": "frontend/src/lib/api.ts",
+      "source_location": "L91"
+    },
+    {
       "id": "frontend_src_lib_api_configuredbase",
       "label": "configuredBase",
       "_origin": "ast",
       "community": 2,
-      "community_name": "frontend/src/types.ts",
+      "community_name": "SettingsPanel.tsx",
       "file_type": "code",
       "norm_label": "configuredbase",
       "source_file": "frontend/src/lib/api.ts",
@@ -6406,7 +6913,7 @@
       "label": "frontend/src/types.ts",
       "_origin": "ast",
       "community": 2,
-      "community_name": "frontend/src/types.ts",
+      "community_name": "SettingsPanel.tsx",
       "file_type": "code",
       "norm_label": "frontend/src/types.ts",
       "source_file": "frontend/src/types.ts",
@@ -6698,70 +7205,15 @@
       "source_location": "L81"
     },
     {
-      "id": "frontend_src_pages_cookiespage",
-      "label": "CookiesPage.tsx",
+      "id": "frontend_src_hooks_usespeechrecognition",
+      "label": "useSpeechRecognition.ts",
       "_origin": "ast",
       "community": 21,
-      "community_name": "playTap",
+      "community_name": "useSpeechRecognition.ts",
       "file_type": "code",
-      "norm_label": "cookiespage.tsx",
-      "source_file": "frontend/src/pages/CookiesPage.tsx",
+      "norm_label": "usespeechrecognition.ts",
+      "source_file": "frontend/src/hooks/useSpeechRecognition.ts",
       "source_location": "L1"
-    },
-    {
-      "id": "frontend_src_pages_cookiespage_current_year",
-      "label": "CURRENT_YEAR",
-      "_origin": "ast",
-      "community": 21,
-      "community_name": "playTap",
-      "file_type": "code",
-      "norm_label": "current_year",
-      "source_file": "frontend/src/pages/CookiesPage.tsx",
-      "source_location": "L7"
-    },
-    {
-      "id": "frontend_src_pages_privacypage",
-      "label": "PrivacyPage.tsx",
-      "_origin": "ast",
-      "community": 21,
-      "community_name": "playTap",
-      "file_type": "code",
-      "norm_label": "privacypage.tsx",
-      "source_file": "frontend/src/pages/PrivacyPage.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "frontend_src_pages_privacypage_current_year",
-      "label": "CURRENT_YEAR",
-      "_origin": "ast",
-      "community": 21,
-      "community_name": "playTap",
-      "file_type": "code",
-      "norm_label": "current_year",
-      "source_file": "frontend/src/pages/PrivacyPage.tsx",
-      "source_location": "L7"
-    },
-    {
-      "id": "frontend_src_pages_termspage",
-      "label": "TermsPage.tsx",
-      "_origin": "ast",
-      "community": 21,
-      "community_name": "playTap",
-      "file_type": "code",
-      "norm_label": "termspage.tsx",
-      "source_file": "frontend/src/pages/TermsPage.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "frontend_src_pages_termspage_current_year",
-      "label": "CURRENT_YEAR",
-      "_origin": "ast",
-      "community": 21,
-      "community_name": "playTap",
-      "file_type": "code",
-      "norm_label": "current_year",
-      "source_file": "frontend/src/pages/TermsPage.tsx",
-      "source_location": "L7"
     },
     {
       "id": "backend_src_main",
@@ -6808,62 +7260,15 @@
       "source_location": "L8"
     },
     {
-      "id": "ref_dotenv",
-      "label": "dotenv",
+      "id": "backend_src_store",
+      "label": "store.ts",
       "_origin": "ast",
       "community": 22,
       "community_name": "persistence.ts",
-      "file_type": "concept",
-      "norm_label": "dotenv",
-      "source_file": "backend/package.json",
-      "source_location": "L15"
-    },
-    {
-      "id": "ref_vercel_blob",
-      "label": "@vercel/blob",
-      "_origin": "ast",
-      "community": 22,
-      "community_name": "persistence.ts",
-      "file_type": "concept",
-      "norm_label": "@vercel/blob",
-      "source_file": "backend/package.json",
-      "source_location": "L13"
-    },
-    {
-      "id": "agents_10_git_and_deployment",
-      "label": "10. Git and deployment",
-      "_origin": "ast",
-      "community": 22,
-      "community_name": "persistence.ts",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "10. git and deployment",
-      "source_file": "AGENTS.md",
-      "source_location": "L445"
-    },
-    {
-      "id": "agents_accessibility",
-      "label": "Accessibility",
-      "_origin": "ast",
-      "community": 22,
-      "community_name": "persistence.ts",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "accessibility",
-      "source_file": "AGENTS.md",
-      "source_location": "L351"
-    },
-    {
-      "id": "agents_skills_shadcn_registry_address_schemes",
-      "label": "Address Schemes",
-      "_origin": "ast",
-      "community": 22,
-      "community_name": "persistence.ts",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "address schemes",
-      "source_file": ".agents/skills/shadcn/registry.md",
-      "source_location": "L179"
+      "file_type": "code",
+      "norm_label": "store.ts",
+      "source_file": "backend/src/store.ts",
+      "source_location": "L1"
     },
     {
       "id": "readme",
@@ -7262,48 +7667,48 @@
       "source_location": "L15"
     },
     {
-      "id": "backend_src_types",
-      "label": "backend/src/types.ts",
+      "id": "frontend_src_utils_cookieconsent",
+      "label": "cookieConsent.ts",
       "_origin": "ast",
       "community": 25,
-      "community_name": "backend/src/types.ts",
+      "community_name": "cookieConsent.test.ts",
       "file_type": "code",
-      "norm_label": "backend/src/types.ts",
-      "source_file": "backend/src/types.ts",
+      "norm_label": "cookieconsent.ts",
+      "source_file": "frontend/src/utils/cookieConsent.ts",
       "source_location": "L1"
     },
     {
-      "id": "backend_src_types_priorities",
-      "label": "PRIORITIES",
+      "id": "frontend_src_utils_cookieconsent_cookie_consent_key",
+      "label": "COOKIE_CONSENT_KEY",
       "_origin": "ast",
       "community": 25,
-      "community_name": "backend/src/types.ts",
+      "community_name": "cookieConsent.test.ts",
       "file_type": "code",
-      "norm_label": "priorities",
-      "source_file": "backend/src/types.ts",
+      "norm_label": "cookie_consent_key",
+      "source_file": "frontend/src/utils/cookieConsent.ts",
       "source_location": "L1"
     },
     {
-      "id": "backend_src_types_target_types",
-      "label": "TARGET_TYPES",
+      "id": "frontend_test_cookieconsent_test",
+      "label": "cookieConsent.test.ts",
       "_origin": "ast",
       "community": 25,
-      "community_name": "backend/src/types.ts",
+      "community_name": "cookieConsent.test.ts",
       "file_type": "code",
-      "norm_label": "target_types",
-      "source_file": "backend/src/types.ts",
-      "source_location": "L4"
+      "norm_label": "cookieconsent.test.ts",
+      "source_file": "frontend/test/cookieConsent.test.ts",
+      "source_location": "L1"
     },
     {
-      "id": "backend_src_types_user_roles",
-      "label": "USER_ROLES",
+      "id": "frontend_src_components_ui",
+      "label": "ui.tsx",
       "_origin": "ast",
-      "community": 25,
-      "community_name": "backend/src/types.ts",
+      "community": 26,
+      "community_name": "ChatPanel.tsx",
       "file_type": "code",
-      "norm_label": "user_roles",
-      "source_file": "backend/src/types.ts",
-      "source_location": "L7"
+      "norm_label": "ui.tsx",
+      "source_file": "frontend/src/components/ui.tsx",
+      "source_location": "L1"
     },
     {
       "id": "frontend_src_components_workspace_chatpanel",
@@ -7339,15 +7744,16 @@
       "source_location": "L1"
     },
     {
-      "id": "frontend_src_hooks_usespeechrecognition",
-      "label": "useSpeechRecognition.ts",
+      "id": "agents_skills_shadcn_skill_component_structure_composition_md_rules_composition_md",
+      "label": "Component Structure \u2192 [composition.md](./rules/composition.md)",
       "_origin": "ast",
       "community": 26,
       "community_name": "ChatPanel.tsx",
-      "file_type": "code",
-      "norm_label": "usespeechrecognition.ts",
-      "source_file": "frontend/src/hooks/useSpeechRecognition.ts",
-      "source_location": "L1"
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "component structure \u2192 [composition.md](./rules/composition.md)",
+      "source_file": ".agents/skills/shadcn/SKILL.md",
+      "source_location": "L52"
     },
     {
       "id": "frontend_oxlintrc",
@@ -7672,102 +8078,6 @@
       "source_location": "L12"
     },
     {
-      "id": "agents_11_common_pitfalls",
-      "label": "11. Common pitfalls",
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "4. Backend rules",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "11. common pitfalls",
-      "source_file": "AGENTS.md",
-      "source_location": "L456"
-    },
-    {
-      "id": "agents_4_backend_rules",
-      "label": "4. Backend rules",
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "4. Backend rules",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "4. backend rules",
-      "source_file": "AGENTS.md",
-      "source_location": "L184"
-    },
-    {
-      "id": "agents_api_responses",
-      "label": "API responses",
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "4. Backend rules",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "api responses",
-      "source_file": "AGENTS.md",
-      "source_location": "L278"
-    },
-    {
-      "id": "agents_chat",
-      "label": "Chat",
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "4. Backend rules",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "chat",
-      "source_file": "AGENTS.md",
-      "source_location": "L222"
-    },
-    {
-      "id": "agents_configuration",
-      "label": "Configuration",
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "4. Backend rules",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "configuration",
-      "source_file": "AGENTS.md",
-      "source_location": "L186"
-    },
-    {
-      "id": "agents_provider_adapters",
-      "label": "Provider adapters",
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "4. Backend rules",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "provider adapters",
-      "source_file": "AGENTS.md",
-      "source_location": "L194"
-    },
-    {
-      "id": "agents_store_and_persistence",
-      "label": "Store and persistence",
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "4. Backend rules",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "store and persistence",
-      "source_file": "AGENTS.md",
-      "source_location": "L268"
-    },
-    {
-      "id": "agents_validation",
-      "label": "Validation",
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "4. Backend rules",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "validation",
-      "source_file": "AGENTS.md",
-      "source_location": "L261"
-    },
-    {
       "id": "frontend_src_components_icons",
       "label": "Icons.tsx",
       "_origin": "ast",
@@ -7843,6 +8153,28 @@
       "norm_label": "ticker_items",
       "source_file": "frontend/src/pages/LandingPage.tsx",
       "source_location": "L75"
+    },
+    {
+      "id": "frontend_src_pages_termspage",
+      "label": "TermsPage.tsx",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "Icons.tsx",
+      "file_type": "code",
+      "norm_label": "termspage.tsx",
+      "source_file": "frontend/src/pages/TermsPage.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "frontend_src_pages_termspage_current_year",
+      "label": "CURRENT_YEAR",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "Icons.tsx",
+      "file_type": "code",
+      "norm_label": "current_year",
+      "source_file": "frontend/src/pages/TermsPage.tsx",
+      "source_location": "L7"
     },
     {
       "id": "agents_skills_shadcn_design_system_contents",
@@ -9562,7 +9894,7 @@
       "label": "App.tsx",
       "_origin": "ast",
       "community": 4,
-      "community_name": "router.ts",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "app.tsx",
       "source_file": "frontend/src/App.tsx",
@@ -9573,7 +9905,7 @@
       "label": "CookieNotice.tsx",
       "_origin": "ast",
       "community": 4,
-      "community_name": "router.ts",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "cookienotice.tsx",
       "source_file": "frontend/src/components/CookieNotice.tsx",
@@ -9584,7 +9916,7 @@
       "label": "router.ts",
       "_origin": "ast",
       "community": 4,
-      "community_name": "router.ts",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "router.ts",
       "source_file": "frontend/src/lib/router.ts",
@@ -9595,162 +9927,100 @@
       "label": "main.tsx",
       "_origin": "ast",
       "community": 4,
-      "community_name": "router.ts",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "main.tsx",
       "source_file": "frontend/src/main.tsx",
       "source_location": "L1"
     },
     {
-      "id": "frontend_src_utils_cookieconsent",
-      "label": "cookieConsent.ts",
+      "id": "frontend_src_pages_cookiespage",
+      "label": "CookiesPage.tsx",
       "_origin": "ast",
       "community": 4,
-      "community_name": "router.ts",
+      "community_name": "react",
       "file_type": "code",
-      "norm_label": "cookieconsent.ts",
-      "source_file": "frontend/src/utils/cookieConsent.ts",
+      "norm_label": "cookiespage.tsx",
+      "source_file": "frontend/src/pages/CookiesPage.tsx",
       "source_location": "L1"
     },
     {
-      "id": "frontend_src_utils_cookieconsent_cookie_consent_key",
-      "label": "COOKIE_CONSENT_KEY",
+      "id": "frontend_src_pages_cookiespage_current_year",
+      "label": "CURRENT_YEAR",
       "_origin": "ast",
       "community": 4,
-      "community_name": "router.ts",
+      "community_name": "react",
       "file_type": "code",
-      "norm_label": "cookie_consent_key",
-      "source_file": "frontend/src/utils/cookieConsent.ts",
+      "norm_label": "current_year",
+      "source_file": "frontend/src/pages/CookiesPage.tsx",
+      "source_location": "L7"
+    },
+    {
+      "id": "frontend_src_pages_privacypage",
+      "label": "PrivacyPage.tsx",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "privacypage.tsx",
+      "source_file": "frontend/src/pages/PrivacyPage.tsx",
       "source_location": "L1"
     },
     {
-      "id": "frontend_test_cookieconsent_test",
-      "label": "cookieConsent.test.ts",
+      "id": "frontend_src_pages_privacypage_current_year",
+      "label": "CURRENT_YEAR",
       "_origin": "ast",
       "community": 4,
-      "community_name": "router.ts",
+      "community_name": "react",
       "file_type": "code",
-      "norm_label": "cookieconsent.test.ts",
-      "source_file": "frontend/test/cookieConsent.test.ts",
-      "source_location": "L1"
+      "norm_label": "current_year",
+      "source_file": "frontend/src/pages/PrivacyPage.tsx",
+      "source_location": "L7"
     },
     {
       "id": "frontend_test_router_test",
       "label": "router.test.ts",
       "_origin": "ast",
       "community": 4,
-      "community_name": "router.ts",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "router.test.ts",
       "source_file": "frontend/test/router.test.ts",
       "source_location": "L1"
     },
     {
+      "id": "ref_react",
+      "label": "react",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "react",
+      "file_type": "concept",
+      "norm_label": "react",
+      "source_file": "frontend/package.json",
+      "source_location": "L15"
+    },
+    {
       "id": "ref_react_dom",
       "label": "react-dom",
       "_origin": "ast",
       "community": 4,
-      "community_name": "router.ts",
+      "community_name": "react",
       "file_type": "concept",
       "norm_label": "react-dom",
       "source_file": "frontend/package.json",
       "source_location": "L16"
     },
     {
-      "id": "agents_5_frontend_rules",
-      "label": "5. Frontend rules",
-      "_origin": "ast",
-      "community": 4,
-      "community_name": "router.ts",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "5. frontend rules",
-      "source_file": "AGENTS.md",
-      "source_location": "L288"
-    },
-    {
-      "id": "agents_data_layer",
-      "label": "Data layer",
-      "_origin": "ast",
-      "community": 4,
-      "community_name": "router.ts",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "data layer",
-      "source_file": "AGENTS.md",
-      "source_location": "L298"
-    },
-    {
-      "id": "agents_landing_field",
-      "label": "Landing field",
-      "_origin": "ast",
-      "community": 4,
-      "community_name": "router.ts",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "landing field",
-      "source_file": "AGENTS.md",
-      "source_location": "L332"
-    },
-    {
       "id": "agents_routing",
       "label": "Routing",
       "_origin": "ast",
       "community": 4,
-      "community_name": "router.ts",
+      "community_name": "react",
       "file_type": "document",
       "node_kind": "heading",
       "norm_label": "routing",
       "source_file": "AGENTS.md",
       "source_location": "L290"
-    },
-    {
-      "id": "agents_sound",
-      "label": "Sound",
-      "_origin": "ast",
-      "community": 4,
-      "community_name": "router.ts",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "sound",
-      "source_file": "AGENTS.md",
-      "source_location": "L325"
-    },
-    {
-      "id": "agents_state_and_components",
-      "label": "State and components",
-      "_origin": "ast",
-      "community": 4,
-      "community_name": "router.ts",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "state and components",
-      "source_file": "AGENTS.md",
-      "source_location": "L306"
-    },
-    {
-      "id": "agents_styling_and_ux",
-      "label": "Styling and UX",
-      "_origin": "ast",
-      "community": 4,
-      "community_name": "router.ts",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "styling and ux",
-      "source_file": "AGENTS.md",
-      "source_location": "L340"
-    },
-    {
-      "id": "agents_voice",
-      "label": "Voice",
-      "_origin": "ast",
-      "community": 4,
-      "community_name": "router.ts",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "voice",
-      "source_file": "AGENTS.md",
-      "source_location": "L315"
     },
     {
       "id": "agents_skills_shadcn_skill",
@@ -11219,201 +11489,6 @@
       "source_location": "L654"
     },
     {
-      "id": "agents_skills_shadcn_registry_build_and_verify",
-      "label": "Build and Verify",
-      "_origin": "ast",
-      "community": 57,
-      "community_name": "Registry Authoring and Addresses",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "build and verify",
-      "source_file": ".agents/skills/shadcn/registry.md",
-      "source_location": "L239"
-    },
-    {
-      "id": "agents_skills_shadcn_registry_github_registries",
-      "label": "GitHub Registries",
-      "_origin": "ast",
-      "community": 57,
-      "community_name": "Registry Authoring and Addresses",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "github registries",
-      "source_file": ".agents/skills/shadcn/registry.md",
-      "source_location": "L198"
-    },
-    {
-      "id": "agents_skills_shadcn_registry_include",
-      "label": "Include",
-      "_origin": "ast",
-      "community": 57,
-      "community_name": "Registry Authoring and Addresses",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "include",
-      "source_file": ".agents/skills/shadcn/registry.md",
-      "source_location": "L56"
-    },
-    {
-      "id": "agents_skills_shadcn_registry_item_definitions",
-      "label": "Item Definitions",
-      "_origin": "ast",
-      "community": 57,
-      "community_name": "Registry Authoring and Addresses",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "item definitions",
-      "source_file": ".agents/skills/shadcn/registry.md",
-      "source_location": "L100"
-    },
-    {
-      "id": "agents_skills_shadcn_registry_mental_model",
-      "label": "Mental Model",
-      "_origin": "ast",
-      "community": 57,
-      "community_name": "Registry Authoring and Addresses",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "mental model",
-      "source_file": ".agents/skills/shadcn/registry.md",
-      "source_location": "L6"
-    },
-    {
-      "id": "agents_skills_shadcn_registry_registry_authoring_and_addresses",
-      "label": "Registry Authoring and Addresses",
-      "_origin": "ast",
-      "community": 57,
-      "community_name": "Registry Authoring and Addresses",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "registry authoring and addresses",
-      "source_file": ".agents/skills/shadcn/registry.md",
-      "source_location": "L1"
-    },
-    {
-      "id": "agents_skills_shadcn_registry_registry_dependencies",
-      "label": "Registry Dependencies",
-      "_origin": "ast",
-      "community": 57,
-      "community_name": "Registry Authoring and Addresses",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "registry dependencies",
-      "source_file": ".agents/skills/shadcn/registry.md",
-      "source_location": "L150"
-    },
-    {
-      "id": "agents_skills_shadcn_registry_root_registry_json",
-      "label": "Root `registry.json`",
-      "_origin": "ast",
-      "community": 57,
-      "community_name": "Registry Authoring and Addresses",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "root `registry.json`",
-      "source_file": ".agents/skills/shadcn/registry.md",
-      "source_location": "L22"
-    },
-    {
-      "id": "frontend_src_components_workspace_speechsettings",
-      "label": "SpeechSettings.tsx",
-      "_origin": "ast",
-      "community": 58,
-      "community_name": "SpeechSettings.tsx",
-      "file_type": "code",
-      "norm_label": "speechsettings.tsx",
-      "source_file": "frontend/src/components/workspace/SpeechSettings.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "frontend_src_components_workspace_speechsettings_status_label",
-      "label": "STATUS_LABEL",
-      "_origin": "ast",
-      "community": 58,
-      "community_name": "SpeechSettings.tsx",
-      "file_type": "code",
-      "norm_label": "status_label",
-      "source_file": "frontend/src/components/workspace/SpeechSettings.tsx",
-      "source_location": "L8"
-    },
-    {
-      "id": "backend_package_dependencies",
-      "label": "dependencies",
-      "_origin": "ast",
-      "community": 59,
-      "community_name": "dependencies",
-      "file_type": "code",
-      "norm_label": "dependencies",
-      "source_file": "backend/package.json",
-      "source_location": "L12"
-    },
-    {
-      "id": "backend_package_dependencies_cors",
-      "label": "cors",
-      "_origin": "ast",
-      "community": 59,
-      "community_name": "dependencies",
-      "file_type": "code",
-      "norm_label": "cors",
-      "source_file": "backend/package.json",
-      "source_location": "L14"
-    },
-    {
-      "id": "backend_package_dependencies_dotenv",
-      "label": "dotenv",
-      "_origin": "ast",
-      "community": 59,
-      "community_name": "dependencies",
-      "file_type": "code",
-      "norm_label": "dotenv",
-      "source_file": "backend/package.json",
-      "source_location": "L15"
-    },
-    {
-      "id": "backend_package_dependencies_express",
-      "label": "express",
-      "_origin": "ast",
-      "community": 59,
-      "community_name": "dependencies",
-      "file_type": "code",
-      "norm_label": "express",
-      "source_file": "backend/package.json",
-      "source_location": "L16"
-    },
-    {
-      "id": "backend_package_dependencies_express_rate_limit",
-      "label": "express-rate-limit",
-      "_origin": "ast",
-      "community": 59,
-      "community_name": "dependencies",
-      "file_type": "code",
-      "norm_label": "express-rate-limit",
-      "source_file": "backend/package.json",
-      "source_location": "L17"
-    },
-    {
-      "id": "backend_package_dependencies_helmet",
-      "label": "helmet",
-      "_origin": "ast",
-      "community": 59,
-      "community_name": "dependencies",
-      "file_type": "code",
-      "norm_label": "helmet",
-      "source_file": "backend/package.json",
-      "source_location": "L18"
-    },
-    {
-      "id": "backend_package_dependencies_vercel_blob",
-      "label": "@vercel/blob",
-      "_origin": "ast",
-      "community": 59,
-      "community_name": "dependencies",
-      "file_type": "code",
-      "norm_label": "@vercel/blob",
-      "source_file": "backend/package.json",
-      "source_location": "L13"
-    },
-    {
       "id": "backend_src_chat",
       "label": "chat.ts",
       "_origin": "ast",
@@ -11524,125 +11599,88 @@
       "source_location": "L10"
     },
     {
-      "id": "backend_package_devdependencies",
-      "label": "devDependencies",
+      "id": "agents_4_backend_rules",
+      "label": "4. Backend rules",
       "_origin": "ast",
-      "community": 60,
-      "community_name": "devDependencies",
-      "file_type": "code",
-      "norm_label": "devdependencies",
-      "source_file": "backend/package.json",
-      "source_location": "L20"
+      "community": 6,
+      "community_name": "chat.ts",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "4. backend rules",
+      "source_file": "AGENTS.md",
+      "source_location": "L184"
     },
     {
-      "id": "backend_package_devdependencies_tsx",
-      "label": "tsx",
+      "id": "agents_api_responses",
+      "label": "API responses",
       "_origin": "ast",
-      "community": 60,
-      "community_name": "devDependencies",
-      "file_type": "code",
-      "norm_label": "tsx",
-      "source_file": "backend/package.json",
-      "source_location": "L24"
+      "community": 6,
+      "community_name": "chat.ts",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "api responses",
+      "source_file": "AGENTS.md",
+      "source_location": "L278"
     },
     {
-      "id": "backend_package_devdependencies_types_cors",
-      "label": "@types/cors",
+      "id": "agents_chat",
+      "label": "Chat",
       "_origin": "ast",
-      "community": 60,
-      "community_name": "devDependencies",
-      "file_type": "code",
-      "norm_label": "@types/cors",
-      "source_file": "backend/package.json",
-      "source_location": "L21"
+      "community": 6,
+      "community_name": "chat.ts",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "chat",
+      "source_file": "AGENTS.md",
+      "source_location": "L222"
     },
     {
-      "id": "backend_package_devdependencies_types_express",
-      "label": "@types/express",
+      "id": "agents_configuration",
+      "label": "Configuration",
       "_origin": "ast",
-      "community": 60,
-      "community_name": "devDependencies",
-      "file_type": "code",
-      "norm_label": "@types/express",
-      "source_file": "backend/package.json",
-      "source_location": "L22"
+      "community": 6,
+      "community_name": "chat.ts",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "configuration",
+      "source_file": "AGENTS.md",
+      "source_location": "L186"
     },
     {
-      "id": "backend_package_devdependencies_types_node",
-      "label": "@types/node",
+      "id": "agents_provider_adapters",
+      "label": "Provider adapters",
       "_origin": "ast",
-      "community": 60,
-      "community_name": "devDependencies",
-      "file_type": "code",
-      "norm_label": "@types/node",
-      "source_file": "backend/package.json",
-      "source_location": "L23"
+      "community": 6,
+      "community_name": "chat.ts",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "provider adapters",
+      "source_file": "AGENTS.md",
+      "source_location": "L194"
     },
     {
-      "id": "backend_package_devdependencies_typescript",
-      "label": "typescript",
+      "id": "agents_store_and_persistence",
+      "label": "Store and persistence",
       "_origin": "ast",
-      "community": 60,
-      "community_name": "devDependencies",
-      "file_type": "code",
-      "norm_label": "typescript",
-      "source_file": "backend/package.json",
-      "source_location": "L25"
+      "community": 6,
+      "community_name": "chat.ts",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "store and persistence",
+      "source_file": "AGENTS.md",
+      "source_location": "L268"
     },
     {
-      "id": "backend_package_scripts",
-      "label": "scripts",
+      "id": "agents_validation",
+      "label": "Validation",
       "_origin": "ast",
-      "community": 61,
-      "community_name": "scripts",
-      "file_type": "code",
-      "norm_label": "scripts",
-      "source_file": "backend/package.json",
-      "source_location": "L6"
-    },
-    {
-      "id": "backend_package_scripts_build",
-      "label": "build",
-      "_origin": "ast",
-      "community": 61,
-      "community_name": "scripts",
-      "file_type": "code",
-      "norm_label": "build",
-      "source_file": "backend/package.json",
-      "source_location": "L8"
-    },
-    {
-      "id": "backend_package_scripts_dev",
-      "label": "dev",
-      "_origin": "ast",
-      "community": 61,
-      "community_name": "scripts",
-      "file_type": "code",
-      "norm_label": "dev",
-      "source_file": "backend/package.json",
-      "source_location": "L7"
-    },
-    {
-      "id": "backend_package_scripts_start",
-      "label": "start",
-      "_origin": "ast",
-      "community": 61,
-      "community_name": "scripts",
-      "file_type": "code",
-      "norm_label": "start",
-      "source_file": "backend/package.json",
-      "source_location": "L9"
-    },
-    {
-      "id": "backend_package_scripts_test",
-      "label": "test",
-      "_origin": "ast",
-      "community": 61,
-      "community_name": "scripts",
-      "file_type": "code",
-      "norm_label": "test",
-      "source_file": "backend/package.json",
-      "source_location": "L10"
+      "community": 6,
+      "community_name": "chat.ts",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "validation",
+      "source_file": "AGENTS.md",
+      "source_location": "L261"
     },
     {
       "id": "backend_src_dispatch",
@@ -11677,6 +11715,28 @@
       "norm_label": "dispatch",
       "source_file": "AGENTS.md",
       "source_location": "L236"
+    },
+    {
+      "id": "backend_src_types_priorities",
+      "label": "PRIORITIES",
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "validation.ts",
+      "file_type": "code",
+      "norm_label": "priorities",
+      "source_file": "backend/src/types.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "backend_src_types_target_types",
+      "label": "TARGET_TYPES",
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "validation.ts",
+      "file_type": "code",
+      "norm_label": "target_types",
+      "source_file": "backend/src/types.ts",
+      "source_location": "L4"
     },
     {
       "id": "backend_src_validation",
@@ -11782,14 +11842,14 @@
       "type": "external"
     },
     {
-      "id": "ref_node_assert",
-      "label": "ref_node_assert",
+      "id": "frontend_src_styles_tts",
+      "label": "frontend_src_styles_tts",
       "_origin": "semantic",
       "community": 1,
       "community_name": "tts.ts",
       "external": true,
       "file_type": "concept",
-      "norm_label": "ref_node_assert",
+      "norm_label": "frontend_src_styles_tts",
       "source_file": "",
       "type": "external"
     },
@@ -11818,14 +11878,14 @@
       "type": "external"
     },
     {
-      "id": "frontend_src_styles_legal",
-      "label": "frontend_src_styles_legal",
+      "id": "backend_src_store_workspacestore",
+      "label": "backend_src_store_workspacestore",
       "_origin": "semantic",
-      "community": 21,
-      "community_name": "playTap",
+      "community": 22,
+      "community_name": "persistence.ts",
       "external": true,
       "file_type": "concept",
-      "norm_label": "frontend_src_styles_legal",
+      "norm_label": "backend_src_store_workspacestore",
       "source_file": "",
       "type": "external"
     },
@@ -11846,7 +11906,7 @@
       "label": "frontend_src_index",
       "_origin": "semantic",
       "community": 4,
-      "community_name": "router.ts",
+      "community_name": "react",
       "external": true,
       "file_type": "concept",
       "norm_label": "frontend_src_index",
@@ -11858,10 +11918,34 @@
       "label": "frontend_src_styles_cookienotice",
       "_origin": "semantic",
       "community": 4,
-      "community_name": "router.ts",
+      "community_name": "react",
       "external": true,
       "file_type": "concept",
       "norm_label": "frontend_src_styles_cookienotice",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "frontend_src_styles_legal",
+      "label": "frontend_src_styles_legal",
+      "_origin": "semantic",
+      "community": 4,
+      "community_name": "react",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "frontend_src_styles_legal",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "ref_node_assert",
+      "label": "ref_node_assert",
+      "_origin": "semantic",
+      "community": 5,
+      "community_name": "dispatch.test.ts",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "ref_node_assert",
       "source_file": "",
       "type": "external"
     },
@@ -11910,30 +11994,6 @@
       "external": true,
       "file_type": "concept",
       "norm_label": "ref_node_test",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "frontend_src_styles_tts",
-      "label": "frontend_src_styles_tts",
-      "_origin": "semantic",
-      "community": 58,
-      "community_name": "SpeechSettings.tsx",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "frontend_src_styles_tts",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "backend_src_store_workspacestore",
-      "label": "backend_src_store_workspacestore",
-      "_origin": "semantic",
-      "community": 6,
-      "community_name": "chat.ts",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "backend_src_store_workspacestore",
       "source_file": "",
       "type": "external"
     },
@@ -12193,6 +12253,18 @@
     },
     {
       "source": "backend_src_app_createapp",
+      "target": "backend_src_chat_runchatstream",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "backend/src/app.ts",
+      "source_location": "L429",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_src_app_createapp",
       "target": "backend_src_validation_parseplanrequest",
       "relation": "calls",
       "_origin": "ast",
@@ -12200,7 +12272,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/app.ts",
-      "source_location": "L414",
+      "source_location": "L455",
       "weight": 1.0
     },
     {
@@ -12212,7 +12284,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/app.ts",
-      "source_location": "L426",
+      "source_location": "L467",
       "weight": 1.0
     },
     {
@@ -12224,7 +12296,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/app.ts",
-      "source_location": "L438",
+      "source_location": "L479",
       "weight": 1.0
     },
     {
@@ -12236,7 +12308,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/app.ts",
-      "source_location": "L461",
+      "source_location": "L502",
       "weight": 1.0
     },
     {
@@ -12248,7 +12320,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/app.ts",
-      "source_location": "L490",
+      "source_location": "L531",
       "weight": 1.0
     },
     {
@@ -12260,7 +12332,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/app.ts",
-      "source_location": "L495",
+      "source_location": "L536",
       "weight": 1.0
     },
     {
@@ -12272,7 +12344,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/app.ts",
-      "source_location": "L503",
+      "source_location": "L544",
       "weight": 1.0
     },
     {
@@ -12284,7 +12356,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/app.ts",
-      "source_location": "L554",
+      "source_location": "L595",
       "weight": 1.0
     },
     {
@@ -12393,6 +12465,42 @@
       "context": "call",
       "source_file": "backend/src/chat.ts",
       "source_location": "L78",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_src_chat_runchatstream",
+      "target": "backend_src_providers_types_providererror",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "backend/src/chat.ts",
+      "source_location": "L109",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_src_chat_runchatstream",
+      "target": "backend_src_chat_now",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "backend/src/chat.ts",
+      "source_location": "L129",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_src_chat_runchatstream",
+      "target": "backend_src_chat_buildsystemprompt",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "backend/src/chat.ts",
+      "source_location": "L141",
       "weight": 1.0
     },
     {
@@ -13308,6 +13416,18 @@
       "weight": 1.0
     },
     {
+      "source": "backend_src_providers_anthropic_createanthropicadapter",
+      "target": "backend_src_providers_types_streamsse",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "backend/src/providers/anthropic.ts",
+      "source_location": "L80",
+      "weight": 1.0
+    },
+    {
       "source": "backend_src_providers_google_creategoogleadapter",
       "target": "backend_src_providers_types_fetchjson",
       "relation": "calls",
@@ -13320,6 +13440,18 @@
       "weight": 1.0
     },
     {
+      "source": "backend_src_providers_google_creategoogleadapter",
+      "target": "backend_src_providers_types_streamsse",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "backend/src/providers/google.ts",
+      "source_location": "L87",
+      "weight": 1.0
+    },
+    {
       "source": "backend_src_providers_openai_createopenaicompatibleadapter",
       "target": "backend_src_providers_types_fetchjson",
       "relation": "calls",
@@ -13328,7 +13460,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/providers/openai.ts",
-      "source_location": "L33",
+      "source_location": "L34",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_src_providers_openai_createopenaicompatibleadapter",
+      "target": "backend_src_providers_types_streamsse",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "backend/src/providers/openai.ts",
+      "source_location": "L80",
       "weight": 1.0
     },
     {
@@ -13412,7 +13556,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/providers/types.ts",
-      "source_location": "L107",
+      "source_location": "L108",
       "weight": 1.0
     },
     {
@@ -13424,7 +13568,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/providers/types.ts",
-      "source_location": "L108",
+      "source_location": "L109",
       "weight": 1.0
     },
     {
@@ -13436,7 +13580,43 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/src/providers/types.ts",
-      "source_location": "L109",
+      "source_location": "L110",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_src_providers_types_streamsse",
+      "target": "backend_src_providers_types_readerrordetail",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "backend/src/providers/types.ts",
+      "source_location": "L148",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_src_providers_types_streamsse",
+      "target": "backend_src_providers_types_classifystatus",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "backend/src/providers/types.ts",
+      "source_location": "L149",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_src_providers_types_streamsse",
+      "target": "backend_src_providers_types_providererror",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "backend/src/providers/types.ts",
+      "source_location": "L150",
       "weight": 1.0
     },
     {
@@ -14156,7 +14336,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "frontend/src/components/workspace/ChatPanel.tsx",
-      "source_location": "L113",
+      "source_location": "L118",
       "weight": 1.0
     },
     {
@@ -14168,7 +14348,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "frontend/src/components/workspace/ChatPanel.tsx",
-      "source_location": "L119",
+      "source_location": "L124",
       "weight": 1.0
     },
     {
@@ -14180,7 +14360,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "frontend/src/components/workspace/ChatPanel.tsx",
-      "source_location": "L167",
+      "source_location": "L172",
       "weight": 1.0
     },
     {
@@ -14192,7 +14372,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "frontend/src/components/workspace/ChatPanel.tsx",
-      "source_location": "L51",
+      "source_location": "L52",
       "weight": 1.0
     },
     {
@@ -14204,7 +14384,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "frontend/src/components/workspace/ChatPanel.tsx",
-      "source_location": "L309",
+      "source_location": "L320",
       "weight": 1.0
     },
     {
@@ -14216,7 +14396,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "frontend/src/components/workspace/ChatPanel.tsx",
-      "source_location": "L314",
+      "source_location": "L325",
       "weight": 1.0
     },
     {
@@ -14432,7 +14612,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "frontend/src/components/workspace/VoicePanel.tsx",
-      "source_location": "L137",
+      "source_location": "L142",
       "weight": 1.0
     },
     {
@@ -14444,7 +14624,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "frontend/src/components/workspace/VoicePanel.tsx",
-      "source_location": "L138",
+      "source_location": "L143",
       "weight": 1.0
     },
     {
@@ -14456,7 +14636,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "frontend/src/components/workspace/VoicePanel.tsx",
-      "source_location": "L249",
+      "source_location": "L254",
       "weight": 1.0
     },
     {
@@ -14492,7 +14672,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "frontend/src/components/workspace/VoicePanel.tsx",
-      "source_location": "L80",
+      "source_location": "L82",
       "weight": 1.0
     },
     {
@@ -14828,7 +15008,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "frontend/src/pages/WorkspacePage.tsx",
-      "source_location": "L156",
+      "source_location": "L169",
       "weight": 1.0
     },
     {
@@ -14840,7 +15020,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "frontend/src/pages/WorkspacePage.tsx",
-      "source_location": "L199",
+      "source_location": "L212",
       "weight": 1.0
     },
     {
@@ -16394,6 +16574,18 @@
     },
     {
       "source": "backend_src_app",
+      "target": "backend_src_chat_runchatstream",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "backend/src/app.ts",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_src_app",
       "target": "backend_src_dispatch_checktargeturl",
       "relation": "imports",
       "_origin": "ast",
@@ -17089,6 +17281,18 @@
       "weight": 1.0
     },
     {
+      "source": "backend_src_providers_anthropic",
+      "target": "backend_src_providers_types_streamsse",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "backend/src/providers/anthropic.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
       "source": "backend_src_providers_google",
       "target": "backend_src_providers_types_chatrequest",
       "relation": "imports",
@@ -17149,6 +17353,18 @@
       "weight": 1.0
     },
     {
+      "source": "backend_src_providers_google",
+      "target": "backend_src_providers_types_streamsse",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "backend/src/providers/google.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
       "source": "backend_src_providers_openai",
       "target": "backend_src_providers_types_chatrequest",
       "relation": "imports",
@@ -17199,6 +17415,18 @@
     {
       "source": "backend_src_providers_openai",
       "target": "backend_src_providers_types_providererror",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "backend/src/providers/openai.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_src_providers_openai",
+      "target": "backend_src_providers_types_streamsse",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -17475,6 +17703,18 @@
     {
       "source": "backend_test_chat_test",
       "target": "backend_src_chat_runchat",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "backend/test/chat.test.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_test_chat_test",
+      "target": "backend_src_chat_runchatstream",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -27997,6 +28237,17 @@
     },
     {
       "source": "backend_src_chat",
+      "target": "backend_src_chat_runchatstream",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/src/chat.ts",
+      "source_location": "L100",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_src_chat",
       "target": "backend_src_chat_now",
       "relation": "contains",
       "_origin": "ast",
@@ -28641,7 +28892,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/providers/openai.ts",
-      "source_location": "L12",
+      "source_location": "L13",
       "weight": 1.0
     },
     {
@@ -28686,6 +28937,17 @@
       "confidence_score": 1.0,
       "source_file": "backend/src/providers/types.ts",
       "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_src_providers_types",
+      "target": "backend_src_providers_types_streamsse",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/src/providers/types.ts",
+      "source_location": "L129",
       "weight": 1.0
     },
     {
@@ -28740,7 +29002,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/providers/types.ts",
-      "source_location": "L35",
+      "source_location": "L36",
       "weight": 1.0
     },
     {
@@ -28751,7 +29013,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/providers/types.ts",
-      "source_location": "L46",
+      "source_location": "L47",
       "weight": 1.0
     },
     {
@@ -28762,7 +29024,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/providers/types.ts",
-      "source_location": "L58",
+      "source_location": "L59",
       "weight": 1.0
     },
     {
@@ -28773,7 +29035,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/providers/types.ts",
-      "source_location": "L67",
+      "source_location": "L68",
       "weight": 1.0
     },
     {
@@ -28795,7 +29057,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/providers/types.ts",
-      "source_location": "L89",
+      "source_location": "L90",
       "weight": 1.0
     },
     {
@@ -29261,6 +29523,17 @@
       "weight": 1.0
     },
     {
+      "source": "backend_test_api_test",
+      "target": "backend_test_api_test_start",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/test/api.test.ts",
+      "source_location": "L199",
+      "weight": 1.0
+    },
+    {
       "source": "backend_test_chat_test",
       "target": "backend_test_chat_test_store",
       "relation": "contains",
@@ -29280,6 +29553,17 @@
       "confidence_score": 1.0,
       "source_file": "backend/test/chat.test.ts",
       "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_test_chat_test",
+      "target": "backend_test_chat_test_start",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/test/chat.test.ts",
+      "source_location": "L127",
       "weight": 1.0
     },
     {
@@ -30313,7 +30597,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "frontend/src/components/workspace/ChatPanel.tsx",
-      "source_location": "L304",
+      "source_location": "L315",
       "weight": 1.0
     },
     {
@@ -33518,6 +33802,17 @@
       "weight": 1.0
     },
     {
+      "source": "backend_src_providers_types_provideradapter",
+      "target": "backend_src_providers_types_provideradapter_streamchat",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "backend/src/providers/types.ts",
+      "source_location": "L33",
+      "weight": 1.0
+    },
+    {
       "source": "backend_src_providers_types_providererror",
       "target": "backend_src_providers_types_providererror_constructor",
       "relation": "method",
@@ -33525,7 +33820,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/src/providers/types.ts",
-      "source_location": "L50",
+      "source_location": "L51",
       "weight": 1.0
     },
     {
@@ -34071,6 +34366,18 @@
       "weight": 1.0
     },
     {
+      "source": "backend_src_chat_runchatstream",
+      "target": "backend_src_providers_registry_providerregistry_get",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "context": "call",
+      "source_file": "backend/src/chat.ts",
+      "source_location": "L138",
+      "weight": 1.0
+    },
+    {
       "source": "frontend_src_hooks_usespeechplayback_usespeechplayback",
       "target": "frontend_src_utils_tts_speechplaybackcontroller_refreshvoices",
       "relation": "calls",
@@ -34443,6 +34750,18 @@
       "weight": 1.0
     },
     {
+      "source": "agents_chat",
+      "target": "backend_src_providers_types_provideradapter_chat",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "context": "chat",
+      "source_file": "AGENTS.md",
+      "source_location": "L230",
+      "weight": 1.0
+    },
+    {
       "source": "agents_dispatch",
       "target": "backend_src_dispatch_checktargeturl",
       "relation": "references",
@@ -34611,6 +34930,18 @@
       "weight": 1.0
     },
     {
+      "source": "agents_chat",
+      "target": "backend_src_providers_types_provideradapter_streamchat",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "context": "streamChat",
+      "source_file": "AGENTS.md",
+      "source_location": "L230",
+      "weight": 1.0
+    },
+    {
       "source": "agents_skills_shadcn_registry_item_definitions",
       "target": "backend_test_dispatch_test_target",
       "relation": "references",
@@ -34660,5 +34991,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "f8895f69f5fcfc6d1c1b25056779302fe7f8260b"
+  "built_at_commit": "0c9a4ee7f9095569ffb7014c7acb620ebc479e90"
 }

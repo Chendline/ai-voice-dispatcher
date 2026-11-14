@@ -104,7 +104,7 @@ export function WorkspacePage() {
 
   const conversationId = conversation?.id;
   const sendMessage = useCallback(
-    async (message: string): Promise<ConversationMessage | null> => {
+    async (message: string, onDelta?: (delta: string) => void): Promise<ConversationMessage | null> => {
       if (!agent) {
         setSendError('Create an agent before sending a message.');
         return null;
@@ -114,11 +114,24 @@ export function WorkspacePage() {
       setSending(true);
       setSendError(null);
       try {
-        const result = await api.chat({
-          agentId: agent.id,
-          conversationId,
-          message: message.trim(),
-        });
+        let result: { conversation: Conversation; reply: ConversationMessage };
+        try {
+          result = await api.chatStream(
+            {
+              agentId: agent.id,
+              conversationId,
+              message: message.trim(),
+            },
+            delta => onDelta?.(delta),
+          );
+        } catch {
+          // If SSE streaming fails, fall back to standard turn
+          result = await api.chat({
+            agentId: agent.id,
+            conversationId,
+            message: message.trim(),
+          });
+        }
         setConversation(result.conversation);
         await reload();
         return result.reply;

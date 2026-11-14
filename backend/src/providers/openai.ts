@@ -1,9 +1,10 @@
 import type { ChatRequest, ChatResult, ProviderAdapter } from './types.js';
-import { ProviderError, fetchJson } from './types.js';
+import { ProviderError, fetchJson, streamSse } from './types.js';
 
 interface OpenAiPayload {
   choices?: {
     message?: { content?: string | null };
+    delta?: { content?: string | null };
     finish_reason?: string;
   }[];
   usage?: { prompt_tokens?: number; completion_tokens?: number };
@@ -63,6 +64,64 @@ export function createOpenAiCompatibleAdapter(options: {
           inputTokens: payload.usage?.prompt_tokens,
           outputTokens: payload.usage?.completion_tokens,
         },
+      };
+    },
+    async streamChat(request: ChatRequest, onChunk: (text: string) => void): Promise<ChatResult> {
+      const messages = [
+        ...(request.system ? [{ role: 'system' as const, content: request.system }] : []),
+        ...request.messages.map(message => ({ role: message.role, content: message.content })),
+      ];
+
+      if (!messages.some(message => message.role === 'user')) {
+        throw new ProviderError('invalid_response', 'At least one user message is required.');
+      }
+
+      let accumulated = '';
+      await streamSse(
+        `${options.baseUrl}/chat/completions`,
+        {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            ...(options.apiKey ? { authorization: `Bearer ${options.apiKey}` } : {}),
+            ...options.extraHeaders,
+          },
+          body: JSON.stringify({
+            model: request.model,
+            messages,
+            temperature: request.temperature ?? 0.7,
+            max_tokens: request.maxTokens ?? 1024,
+            stream: true,
+          }),
+        },
+        options.timeoutMs,
+        request.signal,
+        (line: string) => {
+          if (!line.startsWith('data:')) return;
+          const payloadStr = line.slice(5).trim();
+          if (payloadStr === '[DONE]') return;
+          try {
+            const data = JSON.parse(payloadStr) as OpenAiPayload;
+            const delta = data.choices?.[0]?.delta?.content ?? '';
+            if (delta) {
+              accumulated += delta;
+              onChunk(delta);
+            }
+          } catch {
+            // Ignore partial/malformed stream line
+          }
+        },
+      );
+
+      const text = accumulated.trim();
+      if (!text) {
+        throw new ProviderError('invalid_response', 'The AI provider returned an empty response.');
+      }
+
+      return {
+        text,
+        providerId: options.id,
+        model: request.model,
       };
     },
   };

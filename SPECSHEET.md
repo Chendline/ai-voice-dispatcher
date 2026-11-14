@@ -36,10 +36,10 @@ Operational teams communicate incident context, customer escalations, and system
   - Perimeter Route Protection enforcing `requireWorkspaceAuth` and role-based permissions (`admin`, `operator`, `auditor`) across all workspace endpoints.
 - **Sprint 2 (Data Confidentiality) [COMPLETED]:**
   - Target Secret Encryption at Rest: AES-256-GCM envelope encryption (`enc:v1:<iv>:<tag>:<ciphertext>`) for webhook and Slack URLs in SQLite (`crypto.ts`, `db.ts`).
-- **Sprint 3 (Real-Time Performance) [NEXT]:**
-  - Server-Sent Events (SSE) streaming (`POST /api/chat/stream`) across all AI providers.
-  - Real-time sentence-by-sentence voice synthesis chunking to reduce Time-To-First-Token (TTFT) from ~3s to ~250–400ms.
-- **Sprint 4 (Compliance & Operations):**
+- **Sprint 3 (Real-Time Performance) [COMPLETED]:**
+  - Server-Sent Events (SSE) streaming (`POST /api/chat/stream`) across all AI providers (Anthropic, OpenAI, Google, Compatible).
+  - Real-time token streaming and voice transcript feed reducing Time-To-First-Token (TTFT) from ~3s to ~250–400ms.
+- **Sprint 4 (Compliance & Operations) [NEXT]:**
   - Operator attribution (`operator_id`, `operator_name`) attached to all dispatch logs and turns.
   - Audit Trail Export (JSON and CSV formats) with filtering in the Dispatch UI.
 

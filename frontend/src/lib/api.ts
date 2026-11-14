@@ -128,6 +128,112 @@ export const api = {
       AI_TIMEOUT,
     ),
 
+  chatStream: async (
+    input: { agentId: string; conversationId?: string; message: string },
+    onDelta: (delta: string) => void,
+    signal?: AbortSignal,
+  ): Promise<{ conversation: Conversation; reply: Conversation['messages'][number] }> => {
+    const url = `${API_BASE}/api/chat/stream`;
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(new Error('timeout')), AI_TIMEOUT);
+    const forwardAbort = () => controller.abort(signal?.reason);
+    if (signal) {
+      if (signal.aborted) forwardAbort();
+      else signal.addEventListener('abort', forwardAbort, { once: true });
+    }
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'text/event-stream',
+        },
+        credentials: 'include',
+        body: JSON.stringify(input),
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        const body = (await response.json().catch(() => null)) as { error?: unknown; code?: unknown } | null;
+        const message =
+          body && typeof body.error === 'string' && body.error.trim()
+            ? body.error
+            : `The AEGIS API responded with HTTP ${response.status}.`;
+        const code = body && typeof body.code === 'string' ? body.code : undefined;
+        throw new ApiError(message, response.status, code);
+      }
+
+      if (!response.body) {
+        throw new Error('Streaming response body is missing.');
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder('utf-8');
+      let buffer = '';
+      let finalResult: { conversation: Conversation; reply: Conversation['messages'][number] } | null = null;
+      let streamError: string | null = null;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() ?? '';
+
+        let currentEvent = 'message';
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed) continue;
+          if (trimmed.startsWith('event:')) {
+            currentEvent = trimmed.slice(6).trim();
+          } else if (trimmed.startsWith('data:')) {
+            const dataStr = trimmed.slice(5).trim();
+            try {
+              const data = JSON.parse(dataStr) as {
+                delta?: string;
+                conversation?: Conversation;
+                message?: Conversation['messages'][number];
+                reply?: Conversation['messages'][number];
+                error?: string;
+              };
+              if (currentEvent === 'delta' && data.delta) {
+                onDelta(data.delta);
+              } else if (currentEvent === 'done' && data.conversation) {
+                const rep = data.message || data.reply;
+                if (rep) {
+                  finalResult = { conversation: data.conversation, reply: rep };
+                }
+              } else if (currentEvent === 'error') {
+                streamError = data.error || 'Chat stream failed.';
+              }
+            } catch {
+              // Ignore partial JSON
+            }
+          }
+        }
+      }
+
+      if (streamError) {
+        throw new Error(streamError);
+      }
+
+      if (!finalResult) {
+        throw new Error('Stream completed without a final response payload.');
+      }
+
+      return finalResult;
+    } catch (err) {
+      if (controller.signal.aborted) {
+        throw new Error('The AI provider did not respond before the timeout.');
+      }
+      throw err;
+    } finally {
+      window.clearTimeout(timeout);
+      signal?.removeEventListener('abort', forwardAbort);
+    }
+  },
+
   planDispatch: (input: { instruction: string; agentId?: string }) =>
     request<{ plan: DispatchPlan; targets: PublicDispatchTarget[] }>(
       '/api/dispatch/plan',

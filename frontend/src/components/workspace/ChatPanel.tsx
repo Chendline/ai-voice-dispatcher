@@ -23,7 +23,7 @@ interface ChatPanelProps {
   error: string | null;
   onSelectConversation: (conversationId: string) => void;
   onNewConversation: () => void;
-  onSend: (message: string) => Promise<ConversationMessage | null>;
+  onSend: (message: string, onDelta?: (delta: string) => void) => Promise<ConversationMessage | null>;
   onRefresh: () => void;
 }
 
@@ -47,6 +47,7 @@ export function ChatPanel({
 }: ChatPanelProps) {
   const [draft, setDraft] = useState('');
   const [pending, setPending] = useState<{ text: string; createdAt: string } | null>(null);
+  const [streamingReply, setStreamingReply] = useState<string>('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const recognition = useSpeechRecognition();
   const scrollRef = useRef<HTMLDivElement | null>(null);
@@ -71,8 +72,12 @@ export function ChatPanel({
     if (recognition.listening) recognition.stop();
     setDraft('');
     setPending({ text, createdAt: new Date().toISOString() });
-    const reply = await onSend(text);
+    setStreamingReply('');
+    const reply = await onSend(text, delta => {
+      setStreamingReply(prev => prev + delta);
+    });
     setPending(null);
+    setStreamingReply('');
     if (!reply) setDraft(text);
   };
 
@@ -233,11 +238,17 @@ export function ChatPanel({
                   />
                   <div className="message-row assistant">
                     <div className="message-avatar">AI</div>
-                    <div className="message-bubble assistant typing">
-                      <span className="typing-dot" />
-                      <span className="typing-dot" />
-                      <span className="typing-dot" />
-                    </div>
+                    {streamingReply ? (
+                      <div className="message-bubble assistant">
+                        <p>{streamingReply}</p>
+                      </div>
+                    ) : (
+                      <div className="message-bubble assistant typing">
+                        <span className="typing-dot" />
+                        <span className="typing-dot" />
+                        <span className="typing-dot" />
+                      </div>
+                    )}
                   </div>
                 </>
               ) : null}
